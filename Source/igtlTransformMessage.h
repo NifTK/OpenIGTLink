@@ -25,6 +25,32 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT GetTransformMessage: public MessageBase
+{
+
+public:
+
+  typedef GetTransformMessage            Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::GetTransformMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetTransformMessage);
+
+
+protected:
+  GetTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_TRANS"; };
+  ~GetTransformMessage() {};
+  
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+
+};
+
 class IGTLCommon_EXPORT TransformMessage: public MessageBase
 {
 

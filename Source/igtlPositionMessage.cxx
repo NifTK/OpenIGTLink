@@ -226,6 +226,75 @@ int PositionMessage::UnpackBody()
 
 }
 
+StartPositionMessage::StartPositionMessage():
+  GetPositionMessage()
+{
+  this->m_DefaultBodyType = "STT_POSITION";
+}
+
+
+StartPositionMessage::~StartPositionMessage()
+{
+}
+
+void StartPositionMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartPositionMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartPositionMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartPositionMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartPositionMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+int  RTSPositionMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int  RTSPositionMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+
+int  RTSPositionMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
+
+
+
+
 } // namespace igtl
 
 

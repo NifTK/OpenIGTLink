@@ -236,7 +236,7 @@ int TransformMessage::UnpackBody()
 StartTransformMessage::StartTransformMessage():
   GetTransformMessage()
 {
-  this->m_DefaultBodyType = "STT_TRANSFORM";
+  this->m_DefaultBodyType = "STT_TRANS";
 }
 
 

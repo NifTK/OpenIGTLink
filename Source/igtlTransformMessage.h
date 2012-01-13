@@ -40,7 +40,7 @@ public:
 
 
 protected:
-  GetTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_TRANSFORM"; };
+  GetTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_TRANS"; };
   ~GetTransformMessage() {};
   
 protected:
@@ -95,7 +95,7 @@ public:
   igtlNewMacro(igtl::StopTransformMessage);
 
 protected:
-  StopTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_TRANSFORM"; };
+  StopTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_TRANS"; };
   ~StopTransformMessage() {};
 
 protected:
@@ -128,7 +128,7 @@ public:
   igtlUint8     GetStatus()                { return this->m_Status; };
 
 protected:
-  RTSTransformMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_TRANSFORM"; };
+  RTSTransformMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_TRANS"; };
   ~RTSTransformMessage() {};
 
   igtlUint8 m_Status;

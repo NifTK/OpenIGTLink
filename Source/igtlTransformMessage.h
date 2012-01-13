@@ -40,7 +40,7 @@ public:
 
 
 protected:
-  GetTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_TRANS"; };
+  GetTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_TRANSFORM"; };
   ~GetTransformMessage() {};
   
 protected:
@@ -48,6 +48,95 @@ protected:
   virtual int  PackBody()        { AllocatePack(); return 1; };
   virtual int  UnpackBody()      { return 1; };
 
+
+};
+
+class IGTLCommon_EXPORT StartTransformMessage: public GetTransformMessage
+{
+public:
+  typedef StartTransformMessage             Self;
+  typedef GetTransformMessage               Superclass;
+  typedef SmartPointer<Self>	            Pointer;
+  typedef SmartPointer<const Self>			ConstPointer;
+
+  igtlTypeMacro(igtl::StartTransformMessage, igtl::GetTransformMessage);
+  igtlNewMacro(igtl::StartTransformMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartTransformMessage();
+  ~StartTransformMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopTransformMessage: public MessageBase
+{
+public:
+  typedef StopTransformMessage                Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopTransformMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopTransformMessage);
+
+protected:
+  StopTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_TRANSFORM"; };
+  ~StopTransformMessage() {};
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+
+class IGTLCommon_EXPORT RTSTransformMessage: public MessageBase
+{
+public:
+  typedef RTSTransformMessage         Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSTransformMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSTransformMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSTransformMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_TRANSFORM"; };
+  ~RTSTransformMessage() {};
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
 
 };
 

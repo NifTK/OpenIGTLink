@@ -26,6 +26,123 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT GetStatusMessage: public MessageBase
+{
+
+public:
+
+  typedef GetStatusMessage            Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::GetStatusMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetStatusMessage);
+
+
+protected:
+  GetStatusMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_STATUS"; };
+  ~GetStatusMessage() {};
+  
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+
+};
+
+class IGTLCommon_EXPORT StartStatusMessage: public GetStatusMessage
+{
+public:
+  typedef StartStatusMessage             Self;
+  typedef GetStatusMessage               Superclass;
+  typedef SmartPointer<Self>	            Pointer;
+  typedef SmartPointer<const Self>			ConstPointer;
+
+  igtlTypeMacro(igtl::StartStatusMessage, igtl::GetStatusMessage);
+  igtlNewMacro(igtl::StartStatusMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartStatusMessage();
+  ~StartStatusMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopStatusMessage: public MessageBase
+{
+public:
+  typedef StopStatusMessage                Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopStatusMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopStatusMessage);
+
+protected:
+  StopStatusMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_STATUS"; };
+  ~StopStatusMessage() {};
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+
+class IGTLCommon_EXPORT RTSStatusMessage: public MessageBase
+{
+public:
+  typedef RTSStatusMessage         Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSStatusMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSStatusMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSStatusMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_STATUS"; };
+  ~RTSStatusMessage() {};
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
+
+
+
 class IGTLCommon_EXPORT StatusMessage: public MessageBase
 {
 public:

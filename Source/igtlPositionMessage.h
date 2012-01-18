@@ -48,9 +48,8 @@ protected:
   virtual int  GetBodyPackSize() { return 0; };
   virtual int  PackBody()        { AllocatePack(); return 1; };
   virtual int  UnpackBody()      { return 1; };
-
-
 };
+
 
 class IGTLCommon_EXPORT StartPositionMessage: public GetPositionMessage
 {

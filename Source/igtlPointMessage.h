@@ -31,6 +31,120 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT GetPointMessage: public MessageBase
+{
+
+public:
+
+  typedef GetPointMessage				 Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::GetPointMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetPointMessage);
+
+
+protected:
+  GetPointMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_POINT"; };
+  ~GetPointMessage() {};
+  
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+};
+
+class IGTLCommon_EXPORT StartPointMessage: public GetPointMessage
+{
+public:
+  typedef StartPointMessage             Self;
+  typedef GetPointMessage               Superclass;
+  typedef SmartPointer<Self>	            Pointer;
+  typedef SmartPointer<const Self>			ConstPointer;
+
+  igtlTypeMacro(igtl::StartPointMessage, igtl::GetPointMessage);
+  igtlNewMacro(igtl::StartPointMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartPointMessage();
+  ~StartPointMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopPointMessage: public MessageBase
+{
+public:
+  typedef StopPointMessage                Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopPointMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopPointMessage);
+
+protected:
+  StopPointMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_POINT"; };
+  ~StopPointMessage() {};
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+
+class IGTLCommon_EXPORT RTSPointMessage: public MessageBase
+{
+public:
+  typedef RTSPointMessage         Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSPointMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSPointMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSPointMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_POINT"; };
+  ~RTSPointMessage() {};
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
+
+
 class IGTLCommon_EXPORT PointElement: public Object
 {
 public:
@@ -78,28 +192,6 @@ protected:
   igtlFloat32   m_Radius;      /* Radius of the point. Can be 0. */
   std::string   m_Owner;       /* Device name of the ower image */
 };
-
-
-class IGTLCommon_EXPORT GetPointMessage: public MessageBase
-{
-public:
-  typedef GetPointMessage            Self;
-  typedef MessageBase                    Superclass;
-  typedef SmartPointer<Self>             Pointer;
-  typedef SmartPointer<const Self>       ConstPointer;
-
-  igtlTypeMacro(igtl::GetPointMessage, igtl::MessageBase);
-  igtlNewMacro(igtl::GetPointMessage);
-
-protected:
-  GetPointMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_POINT"; };
-  ~GetPointMessage() {};
-protected:
-  virtual int  GetBodyPackSize() { return 0; };
-  virtual int  PackBody()        { AllocatePack(); return 1; };
-  virtual int  UnpackBody()      { return 1; };
-};
-
 
 class IGTLCommon_EXPORT PointMessage: public MessageBase
 {

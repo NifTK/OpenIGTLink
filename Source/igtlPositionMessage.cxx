@@ -230,6 +230,7 @@ StartPositionMessage::StartPositionMessage():
   GetPositionMessage()
 {
   this->m_DefaultBodyType = "STT_POSITION";
+  this->m_Resolution = 0;
 }
 
 

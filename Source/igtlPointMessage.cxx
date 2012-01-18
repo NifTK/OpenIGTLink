@@ -294,6 +294,73 @@ int PointMessage::UnpackBody()
   return 1;
 }
 
+StartPointMessage::StartPointMessage():
+  GetPointMessage()
+{
+  this->m_DefaultBodyType = "STT_POINT";
+  this->m_Resolution = 0;
+}
+
+
+StartPointMessage::~StartPointMessage()
+{
+}
+
+void StartPointMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartPointMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartPointMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartPointMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartPointMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+int  RTSPointMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int  RTSPointMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+
+int  RTSPointMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
+
 } // namespace igtl
 
 

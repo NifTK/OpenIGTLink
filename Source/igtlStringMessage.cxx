@@ -130,6 +130,73 @@ int StringMessage::UnpackBody()
   return 1;
 }
 
+StartStringMessage::StartStringMessage():
+  GetStringMessage()
+{
+  this->m_DefaultBodyType = "STT_STRING";
+  this->m_Resolution = 0;
+}
+
+
+StartStringMessage::~StartStringMessage()
+{
+}
+
+void StartStringMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartStringMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartStringMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartStringMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartStringMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+int  RTSStringMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int  RTSStringMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+
+int  RTSStringMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
+
 } // namespace igtl
 
 

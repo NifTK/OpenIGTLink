@@ -237,6 +237,7 @@ StartTransformMessage::StartTransformMessage():
   GetTransformMessage()
 {
   this->m_DefaultBodyType = "STT_TRANS";
+  this->m_Resolution      = 0;
 }
 
 

@@ -144,6 +144,73 @@ int StatusMessage::UnpackBody()
   return 1;
 }
 
+StartStatusMessage::StartStatusMessage():
+  GetStatusMessage()
+{
+  this->m_DefaultBodyType = "STT_STATUS";
+  this->m_Resolution = 0;
+}
+
+
+StartStatusMessage::~StartStatusMessage()
+{
+}
+
+void StartStatusMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartStatusMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartStatusMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartStatusMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartStatusMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+int  RTSStatusMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int  RTSStatusMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+
+int  RTSStatusMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
+
 } // namespace igtl
 
 

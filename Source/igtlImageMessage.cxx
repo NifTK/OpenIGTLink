@@ -471,6 +471,72 @@ int ImageMessage::GetNumComponents()
   return numComponents;
 }
 
+StartImageMessage::StartImageMessage():
+  GetImageMessage()
+{
+  this->m_DefaultBodyType = "STT_IMAGE";
+}
+
+
+StartImageMessage::~StartImageMessage()
+{
+}
+
+void StartImageMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+  this->m_Resolution = 0;
+}
+
+
+igtlUint64 StartImageMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartImageMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartImageMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartImageMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+int  RTSImageMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int  RTSImageMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+
+int  RTSImageMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
 
 } // namespace igtl
 

@@ -18,7 +18,6 @@
 #define __igtlTransformMessage_h
 
 #include "igtlObject.h"
-//#include "igtlMacros.h"
 #include "igtlMath.h"
 #include "igtlMessageBase.h"
 
@@ -40,8 +39,8 @@ public:
 
 
 protected:
-  GetTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_TRANS"; };
-  ~GetTransformMessage() {};
+  GetTransformMessage();
+  ~GetTransformMessage();
   
 protected:
   virtual int  GetBodyPackSize() { return 0; };

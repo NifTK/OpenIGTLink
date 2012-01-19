@@ -233,8 +233,18 @@ int TransformMessage::UnpackBody()
   return 1;
 }
 
-StartTransformMessage::StartTransformMessage():
-  GetTransformMessage()
+GetTransformMessage::GetTransformMessage() 
+	: MessageBase() 
+  { 
+	  this->m_DefaultBodyType  = "GET_TRANS"; 
+  }
+ 
+GetTransformMessage::~GetTransformMessage() 
+{
+}
+
+StartTransformMessage::StartTransformMessage()
+	: GetTransformMessage()
 {
   this->m_DefaultBodyType = "STT_TRANS";
   this->m_Resolution      = 0;

@@ -144,13 +144,22 @@ int StatusMessage::UnpackBody()
   return 1;
 }
 
+GetStatusMessage::GetStatusMessage() 
+: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "GET_STATUS";
+}
+
+GetStatusMessage::~GetStatusMessage() 
+{
+}
+
 StartStatusMessage::StartStatusMessage():
   GetStatusMessage()
 {
   this->m_DefaultBodyType = "STT_STATUS";
   this->m_Resolution = 0;
 }
-
 
 StartStatusMessage::~StartStatusMessage()
 {
@@ -160,7 +169,6 @@ void StartStatusMessage::SetResolution(igtlUint64 res)
 {
   this->m_Resolution = res; 
 }
-
 
 igtlUint64 StartStatusMessage::GetResolution()
 {
@@ -189,12 +197,33 @@ int StartStatusMessage::UnpackBody()
   return 1; 
 }
 
-int  RTSStatusMessage::GetBodyPackSize()
+StopStatusMessage::StopStatusMessage() 
+: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "STP_STATUS";
+}
+
+StopStatusMessage::~StopStatusMessage() 
+{
+}
+
+RTSStatusMessage::RTSStatusMessage() 
+: MessageBase()
+{
+	this->m_Status = 0;
+	this->m_DefaultBodyType  = "RTS_STATUS";
+}
+
+RTSStatusMessage::~RTSStatusMessage() 
+{
+}
+
+int RTSStatusMessage::GetBodyPackSize()
 { 
   return sizeof (igtlUint8);
 }
 
-int  RTSStatusMessage::PackBody()
+int RTSStatusMessage::PackBody()
 {
   AllocatePack(); 
 
@@ -204,7 +233,7 @@ int  RTSStatusMessage::PackBody()
 }
 
 
-int  RTSStatusMessage::UnpackBody()
+int RTSStatusMessage::UnpackBody()
 { 
   this->m_Status = * (igtlUint8 * )this->m_Body;
 

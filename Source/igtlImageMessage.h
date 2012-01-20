@@ -38,8 +38,9 @@ public:
   igtlNewMacro(igtl::GetImageMessage);
 
 protected:
-  GetImageMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_IMAGE"; };
-  ~GetImageMessage() {};
+  GetImageMessage();
+  ~GetImageMessage();
+
 protected:
   virtual int  GetBodyPackSize() { return 0; };
   virtual int  PackBody()        { AllocatePack(); return 1; };
@@ -91,8 +92,8 @@ public:
   igtlNewMacro(igtl::StopImageMessage);
 
 protected:
-  StopImageMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_IMAGE"; };
-  ~StopImageMessage() {};
+  StopImageMessage();
+  ~StopImageMessage();
 
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -100,7 +101,6 @@ protected:
   virtual int  UnpackBody()      { return 1; };
 
 };
-
 
 class IGTLCommon_EXPORT RTSImageMessage: public MessageBase
 {
@@ -124,8 +124,8 @@ public:
   igtlUint8     GetStatus()                { return this->m_Status; };
 
 protected:
-  RTSImageMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_IMAGE"; };
-  ~RTSImageMessage() {};
+  RTSImageMessage();
+  ~RTSImageMessage();
 
   igtlUint8 m_Status;
 

@@ -356,6 +356,103 @@ int TrajectoryMessage::UnpackBody()
   return 1;
 }
 
+GetTrajectoryMessage::GetTrajectoryMessage()
+	: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "GET_TRAJ";
+}
+
+GetTrajectoryMessage::~GetTrajectoryMessage() 
+{
+}
+
+StartTrajectoryMessage::StartTrajectoryMessage()
+	: GetTrajectoryMessage()
+{
+  this->m_DefaultBodyType = "STT_TRAJ";
+  this->m_Resolution      = 0;
+}
+
+
+StartTrajectoryMessage::~StartTrajectoryMessage()
+{
+}
+
+void StartTrajectoryMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartTrajectoryMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartTrajectoryMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartTrajectoryMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartTrajectoryMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+StopTrajectoryMessage::StopTrajectoryMessage()
+	: MessageBase()
+{ 
+	this->m_DefaultBodyType  = "STP_TRAJ"; 
+}
+
+StopTrajectoryMessage::~StopTrajectoryMessage()
+{
+}
+
+RTSTrajectoryMessage::RTSTrajectoryMessage()
+	: MessageBase()
+{	
+	this->m_Status = 0; 
+	this->m_DefaultBodyType  = "RTS_TRAJ";
+}
+
+RTSTrajectoryMessage::~RTSTrajectoryMessage()
+{
+}
+
+int  RTSTrajectoryMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int  RTSTrajectoryMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+int  RTSTrajectoryMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
+
 } // namespace igtl
 
 

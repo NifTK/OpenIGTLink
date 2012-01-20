@@ -38,14 +38,101 @@ public:
   igtlNewMacro(igtl::GetColorTableMessage);
 
 protected:
-  GetColorTableMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_COLORT"; };
-  ~GetColorTableMessage() {};
+  GetColorTableMessage();
+  ~GetColorTableMessage();
+
 protected:
   virtual int  GetBodyPackSize() { return 0; };
   virtual int  PackBody()        { AllocatePack(); return 1; };
   virtual int  UnpackBody()      { return 1; };
 };
 
+class IGTLCommon_EXPORT StartColorTableMessage: public GetColorTableMessage
+{
+public:
+  typedef StartColorTableMessage            Self;
+  typedef GetColorTableMessage              Superclass;
+  typedef SmartPointer<Self>	            Pointer;
+  typedef SmartPointer<const Self>			ConstPointer;
+
+  igtlTypeMacro(igtl::StartColorTableMessage, igtl::GetColorTableMessage);
+  igtlNewMacro(igtl::StartColorTableMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartColorTableMessage();
+  ~StartColorTableMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopColorTableMessage: public MessageBase
+{
+public:
+  typedef StopColorTableMessage               Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopColorTableMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopColorTableMessage);
+
+protected:
+  StopColorTableMessage();
+  ~StopColorTableMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+class IGTLCommon_EXPORT RTSColorTableMessage: public MessageBase
+{
+public:
+  typedef RTSColorTableMessage			 Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+  igtlTypeMacro(igtl::RTSColorTableMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSColorTableMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSColorTableMessage();
+  ~RTSColorTableMessage();
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
 
 class IGTLCommon_EXPORT ColorTableMessage: public MessageBase
 {

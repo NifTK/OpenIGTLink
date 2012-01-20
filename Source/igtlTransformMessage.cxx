@@ -288,12 +288,33 @@ int StartTransformMessage::UnpackBody()
   return 1; 
 }
 
-int  RTSTransformMessage::GetBodyPackSize()
+StopTransformMessage::StopTransformMessage()
+	: MessageBase()
+{ 
+	this->m_DefaultBodyType  = "STP_TRANS"; 
+}
+
+StopTransformMessage::~StopTransformMessage()
+{
+}
+
+RTSTransformMessage::RTSTransformMessage()
+	: MessageBase()
+{	
+	this->m_Status = 0; 
+	this->m_DefaultBodyType  = "RTS_TRANS";
+}
+
+RTSTransformMessage::~RTSTransformMessage()
+{
+}
+
+int RTSTransformMessage::GetBodyPackSize()
 { 
   return sizeof (igtlUint8);
 }
 
-int  RTSTransformMessage::PackBody()
+int RTSTransformMessage::PackBody()
 {
   AllocatePack(); 
 
@@ -302,8 +323,7 @@ int  RTSTransformMessage::PackBody()
   return 1; 
 }
 
-
-int  RTSTransformMessage::UnpackBody()
+int RTSTransformMessage::UnpackBody()
 { 
   this->m_Status = * (igtlUint8 * )this->m_Body;
 

@@ -185,7 +185,6 @@ int PositionMessage::GetBodyPackSize()
 
 }
 
-
 int PositionMessage::PackBody()
 {
   // allocate pack
@@ -224,6 +223,15 @@ int PositionMessage::UnpackBody()
 
   return 1;
 
+}
+
+GetPositionMessage::GetPositionMessage() 
+: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "GET_POSITION"; 
+}
+GetPositionMessage::~GetPositionMessage() 
+{
 }
 
 StartPositionMessage::StartPositionMessage():
@@ -271,12 +279,33 @@ int StartPositionMessage::UnpackBody()
   return 1; 
 }
 
-int  RTSPositionMessage::GetBodyPackSize()
+StopPositionMessage::StopPositionMessage() 
+: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "STP_POSITION"; 
+}
+
+StopPositionMessage::~StopPositionMessage() 
+{
+}
+
+RTSPositionMessage::RTSPositionMessage() 
+	: MessageBase()
+{
+	this->m_Status = 0;
+	this->m_DefaultBodyType  = "RTS_POSITION"; 
+}
+
+RTSPositionMessage::~RTSPositionMessage() 
+{
+}
+
+int RTSPositionMessage::GetBodyPackSize()
 { 
   return sizeof (igtlUint8);
 }
 
-int  RTSPositionMessage::PackBody()
+int RTSPositionMessage::PackBody()
 {
   AllocatePack(); 
 
@@ -286,15 +315,12 @@ int  RTSPositionMessage::PackBody()
 }
 
 
-int  RTSPositionMessage::UnpackBody()
+int RTSPositionMessage::UnpackBody()
 { 
   this->m_Status = * (igtlUint8 * )this->m_Body;
 
   return 1; 
 }
-
-
-
 
 } // namespace igtl
 

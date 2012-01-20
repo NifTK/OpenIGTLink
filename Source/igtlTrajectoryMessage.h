@@ -31,6 +31,115 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT GetTrajectoryMessage: public MessageBase
+{
+public:
+  typedef GetTrajectoryMessage           Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::GetTrajectoryMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetTrajectoryMessage);
+
+protected:
+  GetTrajectoryMessage();
+  ~GetTrajectoryMessage();
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+};
+
+class IGTLCommon_EXPORT StartTrajectoryMessage: public GetTrajectoryMessage
+{
+public:
+  typedef StartTrajectoryMessage            Self;
+  typedef GetTrajectoryMessage              Superclass;
+  typedef SmartPointer<Self>	            Pointer;
+  typedef SmartPointer<const Self>			ConstPointer;
+
+  igtlTypeMacro(igtl::StartTrajectoryMessage, igtl::GetTrajectoryMessage);
+  igtlNewMacro(igtl::StartTrajectoryMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartTrajectoryMessage();
+  ~StartTrajectoryMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopTrajectoryMessage: public MessageBase
+{
+public:
+  typedef StopTrajectoryMessage               Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopTrajectoryMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopTrajectoryMessage);
+
+protected:
+  StopTrajectoryMessage();
+  ~StopTrajectoryMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+
+class IGTLCommon_EXPORT RTSTrajectoryMessage: public MessageBase
+{
+public:
+  typedef RTSTrajectoryMessage			 Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSTrajectoryMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSTrajectoryMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSTrajectoryMessage();
+  ~RTSTrajectoryMessage();
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
+
 class IGTLCommon_EXPORT TrajectoryElement: public Object
 {
 public:
@@ -95,32 +204,10 @@ protected:
   std::string   m_Owner;       /* Device name of the ower image */
 };
 
-
-class IGTLCommon_EXPORT GetTrajectoryMessage: public MessageBase
-{
-public:
-  typedef GetTrajectoryMessage            Self;
-  typedef MessageBase                    Superclass;
-  typedef SmartPointer<Self>             Pointer;
-  typedef SmartPointer<const Self>       ConstPointer;
-
-  igtlTypeMacro(igtl::GetTrajectoryMessage, igtl::MessageBase);
-  igtlNewMacro(igtl::GetTrajectoryMessage);
-
-protected:
-  GetTrajectoryMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_TRAJ"; };
-  ~GetTrajectoryMessage() {};
-protected:
-  virtual int  GetBodyPackSize() { return 0; };
-  virtual int  PackBody()        { AllocatePack(); return 1; };
-  virtual int  UnpackBody()      { return 1; };
-};
-
-
 class IGTLCommon_EXPORT TrajectoryMessage: public MessageBase
 {
 public:
-  typedef TrajectoryMessage               Self;
+  typedef TrajectoryMessage              Self;
   typedef MessageBase                    Superclass;
   typedef SmartPointer<Self>             Pointer;
   typedef SmartPointer<const Self>       ConstPointer;

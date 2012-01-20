@@ -42,17 +42,14 @@ public:
   igtlTypeMacro(igtl::GetStringMessage, igtl::MessageBase);
   igtlNewMacro(igtl::GetStringMessage);
 
-
 protected:
-  GetStringMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_STRING"; };
-  ~GetStringMessage() {};
+  GetStringMessage();
+  ~GetStringMessage();
   
 protected:
   virtual int  GetBodyPackSize() { return 0; };
   virtual int  PackBody()        { AllocatePack(); return 1; };
   virtual int  UnpackBody()      { return 1; };
-
-
 };
 
 class IGTLCommon_EXPORT StartStringMessage: public GetStringMessage
@@ -99,8 +96,8 @@ public:
   igtlNewMacro(igtl::StopStringMessage);
 
 protected:
-  StopStringMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_STRING"; };
-  ~StopStringMessage() {};
+  StopStringMessage();
+  ~StopStringMessage();
 
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -108,7 +105,6 @@ protected:
   virtual int  UnpackBody()      { return 1; };
 
 };
-
 
 class IGTLCommon_EXPORT RTSStringMessage: public MessageBase
 {
@@ -132,8 +128,8 @@ public:
   igtlUint8     GetStatus()                { return this->m_Status; };
 
 protected:
-  RTSStringMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_STRING"; };
-  ~RTSStringMessage() {};
+  RTSStringMessage();
+  ~RTSStringMessage();
 
   igtlUint8 m_Status;
 

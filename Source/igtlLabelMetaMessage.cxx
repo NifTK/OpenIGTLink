@@ -298,6 +298,105 @@ int LabelMetaMessage::UnpackBody()
   return 1;
 }
 
+GetLabelMetaMessage::GetLabelMetaMessage()
+	: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "GET_LBMETA";
+}
+
+GetLabelMetaMessage::~GetLabelMetaMessage() 
+{
+}
+
+StartLabelMetaMessage::StartLabelMetaMessage()
+	: GetLabelMetaMessage()
+{
+  this->m_DefaultBodyType = "STT_LBMETA";
+  this->m_Resolution      = 0;
+}
+
+
+StartLabelMetaMessage::~StartLabelMetaMessage()
+{
+}
+
+void StartLabelMetaMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartLabelMetaMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartLabelMetaMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartLabelMetaMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartLabelMetaMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+StopLabelMetaMessage::StopLabelMetaMessage()
+	: MessageBase()
+{ 
+	this->m_DefaultBodyType  = "STP_LBMETA"; 
+}
+
+StopLabelMetaMessage::~StopLabelMetaMessage()
+{
+}
+
+RTSLabelMetaMessage::RTSLabelMetaMessage()
+	: MessageBase()
+{	
+	this->m_Status = 0; 
+	this->m_DefaultBodyType  = "RTS_LBMETA";
+}
+
+RTSLabelMetaMessage::~RTSLabelMetaMessage()
+{
+}
+
+int RTSLabelMetaMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int RTSLabelMetaMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+int RTSLabelMetaMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
+
+
+
 } // namespace igtl
 
 

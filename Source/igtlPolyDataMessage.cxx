@@ -891,6 +891,104 @@ PolyDataAttribute * PolyDataMessage::GetAttribute(unsigned int id)
   return this->m_Attributes[id];
 }
 
+GetPolyDataMessage::GetPolyDataMessage()
+	: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "GET_POLYDATA"; 
+}
+
+GetPolyDataMessage::~GetPolyDataMessage()
+{
+}
+
+StartPolyDataMessage::StartPolyDataMessage()
+	: GetPolyDataMessage()
+{
+  this->m_DefaultBodyType = "STT_POLYDATA";
+  this->m_Resolution      = 0;
+}
+
+
+StartPolyDataMessage::~StartPolyDataMessage()
+{
+}
+
+void StartPolyDataMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartPolyDataMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartPolyDataMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartPolyDataMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartPolyDataMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+StopPolyDataMessage::StopPolyDataMessage()
+	: MessageBase()
+{ 
+	this->m_DefaultBodyType  = "STP_POLYDATA"; 
+}
+
+StopPolyDataMessage::~StopPolyDataMessage()
+{
+}
+
+RTSPolyDataMessage::RTSPolyDataMessage()
+	: MessageBase()
+{	
+	this->m_Status = 0; 
+	this->m_DefaultBodyType  = "RTS_POLYDATA";
+}
+
+RTSPolyDataMessage::~RTSPolyDataMessage()
+{
+}
+
+int RTSPolyDataMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int RTSPolyDataMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+int RTSPolyDataMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
+
+
 } // namespace igtl
 
 

@@ -33,6 +33,8 @@ SensorMessage::SensorMessage():
   this->m_Status = 0;
   this->m_Unit   = 0;
   this->m_Array.clear();
+
+  this->m_DefaultBodyType = "SENSOR";
 }
 
 
@@ -182,6 +184,103 @@ int SensorMessage::UnpackBody()
     }
 
   return 1;
+}
+
+GetSensorMessage::GetSensorMessage() 
+	: MessageBase() 
+  { 
+	  this->m_DefaultBodyType  = "GET_SENSOR"; 
+  }
+ 
+GetSensorMessage::~GetSensorMessage() 
+{
+}
+
+StartSensorMessage::StartSensorMessage()
+	: GetSensorMessage()
+{
+  this->m_DefaultBodyType = "STT_SENSOR";
+  this->m_Resolution      = 0;
+}
+
+
+StartSensorMessage::~StartSensorMessage()
+{
+}
+
+void StartSensorMessage::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartSensorMessage::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartSensorMessage::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartSensorMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartSensorMessage::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+StopSensorMessage::StopSensorMessage()
+	: MessageBase()
+{ 
+	this->m_DefaultBodyType  = "STP_SENSOR"; 
+}
+
+StopSensorMessage::~StopSensorMessage()
+{
+}
+
+RTSSensorMessage::RTSSensorMessage()
+	: MessageBase()
+{	
+	this->m_Status = 0; 
+	this->m_DefaultBodyType  = "RTS_SENSOR";
+}
+
+RTSSensorMessage::~RTSSensorMessage()
+{
+}
+
+int RTSSensorMessage::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int RTSSensorMessage::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+int RTSSensorMessage::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
 }
 
 } // namespace igtl

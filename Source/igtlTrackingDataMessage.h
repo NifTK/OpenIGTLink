@@ -30,53 +30,29 @@
 namespace igtl
 {
 
-class IGTLCommon_EXPORT TrackingDataElement: public Object
+class IGTLCommon_EXPORT GetTrackingDataMessage: public MessageBase
 {
+
 public:
-  typedef TrackingDataElement               Self;
-  typedef Object                         Superclass;
+
+  typedef GetTrackingDataMessage         Self;
+  typedef MessageBase                    Superclass;
   typedef SmartPointer<Self>             Pointer;
   typedef SmartPointer<const Self>       ConstPointer;
 
-  igtlTypeMacro(igtl::TrackingDataElement, igtl::Object);
-  igtlNewMacro(igtl::TrackingDataElement);
+  igtlTypeMacro(igtl::GetTrackingDataMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetTrackingDataMessage);
 
-  // Tracking data type
-  enum {
-    TYPE_TRACKER  = 1,  /* Tracker */
-    TYPE_6D       = 2,  /* 6D instrument (regular instrument) */
-    TYPE_3D       = 3,  /* 3D instrument (only tip of the instrument defined) */
-    TYPE_5D       = 4,  /* 5D instrument (tip and handle are defined,
-                           but not the normal vector) */
-  };
-
-public:
-  int           SetName(const char* name);
-  const char*   GetName()                            { return this->m_Name.c_str(); };
-
-  int           SetType(igtlUint8 type);
-  igtlUint8     GetType()                            { return this->m_Type; };
-
-  void SetPosition(float p[3]);
-  void GetPosition(float p[3]);
-
-  void SetPosition(float px, float py, float pz);
-  void GetPosition(float* px, float* py, float* pz);
-
-  void SetMatrix(Matrix4x4& mat);
-  void GetMatrix(Matrix4x4& mat);
 
 protected:
-  TrackingDataElement();
-  ~TrackingDataElement();
-
+  GetTrackingDataMessage();
+  ~GetTrackingDataMessage();
+  
 protected:
-
-  std::string   m_Name;          /* Name / description (< 20 bytes) */
-  igtlUint8     m_Type;          /* Tracking data type (TYPE_TRACKER, TYPE_6D, TYPE_3D, TYPE_5D) */
-  Matrix4x4     m_Matrix;        /* Transform matrix */
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
 };
-
 
 class IGTLCommon_EXPORT StartTrackingDataMessage: public MessageBase
 {
@@ -125,8 +101,8 @@ public:
   igtlNewMacro(igtl::StopTrackingDataMessage);
 
 protected:
-  StopTrackingDataMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_TDATA"; };
-  ~StopTrackingDataMessage() {};
+  StopTrackingDataMessage();
+  ~StopTrackingDataMessage();
 
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -158,8 +134,8 @@ public:
   igtlUint8     GetStatus()                { return this->m_Status; };
 
 protected:
-  RTSTrackingDataMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_TDATA"; };
-  ~RTSTrackingDataMessage() {};
+  RTSTrackingDataMessage();
+  ~RTSTrackingDataMessage();
 
   igtlUint8 m_Status;
 
@@ -170,7 +146,52 @@ protected:
 
 };
 
+class IGTLCommon_EXPORT TrackingDataElement: public Object
+{
+public:
+  typedef TrackingDataElement               Self;
+  typedef Object                         Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
 
+  igtlTypeMacro(igtl::TrackingDataElement, igtl::Object);
+  igtlNewMacro(igtl::TrackingDataElement);
+
+  // Tracking data type
+  enum {
+    TYPE_TRACKER  = 1,  /* Tracker */
+    TYPE_6D       = 2,  /* 6D instrument (regular instrument) */
+    TYPE_3D       = 3,  /* 3D instrument (only tip of the instrument defined) */
+    TYPE_5D       = 4,  /* 5D instrument (tip and handle are defined,
+                           but not the normal vector) */
+  };
+
+public:
+  int           SetName(const char* name);
+  const char*   GetName()                            { return this->m_Name.c_str(); };
+
+  int           SetType(igtlUint8 type);
+  igtlUint8     GetType()                            { return this->m_Type; };
+
+  void SetPosition(float p[3]);
+  void GetPosition(float p[3]);
+
+  void SetPosition(float px, float py, float pz);
+  void GetPosition(float* px, float* py, float* pz);
+
+  void SetMatrix(Matrix4x4& mat);
+  void GetMatrix(Matrix4x4& mat);
+
+protected:
+  TrackingDataElement();
+  ~TrackingDataElement();
+
+protected:
+
+  std::string   m_Name;          /* Name / description (< 20 bytes) */
+  igtlUint8     m_Type;          /* Tracking data type (TYPE_TRACKER, TYPE_6D, TYPE_3D, TYPE_5D) */
+  Matrix4x4     m_Matrix;        /* Transform matrix */
+};
 
 class IGTLCommon_EXPORT TrackingDataMessage: public MessageBase
 {

@@ -46,8 +46,8 @@ public:
 
 
 protected:
-  GetPointMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_POINT"; };
-  ~GetPointMessage() {};
+  GetPointMessage();
+  ~GetPointMessage();
   
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -99,8 +99,8 @@ public:
   igtlNewMacro(igtl::StopPointMessage);
 
 protected:
-  StopPointMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_POINT"; };
-  ~StopPointMessage() {};
+  StopPointMessage();
+  ~StopPointMessage();
 
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -132,8 +132,8 @@ public:
   igtlUint8     GetStatus()                { return this->m_Status; };
 
 protected:
-  RTSPointMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_POINT"; };
-  ~RTSPointMessage() {};
+  RTSPointMessage();
+  ~RTSPointMessage();
 
   igtlUint8 m_Status;
 

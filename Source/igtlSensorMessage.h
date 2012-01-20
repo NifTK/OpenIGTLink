@@ -29,6 +29,119 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT GetSensorMessage: public MessageBase
+{
+
+public:
+
+  typedef GetSensorMessage				 Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::GetSensorMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetSensorMessage);
+
+
+protected:
+  GetSensorMessage();
+  ~GetSensorMessage();
+  
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+};
+
+class IGTLCommon_EXPORT StartSensorMessage: public GetSensorMessage
+{
+public:
+  typedef StartSensorMessage             Self;
+  typedef GetSensorMessage               Superclass;
+  typedef SmartPointer<Self>	         Pointer;
+  typedef SmartPointer<const Self>		 ConstPointer;
+
+  igtlTypeMacro(igtl::StartSensorMessage, igtl::GetSensorMessage);
+  igtlNewMacro(igtl::StartSensorMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartSensorMessage();
+  ~StartSensorMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopSensorMessage: public MessageBase
+{
+public:
+  typedef StopSensorMessage                   Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopSensorMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopSensorMessage);
+
+protected:
+  StopSensorMessage();
+  ~StopSensorMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+
+class IGTLCommon_EXPORT RTSSensorMessage: public MessageBase
+{
+public:
+  typedef RTSSensorMessage			     Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSSensorMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSSensorMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSSensorMessage();
+  ~RTSSensorMessage();
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
+
 class IGTLCommon_EXPORT SensorMessage: public MessageBase
 {
 public:

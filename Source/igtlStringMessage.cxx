@@ -130,6 +130,16 @@ int StringMessage::UnpackBody()
   return 1;
 }
 
+GetStringMessage::GetStringMessage() 
+	: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "GET_STRING";
+}
+
+GetStringMessage::~GetStringMessage() 
+{
+}
+
 StartStringMessage::StartStringMessage():
   GetStringMessage()
 {
@@ -175,12 +185,33 @@ int StartStringMessage::UnpackBody()
   return 1; 
 }
 
-int  RTSStringMessage::GetBodyPackSize()
+StopStringMessage::StopStringMessage()
+	: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "STP_STRING";
+}
+
+StopStringMessage::~StopStringMessage()
+{
+}
+
+RTSStringMessage::RTSStringMessage()
+	: MessageBase()
+{
+	this->m_Status = 0;
+	this->m_DefaultBodyType  = "RTS_STRING";
+}
+
+RTSStringMessage::~RTSStringMessage() 
+{
+}
+
+int RTSStringMessage::GetBodyPackSize()
 { 
   return sizeof (igtlUint8);
 }
 
-int  RTSStringMessage::PackBody()
+int RTSStringMessage::PackBody()
 {
   AllocatePack(); 
 
@@ -190,7 +221,7 @@ int  RTSStringMessage::PackBody()
 }
 
 
-int  RTSStringMessage::UnpackBody()
+int RTSStringMessage::UnpackBody()
 { 
   this->m_Status = * (igtlUint8 * )this->m_Body;
 

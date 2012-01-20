@@ -31,6 +31,115 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT GetImageMetaMessage: public MessageBase
+{
+public:
+  typedef GetImageMetaMessage            Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::GetImageMetaMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetImageMetaMessage);
+
+protected:
+  GetImageMetaMessage();
+  ~GetImageMetaMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+};
+
+class IGTLCommon_EXPORT StartImageMetaMessage: public GetImageMetaMessage
+{
+public:
+  typedef StartImageMetaMessage             Self;
+  typedef GetImageMetaMessage               Superclass;
+  typedef SmartPointer<Self>	            Pointer;
+  typedef SmartPointer<const Self>			ConstPointer;
+
+  igtlTypeMacro(igtl::StartImageMetaMessage, igtl::GetImageMetaMessage);
+  igtlNewMacro(igtl::StartImageMetaMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartImageMetaMessage();
+  ~StartImageMetaMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopImageMetaMessage: public MessageBase
+{
+public:
+  typedef StopImageMetaMessage                Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopImageMetaMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopImageMetaMessage);
+
+protected:
+  StopImageMetaMessage();
+  ~StopImageMetaMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+class IGTLCommon_EXPORT RTSImageMetaMessage: public MessageBase
+{
+public:
+  typedef RTSImageMetaMessage			 Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSImageMetaMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSImageMetaMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSImageMetaMessage();
+  ~RTSImageMetaMessage();
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
+
 class IGTLCommon_EXPORT ImageMetaElement: public Object
 {
 public:
@@ -85,28 +194,6 @@ protected:
   igtlUint8     m_ScalarType;  /* scalar type. see scalar_type in IMAGE message */
 
 };
-
-
-class IGTLCommon_EXPORT GetImageMetaMessage: public MessageBase
-{
-public:
-  typedef GetImageMetaMessage            Self;
-  typedef MessageBase                    Superclass;
-  typedef SmartPointer<Self>             Pointer;
-  typedef SmartPointer<const Self>       ConstPointer;
-
-  igtlTypeMacro(igtl::GetImageMetaMessage, igtl::MessageBase);
-  igtlNewMacro(igtl::GetImageMetaMessage);
-
-protected:
-  GetImageMetaMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_IMGMETA"; };
-  ~GetImageMetaMessage() {};
-protected:
-  virtual int  GetBodyPackSize() { return 0; };
-  virtual int  PackBody()        { AllocatePack(); return 1; };
-  virtual int  UnpackBody()      { return 1; };
-};
-
 
 class IGTLCommon_EXPORT ImageMetaMessage: public MessageBase
 {

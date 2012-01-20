@@ -31,6 +31,116 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT GetLabelMetaMessage: public MessageBase
+{
+public:
+  typedef GetLabelMetaMessage            Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::GetLabelMetaMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetLabelMetaMessage);
+
+protected:
+  GetLabelMetaMessage();
+  ~GetLabelMetaMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+};
+
+class IGTLCommon_EXPORT StartLabelMetaMessage: public GetLabelMetaMessage
+{
+public:
+  typedef StartLabelMetaMessage             Self;
+  typedef GetLabelMetaMessage               Superclass;
+  typedef SmartPointer<Self>	            Pointer;
+  typedef SmartPointer<const Self>			ConstPointer;
+
+  igtlTypeMacro(igtl::StartLabelMetaMessage, igtl::GetLabelMetaMessage);
+  igtlNewMacro(igtl::StartLabelMetaMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartLabelMetaMessage();
+  ~StartLabelMetaMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopLabelMetaMessage: public MessageBase
+{
+public:
+  typedef StopLabelMetaMessage                Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopLabelMetaMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopLabelMetaMessage);
+
+protected:
+  StopLabelMetaMessage();
+  ~StopLabelMetaMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+
+class IGTLCommon_EXPORT RTSLabelMetaMessage: public MessageBase
+{
+public:
+  typedef RTSLabelMetaMessage			 Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSLabelMetaMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSLabelMetaMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSLabelMetaMessage();
+  ~RTSLabelMetaMessage();
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
+
 class IGTLCommon_EXPORT LabelMetaElement: public Object
 {
 public:
@@ -79,28 +189,6 @@ protected:
   std::string   m_Owner;       /* device name of the owner image. (can be empty) */
 
 };
-
-
-class IGTLCommon_EXPORT GetLabelMetaMessage: public MessageBase
-{
-public:
-  typedef GetLabelMetaMessage            Self;
-  typedef MessageBase                    Superclass;
-  typedef SmartPointer<Self>             Pointer;
-  typedef SmartPointer<const Self>       ConstPointer;
-
-  igtlTypeMacro(igtl::GetLabelMetaMessage, igtl::MessageBase);
-  igtlNewMacro(igtl::GetLabelMetaMessage);
-
-protected:
-  GetLabelMetaMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_LBMETA"; };
-  ~GetLabelMetaMessage() {};
-protected:
-  virtual int  GetBodyPackSize() { return 0; };
-  virtual int  PackBody()        { AllocatePack(); return 1; };
-  virtual int  UnpackBody()      { return 1; };
-};
-
 
 class IGTLCommon_EXPORT LabelMetaMessage: public MessageBase
 {

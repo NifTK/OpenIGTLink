@@ -31,7 +31,7 @@ namespace igtl
 class IGTLCommon_EXPORT GetPolyDataMessage: public MessageBase
 {
 public:
-  typedef GetPolyDataMessage            Self;
+  typedef GetPolyDataMessage             Self;
   typedef MessageBase                    Superclass;
   typedef SmartPointer<Self>             Pointer;
   typedef SmartPointer<const Self>       ConstPointer;
@@ -40,14 +40,103 @@ public:
   igtlNewMacro(igtl::GetPolyDataMessage);
 
 protected:
-  GetPolyDataMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_POLYDATA"; };
-  ~GetPolyDataMessage() {};
+  GetPolyDataMessage();
+  ~GetPolyDataMessage();
+
 protected:
   virtual int  GetBodyPackSize() { return 0; };
   virtual int  PackBody()        { AllocatePack(); return 1; };
   virtual int  UnpackBody()      { return 1; };
 };
 
+class IGTLCommon_EXPORT StartPolyDataMessage: public GetPolyDataMessage
+{
+public:
+  typedef StartPolyDataMessage              Self;
+  typedef GetPolyDataMessage                Superclass;
+  typedef SmartPointer<Self>	            Pointer;
+  typedef SmartPointer<const Self>			ConstPointer;
+
+  igtlTypeMacro(igtl::StartPolyDataMessage, igtl::GetPolyDataMessage);
+  igtlNewMacro(igtl::StartPolyDataMessage);
+
+public:
+
+  // Set/get time resolution. The time resolution is specified
+  // as a 64-bit fixed-point used in OpenIGTLink time stamp.
+  void        SetResolution(igtlUint64 res);
+  igtlUint64  GetResolution();
+
+protected:
+  StartPolyDataMessage();
+  ~StartPolyDataMessage();
+  
+protected:
+
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+  igtlUint64   m_Resolution;
+
+};
+
+class IGTLCommon_EXPORT StopPolyDataMessage: public MessageBase
+{
+public:
+  typedef StopPolyDataMessage                 Self;
+  typedef MessageBase						  Superclass;
+  typedef SmartPointer<Self>				  Pointer;
+  typedef SmartPointer<const Self>			  ConstPointer;
+
+  igtlTypeMacro(igtl::StopPolyDataMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopPolyDataMessage);
+
+protected:
+  StopPolyDataMessage();
+  ~StopPolyDataMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+
+class IGTLCommon_EXPORT RTSPolyDataMessage: public MessageBase
+{
+public:
+  typedef RTSPolyDataMessage			 Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSPolyDataMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSPolyDataMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSPolyDataMessage();
+  ~RTSPolyDataMessage();
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
 
 // Description:
 // PolyDataPointArray class

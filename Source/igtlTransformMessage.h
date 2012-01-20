@@ -46,8 +46,6 @@ protected:
   virtual int  GetBodyPackSize() { return 0; };
   virtual int  PackBody()        { AllocatePack(); return 1; };
   virtual int  UnpackBody()      { return 1; };
-
-
 };
 
 class IGTLCommon_EXPORT StartTransformMessage: public GetTransformMessage
@@ -94,8 +92,8 @@ public:
   igtlNewMacro(igtl::StopTransformMessage);
 
 protected:
-  StopTransformMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_TRANS"; };
-  ~StopTransformMessage() {};
+  StopTransformMessage();
+  ~StopTransformMessage();
 
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -108,7 +106,7 @@ protected:
 class IGTLCommon_EXPORT RTSTransformMessage: public MessageBase
 {
 public:
-  typedef RTSTransformMessage         Self;
+  typedef RTSTransformMessage			 Self;
   typedef MessageBase                    Superclass;
   typedef SmartPointer<Self>             Pointer;
   typedef SmartPointer<const Self>       ConstPointer;
@@ -127,8 +125,8 @@ public:
   igtlUint8     GetStatus()                { return this->m_Status; };
 
 protected:
-  RTSTransformMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_TRANS"; };
-  ~RTSTransformMessage() {};
+  RTSTransformMessage();
+  ~RTSTransformMessage();
 
   igtlUint8 m_Status;
 

@@ -294,6 +294,16 @@ int PointMessage::UnpackBody()
   return 1;
 }
 
+GetPointMessage::GetPointMessage() 
+: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "GET_POINT"; 
+}
+
+GetPointMessage::~GetPointMessage() 
+{
+}
+
 StartPointMessage::StartPointMessage():
   GetPointMessage()
 {
@@ -339,12 +349,33 @@ int StartPointMessage::UnpackBody()
   return 1; 
 }
 
-int  RTSPointMessage::GetBodyPackSize()
+StopPointMessage::StopPointMessage() 
+	: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "STP_POINT"; 
+}
+
+StopPointMessage::~StopPointMessage() 
+{
+}
+
+RTSPointMessage::RTSPointMessage() 
+: MessageBase()
+{
+	this->m_Status = 0;
+	this->m_DefaultBodyType  = "RTS_POINT"; 
+}
+
+RTSPointMessage::~RTSPointMessage() 
+{
+}
+
+int RTSPointMessage::GetBodyPackSize()
 { 
   return sizeof (igtlUint8);
 }
 
-int  RTSPointMessage::PackBody()
+int RTSPointMessage::PackBody()
 {
   AllocatePack(); 
 
@@ -354,7 +385,7 @@ int  RTSPointMessage::PackBody()
 }
 
 
-int  RTSPointMessage::UnpackBody()
+int RTSPointMessage::UnpackBody()
 { 
   this->m_Status = * (igtlUint8 * )this->m_Body;
 

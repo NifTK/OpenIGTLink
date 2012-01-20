@@ -47,11 +47,9 @@ QuaternionTrackingDataElement::QuaternionTrackingDataElement() : Object()
   this->m_quaternion[3] = 1;
 }
 
-
 QuaternionTrackingDataElement::~QuaternionTrackingDataElement()
 {
 }
-
 
 int QuaternionTrackingDataElement::SetName(const char* name)
 {
@@ -65,7 +63,6 @@ int QuaternionTrackingDataElement::SetName(const char* name)
     return 0;
     }
 }
-
 
 int QuaternionTrackingDataElement::SetType(igtlUint8 type)
 {
@@ -83,7 +80,6 @@ int QuaternionTrackingDataElement::SetType(igtlUint8 type)
     }
 }
 
-
 void QuaternionTrackingDataElement::SetPosition(float p[3])
 {
   this->m_position[0] = p[0];
@@ -99,7 +95,6 @@ void QuaternionTrackingDataElement::GetPosition(float p[3])
   p[2] = this->m_position[2];
 }
 
-
 void QuaternionTrackingDataElement::SetPosition(float px, float py, float pz)
 {
   this->m_position[0] = px;
@@ -107,14 +102,12 @@ void QuaternionTrackingDataElement::SetPosition(float px, float py, float pz)
   this->m_position[2] = pz;
 }
 
-
 void QuaternionTrackingDataElement::GetPosition(float* px, float* py, float* pz)
 {
   *px = this->m_position[0];
   *py = this->m_position[1];
   *pz = this->m_position[2];
 }
-
 
 void QuaternionTrackingDataElement::SetQuaternion(float q[4])
 {
@@ -124,7 +117,6 @@ void QuaternionTrackingDataElement::SetQuaternion(float q[4])
   this->m_quaternion[3] = q[3];
 }
 
-
 void QuaternionTrackingDataElement::GetQuaternion(float q[4])
 {
   q[0] = this->m_quaternion[0];
@@ -132,7 +124,6 @@ void QuaternionTrackingDataElement::GetQuaternion(float q[4])
   q[2] = this->m_quaternion[2];
   q[3] = this->m_quaternion[3];
 }
-
 
 void QuaternionTrackingDataElement::SetQuaternion(float qx, float qy, float qz, float w)
 {
@@ -142,7 +133,6 @@ void QuaternionTrackingDataElement::SetQuaternion(float qx, float qy, float qz, 
   this->m_quaternion[3] = w;
 }
 
-
 void QuaternionTrackingDataElement::GetQuaternion(float* qx, float* qy, float* qz, float* w)
 {
   *qx = this->m_quaternion[0];
@@ -151,6 +141,18 @@ void QuaternionTrackingDataElement::GetQuaternion(float* qx, float* qy, float* q
   *w  = this->m_quaternion[3];
 }
 
+//----------------------------------------------------------------------
+// igtl::GetQuaternionTrackingDataMessage class
+
+GetQuaternionTrackingDataMessage::GetQuaternionTrackingDataMessage() 
+	: MessageBase() 
+  { 
+	  this->m_DefaultBodyType  = "GET_QTDATA"; 
+  }
+ 
+GetQuaternionTrackingDataMessage::~GetQuaternionTrackingDataMessage() 
+{
+}
 
 //----------------------------------------------------------------------
 // igtl::StartQuaternionTrackingDataMessage class
@@ -167,7 +169,6 @@ StartQuaternionTrackingDataMessage::StartQuaternionTrackingDataMessage():
 StartQuaternionTrackingDataMessage::~StartQuaternionTrackingDataMessage()
 {
 }
-
 
 int StartQuaternionTrackingDataMessage::SetCoordinateName(const char* name)
 {
@@ -204,7 +205,6 @@ int StartQuaternionTrackingDataMessage::PackBody()
   
 }
 
-
 int StartQuaternionTrackingDataMessage::UnpackBody()
 {
   igtl_stt_qtdata* stt_qtdata = (igtl_stt_qtdata*)this->m_Body;
@@ -223,16 +223,39 @@ int StartQuaternionTrackingDataMessage::UnpackBody()
 
 }
 
+//----------------------------------------------------------------------
+// igtl::StopQuaternionTrackingDataMessage class
+
+StopQuaternionTrackingDataMessage::StopQuaternionTrackingDataMessage() 
+: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "STP_QTDATA";
+}
+
+StopQuaternionTrackingDataMessage::~StopQuaternionTrackingDataMessage() 
+{
+}
 
 //----------------------------------------------------------------------
 // igtl::RTSQuaternionTrackingDataMessage class
 
-int  RTSQuaternionTrackingDataMessage::GetBodyPackSize()
+RTSQuaternionTrackingDataMessage::RTSQuaternionTrackingDataMessage()
+	: MessageBase()
+{
+	this->m_Status = 0;
+	this->m_DefaultBodyType  = "RTS_QTDATA";
+}
+
+RTSQuaternionTrackingDataMessage::~RTSQuaternionTrackingDataMessage() 
+{
+}
+
+int RTSQuaternionTrackingDataMessage::GetBodyPackSize()
 { 
   return IGTL_RTS_QTDATA_SIZE; 
 }
 
-int  RTSQuaternionTrackingDataMessage::PackBody()
+int RTSQuaternionTrackingDataMessage::PackBody()
 {
   AllocatePack(); 
 
@@ -246,7 +269,7 @@ int  RTSQuaternionTrackingDataMessage::PackBody()
 }
 
 
-int  RTSQuaternionTrackingDataMessage::UnpackBody()
+int RTSQuaternionTrackingDataMessage::UnpackBody()
 { 
   igtl_rts_qtdata* rts_qtdata = (igtl_rts_qtdata*)this->m_Body;
   
@@ -256,8 +279,6 @@ int  RTSQuaternionTrackingDataMessage::UnpackBody()
 
   return 1; 
 }
-
-
 
 //----------------------------------------------------------------------
 // igtl::QuaternionTrackingDataMessage class

@@ -26,13 +26,13 @@
 #include <string.h>
 #include <vector>
 
-namespace igtl {
-
+namespace igtl 
+{
 
 //----------------------------------------------------------------------
 // igtl::TrackingDataElement class
 
-TrackingDataElement::TrackingDataElement() : Object()
+	TrackingDataElement::TrackingDataElement() : Object()
 {
   this->m_Name = "";
   this->m_Type = TYPE_TRACKER;
@@ -155,114 +155,6 @@ void TrackingDataElement::GetMatrix(Matrix4x4& mat)
   mat[3][3] = m_Matrix[3][3];
 }
 
-
-//----------------------------------------------------------------------
-// igtl::StartTrackingDataMessage class
-
-StartTrackingDataMessage::StartTrackingDataMessage():
-  MessageBase()
-{
-  this->m_DefaultBodyType = "STT_TDATA";
-  this->m_Resolution      = 0;
-  this->m_CoordinateName  = "";
-}
-
-
-StartTrackingDataMessage::~StartTrackingDataMessage()
-{
-}
-
-
-int StartTrackingDataMessage::SetCoordinateName(const char* name)
-{
-  if (strlen(name) <= IGTL_STT_TDATA_LEN_COORDNAME)
-    {
-    this->m_CoordinateName = name;
-    return 1;
-    }
-  else
-    {
-    return 0;
-    }
-}
-
-
-int StartTrackingDataMessage::GetBodyPackSize()
-{
-  return IGTL_STT_TDATA_SIZE;
-}
-
-
-int StartTrackingDataMessage::PackBody()
-{
-  AllocatePack();
-
-  igtl_stt_tdata* stt_tdata = (igtl_stt_tdata*)this->m_Body;
-
-  stt_tdata->resolution = this->m_Resolution;
-  strncpy(stt_tdata->coord_name, this->m_CoordinateName.c_str(), IGTL_STT_TDATA_LEN_COORDNAME);
-
-  igtl_stt_tdata_convert_byte_order(stt_tdata);
-
-  return 1;
-  
-}
-
-
-int StartTrackingDataMessage::UnpackBody()
-{
-  igtl_stt_tdata* stt_tdata = (igtl_stt_tdata*)this->m_Body;
-  
-  igtl_stt_tdata_convert_byte_order(stt_tdata);
-
-  this->m_Resolution = stt_tdata->resolution;
-
-  char strbuf[IGTL_STT_TDATA_LEN_COORDNAME+1];
-  strbuf[IGTL_STT_TDATA_LEN_COORDNAME] = '\n';
-  strncpy(strbuf, stt_tdata->coord_name, IGTL_STT_TDATA_LEN_COORDNAME);
-
-  this->SetCoordinateName(strbuf);
-
-  return 1;
-
-}
-
-
-//----------------------------------------------------------------------
-// igtl::RTSTrackingDataMessage class
-
-int  RTSTrackingDataMessage::GetBodyPackSize()
-{ 
-  return IGTL_RTS_TDATA_SIZE; 
-}
-
-int  RTSTrackingDataMessage::PackBody()
-{
-  AllocatePack(); 
-
-  igtl_rts_tdata* rts_tdata = (igtl_rts_tdata*)this->m_Body;
-
-  rts_tdata->status = this->m_Status;
-
-  igtl_rts_tdata_convert_byte_order(rts_tdata);
-
-  return 1; 
-}
-
-
-int  RTSTrackingDataMessage::UnpackBody()
-{ 
-  igtl_rts_tdata* rts_tdata = (igtl_rts_tdata*)this->m_Body;
-  
-  igtl_rts_tdata_convert_byte_order(rts_tdata);
-
-  this->m_Status= rts_tdata->status;
-
-  return 1; 
-}
-
-
-
 //----------------------------------------------------------------------
 // igtl::TrackingDataMessage class
 
@@ -345,7 +237,6 @@ int TrackingDataMessage::PackBody()
   return 1;
 }
 
-
 int TrackingDataMessage::UnpackBody()
 {
 
@@ -385,6 +276,144 @@ int TrackingDataMessage::UnpackBody()
     }
 
   return 1;
+}
+
+//----------------------------------------------------------------------
+// igtl::GetTrackingDataMessage class
+
+GetTrackingDataMessage::GetTrackingDataMessage() 
+	: MessageBase() 
+  { 
+	  this->m_DefaultBodyType  = "GET_TDATA"; 
+  }
+ 
+GetTrackingDataMessage::~GetTrackingDataMessage() 
+{
+}
+
+//----------------------------------------------------------------------
+// igtl::StartTrackingDataMessage class
+
+StartTrackingDataMessage::StartTrackingDataMessage()
+: MessageBase()
+{
+  this->m_DefaultBodyType = "STT_TDATA";
+  this->m_Resolution      = 0;
+  this->m_CoordinateName  = "";
+}
+
+
+StartTrackingDataMessage::~StartTrackingDataMessage()
+{
+}
+
+int StartTrackingDataMessage::SetCoordinateName(const char* name)
+{
+  if (strlen(name) <= IGTL_STT_TDATA_LEN_COORDNAME)
+    {
+    this->m_CoordinateName = name;
+    return 1;
+    }
+  else
+    {
+    return 0;
+    }
+}
+
+int StartTrackingDataMessage::GetBodyPackSize()
+{
+  return IGTL_STT_TDATA_SIZE;
+}
+
+
+int StartTrackingDataMessage::PackBody()
+{
+  AllocatePack();
+
+  igtl_stt_tdata* stt_tdata = (igtl_stt_tdata*)this->m_Body;
+
+  stt_tdata->resolution = this->m_Resolution;
+  strncpy(stt_tdata->coord_name, this->m_CoordinateName.c_str(), IGTL_STT_TDATA_LEN_COORDNAME);
+
+  igtl_stt_tdata_convert_byte_order(stt_tdata);
+
+  return 1;
+  
+}
+
+int StartTrackingDataMessage::UnpackBody()
+{
+  igtl_stt_tdata* stt_tdata = (igtl_stt_tdata*)this->m_Body;
+  
+  igtl_stt_tdata_convert_byte_order(stt_tdata);
+
+  this->m_Resolution = stt_tdata->resolution;
+
+  char strbuf[IGTL_STT_TDATA_LEN_COORDNAME+1];
+  strbuf[IGTL_STT_TDATA_LEN_COORDNAME] = '\n';
+  strncpy(strbuf, stt_tdata->coord_name, IGTL_STT_TDATA_LEN_COORDNAME);
+
+  this->SetCoordinateName(strbuf);
+
+  return 1;
+
+}
+
+//----------------------------------------------------------------------
+// igtl::StopTrackingDataMessage class
+
+StopTrackingDataMessage::StopTrackingDataMessage()
+	: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "STP_TDATA";
+}
+
+StopTrackingDataMessage::~StopTrackingDataMessage()
+{
+}
+
+//----------------------------------------------------------------------
+// igtl::RTSTrackingDataMessage class
+
+RTSTrackingDataMessage::RTSTrackingDataMessage()
+	: MessageBase()
+{	
+	this->m_Status = 0; 
+	this->m_DefaultBodyType  = "RTS_TDATA";
+}
+
+RTSTrackingDataMessage::~RTSTrackingDataMessage()
+{
+}
+
+int RTSTrackingDataMessage::GetBodyPackSize()
+{ 
+  return IGTL_RTS_TDATA_SIZE; 
+}
+
+int RTSTrackingDataMessage::PackBody()
+{
+  AllocatePack(); 
+
+  igtl_rts_tdata* rts_tdata = (igtl_rts_tdata*)this->m_Body;
+
+  rts_tdata->status = this->m_Status;
+
+  igtl_rts_tdata_convert_byte_order(rts_tdata);
+
+  return 1; 
+}
+
+
+int RTSTrackingDataMessage::UnpackBody()
+{ 
+  igtl_rts_tdata* rts_tdata = (igtl_rts_tdata*)this->m_Body;
+  
+  igtl_rts_tdata_convert_byte_order(rts_tdata);
+
+  this->m_Status= rts_tdata->status;
+
+  return 1; 
 }
 
 } // namespace igtl

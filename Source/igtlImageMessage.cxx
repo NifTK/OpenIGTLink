@@ -395,7 +395,6 @@ int ImageMessage::PackBody()
 
 }
 
-
 int ImageMessage::UnpackBody()
 {
 
@@ -471,6 +470,16 @@ int ImageMessage::GetNumComponents()
   return numComponents;
 }
 
+GetImageMessage::GetImageMessage()
+	: MessageBase() 
+{	
+	this->m_DefaultBodyType  = "GET_IMAGE"; 
+}
+
+GetImageMessage::~GetImageMessage() 
+{
+}
+
 StartImageMessage::StartImageMessage():
   GetImageMessage()
 {
@@ -516,12 +525,32 @@ int StartImageMessage::UnpackBody()
   return 1; 
 }
 
-int  RTSImageMessage::GetBodyPackSize()
+StopImageMessage::StopImageMessage() : MessageBase()
+{ 
+	this->m_DefaultBodyType  = "STP_IMAGE";
+}
+
+StopImageMessage::~StopImageMessage() 
+{
+}
+
+RTSImageMessage::RTSImageMessage() 
+	: MessageBase()
+{
+	this->m_Status = 0;
+	this->m_DefaultBodyType  = "RTS_IMAGE"; 
+}
+
+RTSImageMessage::~RTSImageMessage() 
+{
+}
+
+int RTSImageMessage::GetBodyPackSize()
 { 
   return sizeof (igtlUint8);
 }
 
-int  RTSImageMessage::PackBody()
+int RTSImageMessage::PackBody()
 {
   AllocatePack(); 
 
@@ -531,7 +560,7 @@ int  RTSImageMessage::PackBody()
 }
 
 
-int  RTSImageMessage::UnpackBody()
+int RTSImageMessage::UnpackBody()
 { 
   this->m_Status = * (igtlUint8 * )this->m_Body;
 

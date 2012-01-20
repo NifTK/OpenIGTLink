@@ -30,6 +30,123 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT GetQuaternionTrackingDataMessage: public MessageBase
+{
+
+public:
+
+  typedef GetQuaternionTrackingDataMessage            Self;
+  typedef MessageBase							      Superclass;
+  typedef SmartPointer<Self>						  Pointer;
+  typedef SmartPointer<const Self>					  ConstPointer;
+
+  igtlTypeMacro(igtl::GetQuaternionTrackingDataMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::GetQuaternionTrackingDataMessage);
+
+
+protected:
+  GetQuaternionTrackingDataMessage();
+  ~GetQuaternionTrackingDataMessage();
+  
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+};
+
+class IGTLCommon_EXPORT StartQuaternionTrackingDataMessage: public MessageBase
+{
+
+public:
+  typedef StartQuaternionTrackingDataMessage  Self;
+  typedef MessageBase                         Superclass;
+  typedef SmartPointer<Self>                  Pointer;
+  typedef SmartPointer<const Self>            ConstPointer;
+
+  igtlTypeMacro(igtl::StartQuaternionTrackingDataMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StartQuaternionTrackingDataMessage);
+
+public:
+  void         SetResolution(igtlInt32 res)  { this->m_Resolution = res; }; // ms
+  igtlInt32    GetResolution()               { return this->m_Resolution; };
+
+  int          SetCoordinateName(const char* name);
+  const char*  GetCoordinateName()            { return this->m_CoordinateName.c_str(); };
+
+protected:
+  StartQuaternionTrackingDataMessage();
+  ~StartQuaternionTrackingDataMessage();
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+protected:
+  igtlInt32     m_Resolution;     /* Minimum time between two frames (ms). Use 0 for as fast as possible. */
+  std::string   m_CoordinateName; /* Name of the coordinate system */
+
+};
+
+
+class IGTLCommon_EXPORT StopQuaternionTrackingDataMessage: public MessageBase
+{
+public:
+  typedef StopQuaternionTrackingDataMessage  Self;
+  typedef MessageBase                        Superclass;
+  typedef SmartPointer<Self>                 Pointer;
+  typedef SmartPointer<const Self>           ConstPointer;
+
+  igtlTypeMacro(igtl::StopQuaternionTrackingDataMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::StopQuaternionTrackingDataMessage);
+
+protected:
+  StopQuaternionTrackingDataMessage();
+  ~StopQuaternionTrackingDataMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+
+};
+
+class IGTLCommon_EXPORT RTSQuaternionTrackingDataMessage: public MessageBase
+{
+public:
+  typedef RTSQuaternionTrackingDataMessage  Self;
+  typedef MessageBase                       Superclass;
+  typedef SmartPointer<Self>                Pointer;
+  typedef SmartPointer<const Self>          ConstPointer;
+
+  // Status type
+  enum {
+    STATUS_SUCCESS = 0,
+    STATUS_ERROR = 1
+  };
+
+
+  igtlTypeMacro(igtl::RTSQuaternionTrackingDataMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::RTSQuaternionTrackingDataMessage);
+
+  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
+  igtlUint8     GetStatus()                { return this->m_Status; };
+
+protected:
+  RTSQuaternionTrackingDataMessage();
+  ~RTSQuaternionTrackingDataMessage();
+
+  igtlUint8 m_Status;
+
+protected:
+  virtual int  GetBodyPackSize();
+  virtual int  PackBody();
+  virtual int  UnpackBody();
+
+};
+
+
+
 class IGTLCommon_EXPORT QuaternionTrackingDataElement: public Object
 {
 public:
@@ -80,100 +197,6 @@ protected:
   igtlFloat32   m_position[3];   /* position (x, y, z) */
   igtlFloat32   m_quaternion[4]; /* orientation as quaternion (qx, qy, qz, w) */
 };
-
-
-class IGTLCommon_EXPORT StartQuaternionTrackingDataMessage: public MessageBase
-{
-
-public:
-  typedef StartQuaternionTrackingDataMessage  Self;
-  typedef MessageBase                         Superclass;
-  typedef SmartPointer<Self>                  Pointer;
-  typedef SmartPointer<const Self>            ConstPointer;
-
-  igtlTypeMacro(igtl::StartQuaternionTrackingDataMessage, igtl::MessageBase);
-  igtlNewMacro(igtl::StartQuaternionTrackingDataMessage);
-
-public:
-  void         SetResolution(igtlInt32 res)  { this->m_Resolution = res; }; // ms
-  igtlInt32    GetResolution()               { return this->m_Resolution; };
-
-  int          SetCoordinateName(const char* name);
-  const char*  GetCoordinateName()            { return this->m_CoordinateName.c_str(); };
-
-protected:
-  StartQuaternionTrackingDataMessage();
-  ~StartQuaternionTrackingDataMessage();
-
-protected:
-  virtual int  GetBodyPackSize();
-  virtual int  PackBody();
-  virtual int  UnpackBody();
-
-protected:
-  igtlInt32     m_Resolution;     /* Minimum time between two frames (ms). Use 0 for as fast as possible. */
-  std::string   m_CoordinateName; /* Name of the coordinate system */
-
-};
-
-
-class IGTLCommon_EXPORT StopQuaternionTrackingDataMessage: public MessageBase
-{
-public:
-  typedef StopQuaternionTrackingDataMessage  Self;
-  typedef MessageBase                        Superclass;
-  typedef SmartPointer<Self>                 Pointer;
-  typedef SmartPointer<const Self>           ConstPointer;
-
-  igtlTypeMacro(igtl::StopQuaternionTrackingDataMessage, igtl::MessageBase);
-  igtlNewMacro(igtl::StopQuaternionTrackingDataMessage);
-
-protected:
-  StopQuaternionTrackingDataMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_QTDATA"; };
-  ~StopQuaternionTrackingDataMessage() {};
-
-protected:
-  virtual int  GetBodyPackSize() { return 0; };
-  virtual int  PackBody()        { AllocatePack(); return 1; };
-  virtual int  UnpackBody()      { return 1; };
-
-};
-
-
-class IGTLCommon_EXPORT RTSQuaternionTrackingDataMessage: public MessageBase
-{
-public:
-  typedef RTSQuaternionTrackingDataMessage  Self;
-  typedef MessageBase                       Superclass;
-  typedef SmartPointer<Self>                Pointer;
-  typedef SmartPointer<const Self>          ConstPointer;
-
-  // Status type
-  enum {
-    STATUS_SUCCESS = 0,
-    STATUS_ERROR = 1
-  };
-
-
-  igtlTypeMacro(igtl::RTSQuaternionTrackingDataMessage, igtl::MessageBase);
-  igtlNewMacro(igtl::RTSQuaternionTrackingDataMessage);
-
-  void          SetStatus(igtlUint8 status){ this->m_Status = status; }
-  igtlUint8     GetStatus()                { return this->m_Status; };
-
-protected:
-  RTSQuaternionTrackingDataMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_QTDATA"; };
-  ~RTSQuaternionTrackingDataMessage() {};
-
-  igtlUint8 m_Status;
-
-protected:
-  virtual int  GetBodyPackSize();
-  virtual int  PackBody();
-  virtual int  UnpackBody();
-
-};
-
 
 class IGTLCommon_EXPORT QuaternionTrackingDataMessage: public MessageBase
 {

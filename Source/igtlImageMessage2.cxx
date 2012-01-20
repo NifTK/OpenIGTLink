@@ -731,6 +731,102 @@ int ImageMessage2::GetNumComponents()
   return numComponents;
 }
 
+GetImageMessage2::GetImageMessage2() 
+	: MessageBase() 
+{ 
+	this->m_DefaultBodyType  = "GET_IMAGE"; 
+}
+
+GetImageMessage2::~GetImageMessage2() 
+{
+}
+
+StartImageMessage2::StartImageMessage2()
+	: GetImageMessage2()
+{
+  this->m_DefaultBodyType = "STT_IMAGE";
+  this->m_Resolution      = 0;
+}
+
+
+StartImageMessage2::~StartImageMessage2()
+{
+}
+
+void StartImageMessage2::SetResolution(igtlUint64 res)
+{
+  this->m_Resolution = res; 
+}
+
+
+igtlUint64 StartImageMessage2::GetResolution()
+{
+  return this->m_Resolution;
+}
+
+int StartImageMessage2::GetBodyPackSize()
+{
+  // Only a time stamp field is in the message
+  return Superclass::GetBodyPackSize() + sizeof(igtlUint64);
+}
+
+int StartImageMessage2::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint64 * )this->m_Body = this->m_Resolution;
+
+  return 1;
+}
+
+int StartImageMessage2::UnpackBody()
+{
+  this->m_Resolution = * (igtlUint64 * )this->m_Body;
+
+  return 1; 
+}
+
+StopImageMessage2::StopImageMessage2()
+	: MessageBase()
+{ 
+	this->m_DefaultBodyType  = "STP_IMAGE"; 
+}
+
+StopImageMessage2::~StopImageMessage2()
+{
+}
+
+RTSImageMessage2::RTSImageMessage2()
+	: MessageBase()
+{	
+	this->m_Status = 0; 
+	this->m_DefaultBodyType  = "RTS_IMAGE";
+}
+
+RTSImageMessage2::~RTSImageMessage2()
+{
+}
+
+int RTSImageMessage2::GetBodyPackSize()
+{ 
+  return sizeof (igtlUint8);
+}
+
+int RTSImageMessage2::PackBody()
+{
+  AllocatePack(); 
+
+  * (igtlUint8 * )this->m_Body = this->m_Status;
+
+  return 1; 
+}
+
+int RTSImageMessage2::UnpackBody()
+{ 
+  this->m_Status = * (igtlUint8 * )this->m_Body;
+
+  return 1; 
+}
 
 } // namespace igtl
 

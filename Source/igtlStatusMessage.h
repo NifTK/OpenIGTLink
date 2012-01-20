@@ -31,7 +31,7 @@ class IGTLCommon_EXPORT GetStatusMessage: public MessageBase
 
 public:
 
-  typedef GetStatusMessage            Self;
+  typedef GetStatusMessage				 Self;
   typedef MessageBase                    Superclass;
   typedef SmartPointer<Self>             Pointer;
   typedef SmartPointer<const Self>       ConstPointer;
@@ -41,22 +41,21 @@ public:
 
 
 protected:
-  GetStatusMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_STATUS"; };
-  ~GetStatusMessage() {};
+  GetStatusMessage();
+  ~GetStatusMessage();
   
 protected:
   virtual int  GetBodyPackSize() { return 0; };
   virtual int  PackBody()        { AllocatePack(); return 1; };
   virtual int  UnpackBody()      { return 1; };
 
-
 };
 
 class IGTLCommon_EXPORT StartStatusMessage: public GetStatusMessage
 {
 public:
-  typedef StartStatusMessage             Self;
-  typedef GetStatusMessage               Superclass;
+  typedef StartStatusMessage				Self;
+  typedef GetStatusMessage					Superclass;
   typedef SmartPointer<Self>	            Pointer;
   typedef SmartPointer<const Self>			ConstPointer;
 
@@ -87,7 +86,7 @@ protected:
 class IGTLCommon_EXPORT StopStatusMessage: public MessageBase
 {
 public:
-  typedef StopStatusMessage                Self;
+  typedef StopStatusMessage					  Self;
   typedef MessageBase						  Superclass;
   typedef SmartPointer<Self>				  Pointer;
   typedef SmartPointer<const Self>			  ConstPointer;
@@ -96,8 +95,8 @@ public:
   igtlNewMacro(igtl::StopStatusMessage);
 
 protected:
-  StopStatusMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_STATUS"; };
-  ~StopStatusMessage() {};
+  StopStatusMessage();
+  ~StopStatusMessage();
 
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -110,7 +109,7 @@ protected:
 class IGTLCommon_EXPORT RTSStatusMessage: public MessageBase
 {
 public:
-  typedef RTSStatusMessage         Self;
+  typedef RTSStatusMessage				 Self;
   typedef MessageBase                    Superclass;
   typedef SmartPointer<Self>             Pointer;
   typedef SmartPointer<const Self>       ConstPointer;
@@ -129,8 +128,8 @@ public:
   igtlUint8     GetStatus()                { return this->m_Status; };
 
 protected:
-  RTSStatusMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_STATUS"; };
-  ~RTSStatusMessage() {};
+  RTSStatusMessage();
+  ~RTSStatusMessage();
 
   igtlUint8 m_Status;
 

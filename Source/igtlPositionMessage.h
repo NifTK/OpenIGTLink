@@ -41,8 +41,8 @@ public:
 
 
 protected:
-  GetPositionMessage() : MessageBase() { this->m_DefaultBodyType  = "GET_POSITION"; };
-  ~GetPositionMessage() {};
+  GetPositionMessage();
+  ~GetPositionMessage();
   
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -95,8 +95,8 @@ public:
   igtlNewMacro(igtl::StopPositionMessage);
 
 protected:
-  StopPositionMessage() : MessageBase() { this->m_DefaultBodyType  = "STP_POSITION"; };
-  ~StopPositionMessage() {};
+  StopPositionMessage();
+  ~StopPositionMessage();
 
 protected:
   virtual int  GetBodyPackSize() { return 0; };
@@ -128,8 +128,8 @@ public:
   igtlUint8     GetStatus()                { return this->m_Status; };
 
 protected:
-  RTSPositionMessage() : MessageBase(), m_Status(0) { this->m_DefaultBodyType  = "RTS_POSITION"; };
-  ~RTSPositionMessage() {};
+  RTSPositionMessage();
+  ~RTSPositionMessage();
 
   igtlUint8 m_Status;
 

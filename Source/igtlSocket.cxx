@@ -57,16 +57,24 @@
   #include <netdb.h>
   #include <unistd.h>
   #include <sys/time.h>
+  #include <errno.h>
 #endif
 
 #include <string.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#define WSA_VERSION MAKEWORD(1,1)
-#define igtlCloseSocketMacro(sock) (closesocket(sock))
-#else
-#define igtlCloseSocketMacro(sock) (close(sock))
+  #define WSA_VERSION MAKEWORD(1,1)
+//  #define igtlCloseSocketMacro(sock) (closesocket(sock))
+//#else
+//  #define igtlCloseSocketMacro(sock) (close(sock))
 #endif
+
+void handle_error(const char * msg)
+{
+    std::cerr <<std::endl;
+    perror(msg);
+    std::cerr <<std::endl;
+}
 
 namespace igtl
 {
@@ -125,19 +133,24 @@ int Socket::BindSocket(int socketdescriptor, int port)
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = INADDR_ANY;
   server.sin_port = htons(port);
+
   // Allow the socket to be bound to an address that is already in use
 #ifdef _WIN32
   int opt=1;
   setsockopt(socketdescriptor, SOL_SOCKET, SO_REUSEADDR, (char*) &opt, sizeof(int));
-#elif defined(VTK_HAVE_SO_REUSEADDR)
+//#elif defined(VTK_HAVE_SO_REUSEADDR)
+#else
   int opt=1;
   setsockopt(socketdescriptor, SOL_SOCKET, SO_REUSEADDR, (void *) &opt, sizeof(int));
 #endif
 
-  if ( bind(socketdescriptor, reinterpret_cast<sockaddr*>(&server), sizeof(server)) )
-    {
-    return -1;
-    }
+  int err = bind(socketdescriptor, reinterpret_cast<sockaddr*>(&server), sizeof(server));
+  if (err != 0)
+  {
+      handle_error("bind");
+      return err;
+  }
+
   return 0;
 }
 
@@ -154,11 +167,19 @@ int Socket::Accept(int socketdescriptor)
 //-----------------------------------------------------------------------------
 int Socket::Listen(int socketdescriptor)
 {
-  if (socketdescriptor < 0)
+    if (socketdescriptor < 0)
     {
-    return -1;
+        return -1;
     }
-  return listen(socketdescriptor, 1);
+
+    int err = listen(socketdescriptor, 1);
+    if (err != 0)
+    {
+        handle_error("listen");
+        return err;
+    }
+
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -299,13 +320,30 @@ int Socket::GetPort(int sock)
 }
 
 //-----------------------------------------------------------------------------
-void Socket::CloseSocket(int socketdescriptor)
+int Socket::CloseSocket(int socketdescriptor)
 {
-  if (socketdescriptor < 0)
+    //"Not checking the return value of close() is a common but nevertheless serious programming error."
+
+    int err = 0;
+
+    if (socketdescriptor < 0)
     {
-    return;
+        return -1;
     }
-  igtlCloseSocketMacro(socketdescriptor);
+
+    #if defined(_WIN32) && !defined(__CYGWIN__)
+      err = closesocket(socketdescriptor);
+    #else
+      err = close(socketdescriptor);
+    #endif
+
+    if (err != 0)
+    {
+        handle_error("close");
+        return err;
+    }
+
+    return err;
 }
 
 //-----------------------------------------------------------------------------

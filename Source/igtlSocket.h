@@ -80,7 +80,7 @@ public:
 
   // Description:
   // Close the socket.
-  void CloseSocket() {this->CloseSocket(this->m_SocketDescriptor);}
+  int CloseSocket() {return this->CloseSocket(this->m_SocketDescriptor);}
  
   // ------ Communication API ---
   // Description:
@@ -129,7 +129,7 @@ protected:
 
   // Description:
   // Close the socket.
-  void CloseSocket(int socketdescriptor);
+  int CloseSocket(int socketdescriptor);
 
   // Description:
   // Binds socket to a particular port.
@@ -179,7 +179,6 @@ private:
   struct timeval m_OrigTimeout;
 #endif
   int m_TimeoutFlag;
-
 };
 
 }

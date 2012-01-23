@@ -56,27 +56,37 @@ int ServerSocket::GetServerPort()
 //-----------------------------------------------------------------------------
 int ServerSocket::CreateServer(int port)
 {
-  if (this->m_SocketDescriptor != -1)
+    if (this->m_SocketDescriptor != -1)
     {
-    igtlWarningMacro("Server Socket already exists. Closing old socket.");
-    this->CloseSocket(this->m_SocketDescriptor);
-    this->m_SocketDescriptor = -1;
+        igtlWarningMacro("Server Socket already exists. Closing old socket.");
+        this->CloseSocket(this->m_SocketDescriptor);
+        this->m_SocketDescriptor = -1;
     }
-  this->m_SocketDescriptor = this->CreateSocket();
-  if (this->m_SocketDescriptor < 0)
+    this->m_SocketDescriptor = this->CreateSocket();
+
+    if (this->m_SocketDescriptor < 0)
     {
-    return -1;
+        igtlErrorMacro("Server Socket not created - CreateSocket() failed");
+        return -1;
     }
-  if ( this->BindSocket(this->m_SocketDescriptor, port) != 0|| 
-    this->Listen(this->m_SocketDescriptor) != 0)
+
+    int err1 = this->BindSocket(this->m_SocketDescriptor, port);
+    int err2 = this->Listen(this->m_SocketDescriptor);
+
+    if ( err1 != 0   || err2 != 0)
     {
-    // failed to bind or listen.
-    this->CloseSocket(this->m_SocketDescriptor);
-    this->m_SocketDescriptor = -1;
-    return -1;
+        // failed to bind or listen.
+        igtlErrorMacro("Server Socket not created - failed to bind or listen on port");
+        std::cerr <<"BindSocket: " <<err1  <<std::endl;
+        std::cerr <<"ListenSocket: " <<err2 <<std::endl;
+
+
+        this->CloseSocket(this->m_SocketDescriptor);
+        this->m_SocketDescriptor = -1;
+        return -1;
     }
-  // Success.
-  return 0;
+    // Success.
+    return 0;
 }
 
 //-----------------------------------------------------------------------------

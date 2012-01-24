@@ -93,33 +93,43 @@ int ServerSocket::CreateServer(int port)
 //ClientSocket* ServerSocket::WaitForConnection(unsigned long msec /*=0*/)
 ClientSocket::Pointer ServerSocket::WaitForConnection(unsigned long msec /*=0*/)
 {
-  if (this->m_SocketDescriptor < 0)
-    {
-    igtlErrorMacro("Server Socket not created yet!");
-    return NULL;
-    }
-   
-  int ret = this->SelectSocket(this->m_SocketDescriptor, msec);
-  if (ret == 0)
-    {
-    // Timed out.
-    return NULL;
-    }
-  if (ret == -1)
-    {
-    igtlErrorMacro("Error selecting socket.");
-    return NULL;
-    }
-  int clientsock = this->Accept(this->m_SocketDescriptor);
-  if (clientsock == -1)
-    {
-    igtlErrorMacro("Failed to accept the socket.");
-    return NULL;
-    }
-  // Create a new ClientSocket and return it.
-  ClientSocket::Pointer cs = ClientSocket::New();
-  cs->m_SocketDescriptor = clientsock;
-  return cs;
+	if (this->m_SocketDescriptor < 0)
+	{
+		igtlErrorMacro("Server Socket not created yet!");
+		return NULL;
+	}
+
+	int ret = this->SelectSocket(this->m_SocketDescriptor, msec);
+	if (ret == 0)
+	{
+		// Timed out.
+		return NULL;
+	}
+	else if (ret == -1)
+	{
+		igtlErrorMacro("Error selecting socket: Invalid socket descriptor.");
+		return NULL;
+	}
+	else
+	{
+		igtlErrorMacro("Error selecting socket: Other Error.");
+		std::cerr <<"Error code: " <<ret <<std::endl;
+		return NULL;
+	}
+
+	int clientsock = this->Accept(this->m_SocketDescriptor);
+	
+	if (clientsock <= 0)
+	{
+		igtlErrorMacro("Failed to accept the socket: Invalid socket descriptor.");
+		igtl::handle_error("Accept");
+		return NULL;
+	}
+	
+	// Create a new ClientSocket and return it.
+	ClientSocket::Pointer cs = ClientSocket::New();
+	cs->m_SocketDescriptor = clientsock;
+	return cs;
 }
 
 //-----------------------------------------------------------------------------

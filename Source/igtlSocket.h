@@ -57,6 +57,8 @@
 namespace igtl
 {
 
+void handle_error(const char * msg);
+
 class SocketCollection;
 
 // class IGTL_EXPORT Socket

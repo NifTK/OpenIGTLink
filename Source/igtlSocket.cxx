@@ -70,15 +70,22 @@
 //  #define igtlCloseSocketMacro(sock) (close(sock))
 #endif
 
+namespace igtl
+{
+
 void handle_error(const char * msg)
 {
     std::cerr <<std::endl;
-    perror(msg);
+	
+	#if defined(_WIN32) && !defined(__CYGWIN__)
+		std::cerr <<WSAGetLastError();
+	#else
+		perror(msg);
+	#endif
+    
     std::cerr <<std::endl;
 }
 
-namespace igtl
-{
 
 //-----------------------------------------------------------------------------
 Socket::Socket()
@@ -110,19 +117,19 @@ int Socket::CreateSocket()
   // Initialize Winsock
   int iResult = WSAStartup( MAKEWORD(2,2), &wsaData );
   if( iResult != NO_ERROR )
-    {
-    std::cerr << "Error at WSAStartup" << std::endl;
-    return -1;
-    }
+  {
+	  std::cerr << "Error at WSAStartup" << std::endl;
+	  return -1;
+  }
 #endif
 
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   // Elimate windows 0.2 second delay sending (buffering) data.
   int on = 1;
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&on, sizeof(on)))
-    {
-    return -1;
-    }
+  {
+	  return -1;
+  }
   return sock;
 }
 
@@ -158,11 +165,11 @@ int Socket::BindSocket(int socketdescriptor, int port)
 //-----------------------------------------------------------------------------
 int Socket::Accept(int socketdescriptor)
 {
-  if (socketdescriptor < 0)
-    {
-    return -1;
-    }
-  return accept(socketdescriptor, 0, 0);
+	if (socketdescriptor < 0)
+	{
+		return -1;
+	}
+	return accept(socketdescriptor, 0, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -186,120 +193,121 @@ int Socket::Listen(int socketdescriptor)
 //-----------------------------------------------------------------------------
 int Socket::SelectSocket(int socketdescriptor, unsigned long msec)
 {
-  if (socketdescriptor < 0 )
-    {
-    // invalid socket descriptor.
-    return -1;
-    }
-  
-  fd_set rset;
-  struct timeval tval;
-  struct timeval* tvalptr = 0;
-  if ( msec > 0 )
-    {
-    tval.tv_sec = msec / 1000;
-    tval.tv_usec = (msec % 1000)*1000;
-    tvalptr = &tval;
-    }
-  FD_ZERO(&rset);
-  FD_SET(socketdescriptor, &rset);
-  int res = select(socketdescriptor + 1, &rset, 0, 0, tvalptr);
-  if(res == 0)
-    {
-    return 0;//for time limit expire
-    }
+	if (socketdescriptor < 0 )
+	{
+		// invalid socket descriptor.
+		return -1;
+	}
 
-  if ( res < 0 || !(FD_ISSET(socketdescriptor, &rset)) )
-    {
-    // Some error.
-    return -1;
-    }
-  // The indicated socket has some activity on it.
-  return 1;
+	fd_set rset;
+	struct timeval tval;
+	struct timeval* tvalptr = 0;
+	if ( msec > 0 )
+	{
+		tval.tv_sec = msec / 1000;
+		tval.tv_usec = (msec % 1000)*1000;
+		tvalptr = &tval;
+	}
+	FD_ZERO(&rset);
+	FD_SET(socketdescriptor, &rset);
+	
+	int res = select(socketdescriptor + 1, &rset, 0, 0, tvalptr);
+	if (res == 0)
+	{
+		return 0;//for time limit expire
+	}
+	else if (res < 0 || !(FD_ISSET(socketdescriptor, &rset)) )
+	{
+		// Some error.
+		return res;
+	}
+	
+	// The indicated socket has some activity on it.
+	return 1;
 }
 
 //-----------------------------------------------------------------------------
-int Socket::SelectSockets(const int* sockets_to_select, int size,
-    unsigned long msec, int* selected_index)
+int Socket::SelectSockets(const int* sockets_to_select, int size, unsigned long msec, int* selected_index)
 {
-  int i;
-  int max_fd = -1;
-  *selected_index = -1;
-  if (size <  0)
-    {
-    return -1;
-    }
-  
-  fd_set rset;
-  struct timeval tval;
-  struct timeval* tvalptr = 0;
-  if ( msec > 0 )
-    {
-    tval.tv_sec = msec / 1000;
-    tval.tv_usec = msec % 1000;
-    tvalptr = &tval;
-    }
-  FD_ZERO(&rset);
-  for (i=0; i<size; i++)
-    {
-    FD_SET(sockets_to_select[i],&rset);
-    max_fd = (sockets_to_select[i] > max_fd)? sockets_to_select[i] : max_fd;
-    }
-  
-  int res = select(max_fd + 1, &rset, 0, 0, tvalptr);
-  if (res == 0)
-    {
-    return 0; //Timeout
-    }
-  if (res < 0)
-    {
-    // SelectSocket error.
-    return -1;
-    }
-  
-  //check which socket has some activity.
-  for (i=0; i<size; i++)
-    {
-    if ( FD_ISSET(sockets_to_select[i],&rset) )
-      {
-      *selected_index = i;
-      return 1;
-      }
-    }
-  return -1; 
+	int i;
+	int max_fd = -1;
+	*selected_index = -1;
+	if (size <  0)
+	{
+		return -1;
+	}
+
+	fd_set rset;
+	struct timeval tval;
+	struct timeval* tvalptr = 0;
+	
+	if ( msec > 0 )
+	{
+		tval.tv_sec = msec / 1000;
+		tval.tv_usec = msec % 1000;
+		tvalptr = &tval;
+	}
+	FD_ZERO(&rset);
+	
+	for (i=0; i<size; i++)
+	{
+		FD_SET(sockets_to_select[i],&rset);
+		max_fd = (sockets_to_select[i] > max_fd)? sockets_to_select[i] : max_fd;
+	}
+
+	int res = select(max_fd + 1, &rset, 0, 0, tvalptr);
+	if (res == 0)
+	{
+		return 0; //Timeout
+	}
+	else if (res < 0)
+	{
+		// SelectSocket error.
+		return res;
+	}
+
+	//check which socket has some activity.
+	for (i=0; i<size; i++)
+	{
+		if ( FD_ISSET(sockets_to_select[i],&rset) )
+		{
+			*selected_index = i;
+			return 1;
+		}
+	}
+	return -1; 
 }
 
 //-----------------------------------------------------------------------------
 int Socket::Connect(int socketdescriptor, const char* hostName, int port)
 {
-  if (socketdescriptor < 0)
-    {
-    return -1;
-    }
+	if (socketdescriptor < 0)
+	{
+		return -1;
+	}
 
-  struct hostent* hp;
-  hp = gethostbyname(hostName);
-  if (!hp)
-    {
-    unsigned long addr = inet_addr(hostName);
-    hp = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET);
-    }
- 
-  if (!hp)
-    {
-    // vtkErrorMacro("Unknown host: " << hostName);
-    return -1;
-    }
+	struct hostent* hp;
+	hp = gethostbyname(hostName);
+	if (!hp)
+	{
+		unsigned long addr = inet_addr(hostName);
+		hp = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET);
+	}
 
-  struct sockaddr_in name;
-  name.sin_family = AF_INET;
-  memcpy(&name.sin_addr, hp->h_addr, hp->h_length);
-  name.sin_port = htons(port);
+	if (!hp)
+	{
+		// vtkErrorMacro("Unknown host: " << hostName);
+		return -1;
+	}
 
-  int r = connect(socketdescriptor, reinterpret_cast<sockaddr*>(&name), 
-                 sizeof(name));
+	struct sockaddr_in name;
+	name.sin_family = AF_INET;
+	memcpy(&name.sin_addr, hp->h_addr, hp->h_length);
+	name.sin_port = htons(port);
 
-  return r;
+	int r = connect(socketdescriptor, reinterpret_cast<sockaddr*>(&name), sizeof(name));
+
+	return r;
 }
 
 //-----------------------------------------------------------------------------
@@ -307,6 +315,7 @@ int Socket::GetPort(int sock)
 {
   struct sockaddr_in sockinfo;
   memset(&sockinfo, 0, sizeof(sockinfo));
+
 #if defined(OpenIGTLink_HAVE_GETSOCKNAME_WITH_SOCKLEN_T)
   socklen_t sizebuf = sizeof(sockinfo);
 #else

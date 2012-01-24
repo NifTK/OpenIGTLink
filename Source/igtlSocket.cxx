@@ -60,6 +60,7 @@
   #include <errno.h>
 #endif
 
+#include <cstdio>
 #include <string.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)

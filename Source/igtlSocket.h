@@ -47,6 +47,20 @@
 #include "igtlMacro.h"
 #include "igtlWin32Header.h"
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  #include <windows.h>
+  #include <winsock2.h> 
+#else
+  #include <sys/types.h>
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <netinet/tcp.h>
+  #include <arpa/inet.h>
+  #include <netdb.h>
+  #include <unistd.h>
+  #include <sys/time.h>
+  #include <errno.h>
+#endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #else
@@ -105,6 +119,11 @@ public:
   int SetTimeout(int timeout);
 
   // Description:
+  // Set connection timeout for the client socket in millisecond.
+  // This function should be called before connecting.
+  int SetConnectionTimeout(int timeout);
+
+  // Description:
   // Skip reading data from the socket.
   // The Skip() call has been newly introduced to the igtlSocket,
   // after the class is imported from VTK, thus the call is
@@ -156,7 +175,10 @@ protected:
   // Description:
   // Connect to a server socket. Returns 0 on success, -1 on error.
   int Connect(int socketdescriptor, const char* hostname, int port);
-  int Connect2(int socketdescriptor, const char* hostname, int port);
+
+  // Description:
+  // Connect to a server socket using non-blocking sockets. Returns 0 on success, or the error message.
+  int ConnectNonBlocking(int socketdescriptor, const char* hostname, int port);
 
   // Description:
   // Returns the port to which the socket is connected.
@@ -167,8 +189,7 @@ protected:
   // Selects set of sockets. Returns 0 on timeout, -1 on error.
   // 1 on success. Selected socket's index is returned thru 
   // selected_index
-  static int SelectSockets(const int* sockets_to_select, int size,
-    unsigned long msec, int* selected_index);
+  static int SelectSockets(const int* sockets_to_select, int size, unsigned long msec, int* selected_index);
 
 private:
   Socket(const Socket&); // Not implemented.
@@ -181,6 +202,7 @@ private:
   struct timeval m_Timeout;
   struct timeval m_OrigTimeout;
 #endif
+  struct timeval m_ConnectionTimeout;
   int m_TimeoutFlag;
 };
 

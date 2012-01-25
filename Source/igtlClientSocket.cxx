@@ -46,28 +46,28 @@ ClientSocket::~ClientSocket()
 int ClientSocket::ConnectToServer(const char* hostName, int port)
 {
   if (this->m_SocketDescriptor != -1)
-    {
+  {
     igtlWarningMacro("Client connection already exists. Closing it.");
     this->CloseSocket(this->m_SocketDescriptor);
     this->m_SocketDescriptor = -1;
-    }
-  
+  }
+
   this->m_SocketDescriptor = this->CreateSocket();
   if (!this->m_SocketDescriptor)
-    {
+  {
     igtlErrorMacro("Failed to create socket.");
     return -1;
-    }
+  }
 
-	if (this->Connect2(this->m_SocketDescriptor, hostName, port) < 0)
-	{
-		this->CloseSocket(this->m_SocketDescriptor);
-		this->m_SocketDescriptor = -1;
+  if (this->ConnectNonBlocking(this->m_SocketDescriptor, hostName, port) < 0)
+  {
+    this->CloseSocket(this->m_SocketDescriptor);
+    this->m_SocketDescriptor = -1;
 
-		igtlErrorMacro("Failed to connect to server " << hostName << ":" << port);
-		return -1;
-	}
-	return 0;
+    igtlErrorMacro("Failed to connect to server " << hostName << ":" << port);
+    return -1;
+  }
+  return 0;
 }
 
 //-----------------------------------------------------------------------------

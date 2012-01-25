@@ -60,6 +60,7 @@
   #include <errno.h>
 #endif
 
+#include <fcntl.h>
 #include <cstdio>
 #include <string.h>
 
@@ -308,6 +309,182 @@ int Socket::Connect(int socketdescriptor, const char* hostName, int port)
 	int r = connect(socketdescriptor, reinterpret_cast<sockaddr*>(&name), sizeof(name));
 
 	return r;
+}
+
+int Socket::Connect2(int soc, const char* hostName, int port)
+{
+	if (soc < 0)
+	{
+		return -1;
+	}
+
+	int res; 
+	struct sockaddr_in addr; 
+	fd_set myset; 
+	struct timeval tv; 
+	int valopt; 
+
+    #if defined(_WIN32) && !defined(__CYGWIN__)
+        int lon;
+        int iResult;
+        u_long iMode = 0;
+    #else
+        socklen_t lon;
+		long arg; 
+    #endif
+
+	struct hostent* hp;
+	hp = gethostbyname(hostName);
+	if (!hp)
+	{
+		unsigned long addr = inet_addr(hostName);
+		hp = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET);
+	}
+
+	if (!hp)
+	{
+		// vtkErrorMacro("Unknown host: " << hostName);
+		return -2;
+	}
+
+	addr.sin_family = AF_INET; 
+	addr.sin_port = htons(port); 
+	memcpy(&addr.sin_addr, hp->h_addr, hp->h_length);
+
+	// Set non-blocking 
+
+	#if defined(_WIN32) && !defined(__CYGWIN__)
+		iMode = 1;
+		iResult = ioctlsocket(soc, FIONBIO, &iMode);
+		if (iResult != NO_ERROR)
+		{
+			fprintf(stderr, "ioctlsocket failed with error: %ld\n", iResult);
+			return -3;
+		}
+	#else
+		if( (arg = fcntl(soc, F_GETFL, NULL)) < 0) 
+		{ 
+			fprintf(stderr, "Error fcntl(..., F_GETFL) (%s)\n", strerror(errno)); 
+			return -3; 
+		} 
+		arg |= O_NONBLOCK; 
+		if( fcntl(soc, F_SETFL, arg) < 0) 
+		{ 
+			fprintf(stderr, "Error fcntl(..., F_SETFL) (%s)\n", strerror(errno)); 
+			return -3; 
+		} 
+	#endif
+	
+
+	// Trying to connect with timeout 
+	res = connect(soc, (struct sockaddr *)&addr, sizeof(addr)); 
+	if (res < 0) 
+	{ 
+		bool connectErr = false;
+
+		#if defined(_WIN32) && !defined(__CYGWIN__)
+			if (errno == WSAEINPROGRESS)
+				connectErr = true;
+		#else
+			if (errno == EINPROGRESS)
+				connectErr = true;
+		#endif
+		
+		if (connectErr == true) 
+		{ 
+			fprintf(stderr, "EINPROGRESS in connect() - selecting\n"); 
+			do 
+			{ 
+				tv.tv_sec = 15; 
+				tv.tv_usec = 0; 
+				FD_ZERO(&myset); 
+				FD_SET(soc, &myset); 
+				
+				res = select(soc+1, NULL, &myset, NULL, &tv); 
+
+				bool selectErr = false;
+
+				#if defined(_WIN32) && !defined(__CYGWIN__)
+					if (errno == WSAEINTR)
+						selectErr = true;
+				#else
+					if (errno == EINTR)
+						selectErr = true;
+				#endif
+
+				if (res < 0 && selectErr == true) 
+				{ 
+					fprintf(stderr, "Error connecting %d - %s\n", errno, strerror(errno)); 
+					return -4; 
+				} 
+				else if (res > 0) 
+				{ 
+					// Socket selected for write 
+					lon = sizeof(int); 
+
+					bool sockoptErr = 0;
+
+					#if defined(_WIN32) && !defined(__CYGWIN__)
+						if (getsockopt(soc, SOL_SOCKET, SO_ERROR, (char*)(&valopt), &lon) < 0)
+							sockoptErr = true;
+					#else
+						if (getsockopt(soc, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &lon) < 0) 
+							sockoptErr = true;
+					#endif
+
+					if (sockoptErr == true) 
+					{ 
+						fprintf(stderr, "Error in getsockopt() %d - %s\n", errno, strerror(errno)); 
+						return -5; 
+					} 
+					
+					// Check the value returned... 
+					if (valopt) 
+					{ 
+						fprintf(stderr, "Error in delayed connection() %d - %s\n", valopt, strerror(valopt)); 
+						return -6; 
+					} 
+					break; 
+				} 
+				else 
+				{ 
+					fprintf(stderr, "Timeout in select() - Cancelling!\n"); 
+					return -7; 
+				} 
+			} while (1); 
+		} 
+		else 
+		{ 
+			fprintf(stderr, "Error connecting %d - %s\n", errno, strerror(errno)); 
+			return -8; 
+		} 
+	} 
+
+	// Set to blocking mode again... 
+	#if defined(_WIN32) && !defined(__CYGWIN__)
+		iMode = 0;
+		iResult = ioctlsocket(soc, FIONBIO, &iMode);
+		if (iResult != NO_ERROR)
+		{
+			fprintf(stderr, "ioctlsocket failed with error: %ld\n", iResult);
+			return -9;
+		}
+	#else
+		if( (arg = fcntl(soc, F_GETFL, NULL)) < 0) 
+		{ 
+			fprintf(stderr, "Error fcntl(..., F_GETFL) (%s)\n", strerror(errno)); 
+			return -9; 
+		} 
+
+		arg &= (~O_NONBLOCK); 
+		if( fcntl(soc, F_SETFL, arg) < 0) 
+		{ 
+			fprintf(stderr, "Error fcntl(..., F_SETFL) (%s)\n", strerror(errno)); 
+			return -9; 
+		}
+	#endif
+
+	return 0;
 }
 
 //-----------------------------------------------------------------------------

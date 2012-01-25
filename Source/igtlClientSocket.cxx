@@ -59,15 +59,15 @@ int ClientSocket::ConnectToServer(const char* hostName, int port)
     return -1;
     }
 
-  if (this->Connect(this->m_SocketDescriptor, hostName, port) == -1)
-    {
-    this->CloseSocket(this->m_SocketDescriptor);
-    this->m_SocketDescriptor = -1;
+	if (this->Connect2(this->m_SocketDescriptor, hostName, port) < 0)
+	{
+		this->CloseSocket(this->m_SocketDescriptor);
+		this->m_SocketDescriptor = -1;
 
-    igtlErrorMacro("Failed to connect to server " << hostName << ":" << port);
-    return -1;
-    }
-  return 0;
+		igtlErrorMacro("Failed to connect to server " << hostName << ":" << port);
+		return -1;
+	}
+	return 0;
 }
 
 //-----------------------------------------------------------------------------

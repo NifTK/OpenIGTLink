@@ -156,6 +156,7 @@ protected:
   // Description:
   // Connect to a server socket. Returns 0 on success, -1 on error.
   int Connect(int socketdescriptor, const char* hostname, int port);
+  int Connect2(int socketdescriptor, const char* hostname, int port);
 
   // Description:
   // Returns the port to which the socket is connected.

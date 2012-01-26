@@ -93,7 +93,7 @@ public:
 
   // Description:
   // Close the socket.
-  int CloseSocket() {return this->CloseSocket(this->m_SocketDescriptor);}
+  int CloseSocket();
  
   // ------ Communication API ---
   // Description:

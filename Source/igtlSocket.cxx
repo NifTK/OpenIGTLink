@@ -436,7 +436,7 @@ int Socket::ConnectNonBlocking(int soc, const char* hostName, int port)
 				} 
 				else 
 				{ 
-					fprintf(stderr, "Timeout in select() - Cancelling!\n"); 
+					fprintf(stderr, "Connection timeout - Cancelling!\n"); 
 					return -7; 
 				} 
 			} while (1); 
@@ -495,6 +495,15 @@ int Socket::GetPort(int sock)
   }
   return ntohs(sockinfo.sin_port);
 }
+//-----------------------------------------------------------------------------
+ int Socket::CloseSocket() 
+ {
+   int ret = this->CloseSocket(this->m_SocketDescriptor);
+   this->m_SocketDescriptor = -1;
+   
+   return ret;
+ }
+
 
 //-----------------------------------------------------------------------------
 int Socket::CloseSocket(int socketdescriptor)

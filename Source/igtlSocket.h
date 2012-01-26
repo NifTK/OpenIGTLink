@@ -60,13 +60,10 @@
   #include <unistd.h>
   #include <sys/time.h>
   #include <errno.h>
+  #ifndef INVALID_SOCKET
+    #define INVALID_SOCKET -1
+  #endif
 #endif
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#else
-#include <sys/time.h>
-#endif
-
 
 namespace igtl
 {

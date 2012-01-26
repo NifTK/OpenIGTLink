@@ -698,6 +698,14 @@ int Socket::Skip(int length, int skipFully/*=1*/)
 }
 
 //-----------------------------------------------------------------------------
+bool Socket::IsValid()
+{
+  if (this->m_SocketDescriptor == INVALID_SOCKET)
+    return false;
+  else return true;
+}
+
+//-----------------------------------------------------------------------------
 void Socket::PrintSelf(std::ostream& os) const
 {
   this->Superclass::PrintSelf(os);

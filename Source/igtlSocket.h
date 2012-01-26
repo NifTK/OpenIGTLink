@@ -130,6 +130,11 @@ public:
   // not available in vtkSocket class.
   int Skip(int length, int skipFully=1);
 
+  // Description:
+  // This method is for checking if the socket handler is valid or not.
+  // Query should be performed before attempting to request action on the socket (e.g. Close())
+  bool IsValid(void);
+
 protected:
   Socket();
   ~Socket();

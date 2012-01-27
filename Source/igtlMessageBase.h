@@ -176,6 +176,30 @@ protected:
 
 };
 
+class IGTLCommon_EXPORT PingMessage: public MessageBase
+{
+
+public:
+
+  typedef PingMessage                    Self;
+  typedef MessageBase                    Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::PingMessage, igtl::MessageBase);
+  igtlNewMacro(igtl::PingMessage);
+
+
+protected:
+  PingMessage();
+  ~PingMessage();
+
+protected:
+  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  PackBody()        { AllocatePack(); return 1; };
+  virtual int  UnpackBody()      { return 1; };
+};
+
 
 } // namespace igtl
 

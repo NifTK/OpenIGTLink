@@ -46,7 +46,7 @@ ServerSocket::~ServerSocket()
 //-----------------------------------------------------------------------------
 int ServerSocket::GetServerPort()
 {
-  if (!this->GetConnected())
+  if (!this->IsValid())
   {
     return 0;
   }

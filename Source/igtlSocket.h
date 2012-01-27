@@ -46,6 +46,10 @@
 #include "igtlObjectFactory.h"
 #include "igtlMacro.h"
 #include "igtlWin32Header.h"
+#include "igtlMessageBase.h"
+
+#include <iostream>
+#include <exception>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   #include <windows.h>
@@ -87,9 +91,6 @@ class IGTLCommon_EXPORT Socket : public Object
 public:
 
   // ----- Status API ----
-  // Description:
-  // Check is the socket is alive.
-  int GetConnected() { return (this->m_SocketDescriptor >=0); }
 
   // Description:
   // Close the socket.
@@ -132,6 +133,17 @@ public:
   // Query should be performed before attempting to request action on the socket (e.g. Close())
   bool IsValid(void);
 
+  // Description:
+  // This method is for checking if the socket is alive, able to read and write.
+  // Query should be performed before attempting to request action on the socket (e.g. Close())
+  // The return value has to be >0 to assume correct operation.
+  int IsAbleToRW(void);
+  
+  // Description:
+  // This method is for checking if the socket is alive or not.
+  // Query should be performed to detect disconnection.
+  bool IsAlive();
+
 protected:
   Socket();
   ~Socket();
@@ -164,6 +176,13 @@ protected:
   // Returns 1 on success; 0 on timeout; -1 on error. msec=0 implies
   // no timeout.
   int SelectSocket(int socketdescriptor, unsigned long msec);
+  
+  // Description:
+  // Tests if the socket is able to read and write.
+  // It uses the Select() method and then checking flags, performing basic read / write with timeout.
+  // Returns 3 on RW, 2 on R only and 1 on W only, 0 on timeout; -1 on error. msec=0 implies
+  // no timeout.
+  int TestSocketRW(int socketdescriptor, unsigned long msec);
 
   // Description:
   // Accept a connection on a socket. Returns -1 on error. Otherwise

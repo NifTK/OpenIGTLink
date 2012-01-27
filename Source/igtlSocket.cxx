@@ -95,6 +95,7 @@ Socket::~Socket()
 //-----------------------------------------------------------------------------
 int Socket::CreateSocket()
 {
+
   #if defined(_WIN32) && !defined(__CYGWIN__)
     // Declare variables
     WSADATA wsaData;
@@ -125,6 +126,11 @@ int Socket::CreateSocket()
 //-----------------------------------------------------------------------------
 int Socket::BindSocket(int socketdescriptor, int port)
 {
+  if (!this->IsValid())
+  {
+    return -1;
+  }
+
   struct sockaddr_in server;
 
   server.sin_family = AF_INET;
@@ -154,17 +160,18 @@ int Socket::BindSocket(int socketdescriptor, int port)
 //-----------------------------------------------------------------------------
 int Socket::Accept(int socketdescriptor)
 {
-  if (socketdescriptor < 0)
+  if (!this->IsValid())
   {
     return -1;
   }
+
   return accept(socketdescriptor, 0, 0);
 }
 
 //-----------------------------------------------------------------------------
 int Socket::Listen(int socketdescriptor)
 {
-  if (socketdescriptor < 0)
+  if (!this->IsValid())
   {
     return -1;
   }
@@ -182,13 +189,13 @@ int Socket::Listen(int socketdescriptor)
 //-----------------------------------------------------------------------------
 int Socket::SelectSocket(int socketdescriptor, unsigned long msec)
 {
-  if (socketdescriptor < 0 )
+  if (!this->IsValid())
   {
-    // invalid socket descriptor.
     return -1;
   }
 
   fd_set rset;
+
   struct timeval tval;
   struct timeval* tvalptr = 0;
   if ( msec > 0 )
@@ -199,9 +206,11 @@ int Socket::SelectSocket(int socketdescriptor, unsigned long msec)
   }
   
   FD_ZERO(&rset);
+
   FD_SET(socketdescriptor, &rset);
 
   int res = select(socketdescriptor + 1, &rset, 0, 0, tvalptr);
+
   if (res == 0)
   {
     return 0;//for time limit expire
@@ -214,6 +223,77 @@ int Socket::SelectSocket(int socketdescriptor, unsigned long msec)
 
   // The indicated socket has some activity on it.
   return 1;
+}
+
+//-----------------------------------------------------------------------------
+int Socket::TestSocketRW(int socketdescriptor, unsigned long msec)
+{
+  if (!this->IsValid())
+  {
+    return -1;
+  }
+
+  fd_set rset, wset;
+  char outbuff[512];     // Buffer to hold outgoing data
+  char inbuff[512];      // Buffer to read incoming data into
+
+  memset(&outbuff,0,sizeof(outbuff));
+  memset(&inbuff,0,sizeof(inbuff));
+
+  struct timeval tval;
+  struct timeval* tvalptr = 0;
+  if ( msec > 0 )
+  {
+    tval.tv_sec = msec / 1000;
+    tval.tv_usec = (msec % 1000)*1000;
+    tvalptr = &tval;
+  }
+  
+  FD_ZERO(&rset);
+  FD_ZERO(&wset);
+  FD_SET(socketdescriptor, &rset);
+  if(strlen(outbuff)!=0) FD_SET(socketdescriptor, &wset);
+
+  int res = select(socketdescriptor + 1, &rset, &wset, 0, tvalptr);
+  if (res == 0)
+  {
+    return 0;//for time limit expire
+  }
+  else if (res < 0)
+  {
+    // Some error.
+    return res;
+  }
+
+  int canRead  = 0;
+  int canWrite = 0;
+  
+  if (FD_ISSET(socketdescriptor, &rset))
+  { 
+    FD_CLR(socketdescriptor, &rset);
+    memset(&inbuff,0,sizeof(inbuff));
+    if ( recv(socketdescriptor, inbuff, sizeof(inbuff)-1, 0) >= 0) 
+      canRead = 1;
+    memset(&inbuff, 0, sizeof(inbuff));
+  }
+  if (FD_ISSET(socketdescriptor, &wset))
+  {
+      FD_CLR(socketdescriptor, &wset);
+      if (send(socketdescriptor, outbuff, strlen(outbuff), 0) >= 0)
+        canWrite = 1;
+      
+      memset(&outbuff,0,sizeof(outbuff));
+  }
+
+  // The indicated socket has some activity on it.
+  if (canRead && canWrite)
+    return 3;
+  else if (canRead)
+    return 2;
+  else if (canWrite)
+    return 1;
+  else
+    return -1;
 }
 
 //-----------------------------------------------------------------------------
@@ -271,7 +351,7 @@ int Socket::SelectSockets(const int* sockets_to_select, int size, unsigned long 
 //-----------------------------------------------------------------------------
 int Socket::Connect(int socketdescriptor, const char* hostName, int port)
 {
-  if (socketdescriptor < 0)
+  if (!this->IsValid())
   {
     return -1;
   }
@@ -496,13 +576,17 @@ int Socket::GetPort(int sock)
   return ntohs(sockinfo.sin_port);
 }
 //-----------------------------------------------------------------------------
- int Socket::CloseSocket() 
- {
-   int ret = this->CloseSocket(this->m_SocketDescriptor);
-   this->m_SocketDescriptor = -1;
-   
-   return ret;
- }
+int Socket::CloseSocket() 
+{
+  if (!this->IsValid())
+  {
+    return -1;
+  }
+  int ret = this->CloseSocket(this->m_SocketDescriptor);
+  this->m_SocketDescriptor = -1;
+
+  return ret;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -558,10 +642,11 @@ int Socket::CloseSocket(int socketdescriptor)
 //-----------------------------------------------------------------------------
 int Socket::Send(const void* data, int length)
 {
-  if (!this->GetConnected())
+  if (!this->IsValid())
   {
     return 0;
   }
+
   if (length == 0)
   {
     // nothing to send.
@@ -595,7 +680,7 @@ int Socket::Send(const void* data, int length)
 //-----------------------------------------------------------------------------
 int Socket::Receive(void* data, int length, int readFully/*=1*/)
 {
-  if (!this->GetConnected())
+  if (!this->IsValid())
   {
     return 0;
   }
@@ -636,7 +721,7 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
 //-----------------------------------------------------------------------------
 int Socket::SetTimeout(int timeout)
 {
-  if (!this->GetConnected())
+  if (!this->IsValid())
   {
     return 0;
   }
@@ -667,6 +752,11 @@ int Socket::SetTimeout(int timeout)
 //-----------------------------------------------------------------------------
 int Socket::SetConnectionTimeout(int timeout)
 {
+  if (!this->IsValid())
+  {
+    return -1;
+  }
+
   if (timeout < 0)
   {
     return 0;
@@ -682,6 +772,11 @@ int Socket::SetConnectionTimeout(int timeout)
 //-----------------------------------------------------------------------------
 int Socket::Skip(int length, int skipFully/*=1*/)
 {
+  if (!this->IsValid())
+  {
+    return -1;
+  }
+
   unsigned char dummy[256];
   int block  = 256;
   int n      = 0;
@@ -709,9 +804,113 @@ int Socket::Skip(int length, int skipFully/*=1*/)
 //-----------------------------------------------------------------------------
 bool Socket::IsValid()
 {
-  if (this->m_SocketDescriptor == INVALID_SOCKET)
+  if (this == NULL)
     return false;
-  else return true;
+
+  bool valid = false;
+  try
+  {
+    if (this->m_SocketDescriptor == INVALID_SOCKET)
+      valid = false;
+    else
+      valid = true;
+  }
+
+  catch (std::exception& e)
+  {
+    std::cout << e.what() << std::endl;
+    return false;
+  }
+
+  try
+  {
+    if (this->m_SocketDescriptor < 0)
+      valid &= false;
+    else
+      valid &= true;
+  }
+
+  catch (std::exception& e)
+  {
+    std::cout << e.what() << std::endl;
+    return false;
+  }
+
+  return valid;
+}
+
+//-----------------------------------------------------------------------------
+bool Socket::IsAlive()
+{
+  if (!this->IsValid())
+  {
+    return false;
+  }
+
+  int bytes = 0;
+
+  char buff[2];
+  int length = 2;
+
+  memset((void *)&buff, 1, sizeof(buff));
+
+  int flags;
+  #if defined(_WIN32) && !defined(__CYGWIN__)
+    flags = 0; //disable signal on Win boxes.
+  #elif defined(__linux__)
+    flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
+  #elif defined(__APPLE__)
+    int opt=1;
+    setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
+    flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
+  #endif
+
+  int total = 0;
+  do
+  {
+    int n = 0;
+
+    try
+    {
+      n = send(this->m_SocketDescriptor, buff+total, length-total, flags);
+    }
+
+    catch (std::exception& e)
+    {
+      std::cout << e.what() << std::endl;
+      break;
+    }
+
+    if (n <= 0)
+    {
+      // FIXME : Use exceptions ?  igtlErrorMacro("Socket Error: Send failed.");
+      return false;
+    }
+
+    total += n;
+
+  } while(total < length);
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+int Socket::IsAbleToRW()
+{
+  if (!this->IsValid())
+  {
+    return -1;
+  }
+  
+  int ret = this->TestSocketRW(this->m_SocketDescriptor, 100);
+  
+  if (ret < 0)
+  {
+    handle_error("test rw: ");
+    return -1;
+  }
+  else 
+    return ret;
 }
 
 //-----------------------------------------------------------------------------

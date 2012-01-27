@@ -342,6 +342,17 @@ int MessageBase::Copy(const MessageBase* mb)
     }
 }
 
+PingMessage::PingMessage()
+  : MessageBase()
+  {
+    this->m_DefaultBodyType  = "PING";
+  }
+
+PingMessage::~PingMessage()
+{
+}
+
+
 }
 
 

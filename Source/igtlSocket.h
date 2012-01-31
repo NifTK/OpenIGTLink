@@ -140,8 +140,8 @@ public:
   int IsAbleToRW(void);
   
   // Description:
-  // This method is for checking if the socket is alive or not.
-  // Query should be performed to detect disconnection.
+  // This method is for checking if the socket is alive or not, by trying to read and write through the socket.
+  // Query should be performed to detect disconnection. The function returns true if the socket is OK for RW.
   bool IsAlive();
 
 protected:

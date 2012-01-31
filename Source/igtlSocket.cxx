@@ -233,13 +233,19 @@ int Socket::TestSocketRW(int socketdescriptor, unsigned long msec)
     return -1;
   }
 
+  int bytes = 0;
+  int canRead  = 0;
+  int canWrite = 0;
+  int total = 0;
+
+  char buff[2];
+  int length = 2;
+  memset((void *)&buff, 1, sizeof(buff));
+
   fd_set rset, wset;
-  char outbuff[512];     // Buffer to hold outgoing data
-  char inbuff[512];      // Buffer to read incoming data into
-
-  memset(&outbuff,0,sizeof(outbuff));
-  memset(&inbuff,0,sizeof(inbuff));
-
+  FD_ZERO(&rset);
+  FD_ZERO(&wset);
+  
   struct timeval tval;
   struct timeval* tvalptr = 0;
   if ( msec > 0 )
@@ -248,12 +254,8 @@ int Socket::TestSocketRW(int socketdescriptor, unsigned long msec)
     tval.tv_usec = (msec % 1000)*1000;
     tvalptr = &tval;
   }
-  
-  FD_ZERO(&rset);
-  FD_ZERO(&wset);
-  FD_SET(socketdescriptor, &rset);
-  if(strlen(outbuff)!=0) FD_SET(socketdescriptor, &wset);
 
+  // Try to select socket with timeout
   int res = select(socketdescriptor + 1, &rset, &wset, 0, tvalptr);
   if (res == 0)
   {
@@ -265,27 +267,72 @@ int Socket::TestSocketRW(int socketdescriptor, unsigned long msec)
     return res;
   }
 
-  int canRead  = 0;
-  int canWrite = 0;
-  
-  if (FD_ISSET(socketdescriptor, &rset))
-  { 
-    FD_CLR(socketdescriptor, &rset);
-    memset(&inbuff,0,sizeof(inbuff));
-    if ( recv(socketdescriptor, inbuff, sizeof(inbuff)-1, 0) >= 0) 
-      canRead = 1;
-    memset(&inbuff, 0, sizeof(inbuff));
-  }
-  if (FD_ISSET(socketdescriptor, &wset))
-  {
-      FD_CLR(socketdescriptor, &wset);
-      if (send(socketdescriptor, outbuff, strlen(outbuff), 0) >= 0)
-        canWrite = 1;
-      
-      memset(&outbuff,0,sizeof(outbuff));
-  }
+  // Set flags to disable SIGPIPE and other low-level exceptions
+  int flags;
+  #if defined(_WIN32) && !defined(__CYGWIN__)
+    flags = 0; //disable signal on Win boxes.
+  #elif defined(__linux__)
+    flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
+  #elif defined(__APPLE__)
+    int opt=1;
+    setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
+    flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
+  #endif
 
-  // The indicated socket has some activity on it.
+  // TEST WRITE
+  do
+  {
+    int n = 0;
+
+    try
+    {
+      n = send(this->m_SocketDescriptor, buff+total, length-total, flags);
+    }
+
+    catch (std::exception& e)
+    {
+      std::cout << e.what() << std::endl;
+      break;
+    }
+
+    if (n > 0)
+      canWrite = 1;
+    else
+      canWrite = 0;
+
+    total += n;
+
+  } while(total < length);
+
+  memset(&buff,0,sizeof(buff));
+
+  //TEST READ
+  total = 0;
+  do
+  {
+    int n = 0;
+
+    try
+    {
+      n = recv(this->m_SocketDescriptor, buff+total, length-total, flags);
+    }
+
+    catch (std::exception& e)
+    {
+      std::cout << e.what() << std::endl;
+      break;
+    }
+
+    if (n > 0)
+      canRead = 1;
+    else
+      canRead = 0;
+
+    total += n;
+
+  } while(total < length);
+
+  // Return the RW status
   if (canRead && canWrite)
     return 3;
   else if (canRead)
@@ -865,6 +912,7 @@ bool Socket::IsAlive()
     flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
   #endif
 
+  // TEST WRITE
   int total = 0;
   do
   {
@@ -882,10 +930,33 @@ bool Socket::IsAlive()
     }
 
     if (n <= 0)
-    {
-      // FIXME : Use exceptions ?  igtlErrorMacro("Socket Error: Send failed.");
       return false;
+
+    total += n;
+
+  } while(total < length);
+
+  memset(&buff,0,sizeof(buff));
+
+  //TEST READ
+  total = 0;
+  do
+  {
+    int n = 0;
+
+    try
+    {
+      n = recv(this->m_SocketDescriptor, buff+total, length-total, flags);
     }
+
+    catch (std::exception& e)
+    {
+      std::cout << e.what() << std::endl;
+      break;
+    }
+
+    if (n <= 0)
+      return false;
 
     total += n;
 

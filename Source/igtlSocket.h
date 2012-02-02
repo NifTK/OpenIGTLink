@@ -64,6 +64,7 @@
   #include <unistd.h>
   #include <sys/time.h>
   #include <errno.h>
+  #include <sys/ioctl.h>
   #ifndef INVALID_SOCKET
     #define INVALID_SOCKET -1
   #endif
@@ -143,6 +144,11 @@ public:
   // This method is for checking if the socket is alive or not, by trying to read and write through the socket.
   // Query should be performed to detect disconnection. The function returns true if the socket is OK for RW.
   bool IsAlive();
+
+  // Description:
+  // This method is for checking if the socket is alive or not, by trying to read and write through the socket.
+  // Query should be performed to detect disconnection. The function returns true if the socket is OK for RW.
+  bool Writable();
 
 protected:
   Socket();

@@ -20,7 +20,10 @@
   #include <windows.h>
 #else
   #include <time.h>
+  #include "errno.h"
 #endif
+
+#include <iostream>
 
 namespace igtl
 {
@@ -33,13 +36,37 @@ void Sleep(int milliseconds)
   ::Sleep(milliseconds);
   
 #else
-  
-  struct timespec req;
-  req.tv_sec  = (int) milliseconds / 1000;
+  //    ORIGINAL AND BUGGY
+  //    struct timespec req;
+  //    req.tv_sec  = (int) milliseconds / 1000;
+  //    req.tv_nsec = (milliseconds % 1000) * 1000000;
+
+  //    nanosleep(&req, NULL);
+
+  //    METHOD 2
+  struct timespec req = { 0 };
+  req.tv_sec = (int)(milliseconds/1000);
   req.tv_nsec = (milliseconds % 1000) * 1000000;
-  
-  nanosleep(&req, NULL);
-  
+  while ((nanosleep(&req, &req) == -1) && (errno == EINTR))
+    continue;
+
+  //    METHOD 3
+//  struct timespec timeout0;
+//  struct timespec timeout1;
+//  struct timespec* tmp;
+//  struct timespec* t0 = &timeout0;
+//  struct timespec* t1 = &timeout1;
+
+//  t0->tv_sec = (int)(milliseconds/1000);
+//  t0->tv_nsec = (milliseconds % 1000) * 1000000;
+
+//  while ((nanosleep(t0, t1) == (-1)) && (errno == EINTR))
+//  {
+//    std::cerr <<"remainder sleeptime: " <<t1->tv_sec <<" "<<t1->tv_nsec <<std::endl;
+//    tmp = t0;
+//    t0 = t1;
+//    t1 = tmp;
+//  }
 #endif
   
 }

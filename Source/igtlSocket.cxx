@@ -233,7 +233,6 @@ int Socket::TestSocketRW(int socketdescriptor, unsigned long msec)
     return -1;
   }
 
-  int bytes = 0;
   int canRead  = 0;
   int canWrite = 0;
   int total = 0;
@@ -291,7 +290,7 @@ int Socket::TestSocketRW(int socketdescriptor, unsigned long msec)
 
     catch (std::exception& e)
     {
-      std::cout << e.what() << std::endl;
+      std::cerr << e.what() << std::endl;
       break;
     }
 
@@ -319,7 +318,7 @@ int Socket::TestSocketRW(int socketdescriptor, unsigned long msec)
 
     catch (std::exception& e)
     {
-      std::cout << e.what() << std::endl;
+      std::cerr << e.what() << std::endl;
       break;
     }
 
@@ -701,22 +700,36 @@ int Socket::Send(const void* data, int length)
   }
   const char* buffer = reinterpret_cast<const char*>(data);
   int total = 0;
+  int n = 0;
+  
   do
   {
     int flags;
     #if defined(_WIN32) && !defined(__CYGWIN__)
-      flags = 0;
-    #else
-      // disabling, since not present on SUN.
-      // flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
-      flags = 0;
+      flags = 0; //disable signal on Win boxes.
+    #elif defined(__linux__)
+      flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
+    #elif defined(__APPLE__)
+      int opt=1;
+      setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
+      flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
     #endif
-    int n = send(this->m_SocketDescriptor, buffer+total, length-total, flags);
-    if(n < 0)
+
+    n = 0;
+    try
     {
-      // FIXME : Use exceptions ?  igtlErrorMacro("Socket Error: Send failed.");
-      return 0;
+      n = send(this->m_SocketDescriptor, buffer+total, length-total, flags);
     }
+
+    catch (std::exception& e)
+    {
+      std::cerr << e.what() << std::endl;
+      return -1;
+    }
+
+    if (n <= 0)
+      return -1;
+
     total += n;
 
   } while(total < length);
@@ -729,20 +742,51 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
 {
   if (!this->IsValid())
   {
-    return 0;
+    return -1;
   }
 
   char* buffer = reinterpret_cast<char*>(data);
-  int total = 0;
+  int total       = 0;
+  int bytesRead   = 0;
+  int bytesToRead = 0;
+  int rVal        = 0;
+  int flags       = 0;
+
   do
   {
     #if defined(_WIN32) && !defined(__CYGWIN__)
-      int trys = 0;
+      int trys  = 0;
     #endif
+
+    bytesRead   = 0;
+    bytesToRead = 0;
+    rVal        = 0;
+
+    try
+    {
+      #if defined(_WIN32) && !defined(__CYGWIN__)
+        rVal = ioctlsocket(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+      #else
+        rVal = ioctl(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+      #endif
+    }
+    catch (std::exception& e)
+    {
+      std::cerr << e.what() << std::endl;
+      return -2;
+    }
     
-    int n = recv(this->m_SocketDescriptor, buffer+total, length-total, 0);
-    
-    if (n < 1)
+    if (rVal == -1)
+    {
+      handle_error("ioctl: ");
+      return -1;
+    }
+
+    //std::cerr <<"Received data.... no bytes: " <<p;
+    memset(buffer, 0, length);
+    flags = 0;
+
+    if (bytesToRead < 1)
     {
       #if defined(_WIN32) && !defined(__CYGWIN__)
         // On long messages, Windows recv sometimes fails with WSAENOBUFS, but
@@ -755,10 +799,46 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
         }
       #endif
       
-      // FIXME : Use exceptions ?  igtlErrorMacro("Socket Error: Receive failed.");
-      return 0;
+      return bytesToRead;
     }
-    total += n;
+
+    // Read a keepalive message
+    else if (bytesToRead == 2)
+    {
+      total = 0;
+      length = 2;
+      try
+      {
+        bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
+      }
+      catch (std::exception& e)
+      {
+        std::cerr << e.what() << std::endl;
+        return -2;
+      }
+    }
+    // Other generic message received
+    else
+    {
+      try
+      {
+        bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
+      }
+      catch (std::exception& e)
+      {
+        std::cerr << e.what() << std::endl;
+        return -2;
+      }
+    }
+
+    if (bytesRead < 1)
+    {
+      handle_error("recv: ");
+      return bytesRead;
+    }
+
+    total += bytesRead;
+
   } while(readFully && total < length);
   
   return total;
@@ -865,7 +945,7 @@ bool Socket::IsValid()
 
   catch (std::exception& e)
   {
-    std::cout << e.what() << std::endl;
+    std::cerr << e.what() << std::endl;
     return false;
   }
 
@@ -879,7 +959,7 @@ bool Socket::IsValid()
 
   catch (std::exception& e)
   {
-    std::cout << e.what() << std::endl;
+    std::cerr << e.what() << std::endl;
     return false;
   }
 
@@ -893,11 +973,11 @@ bool Socket::IsAlive()
   {
     return false;
   }
-
-  int bytes = 0;
-
-  char buff[2];
+  
+  int total  = 0;
+  int n      = 0;
   int length = 2;
+  char buff[2];
 
   memset((void *)&buff, 1, sizeof(buff));
 
@@ -913,20 +993,20 @@ bool Socket::IsAlive()
   #endif
 
   // TEST WRITE
-  int total = 0;
   do
   {
-    int n = 0;
+    n = 0;
 
     try
     {
+      std::cerr <<"Sending keepalive..." <<std::endl;
       n = send(this->m_SocketDescriptor, buff+total, length-total, flags);
     }
 
     catch (std::exception& e)
     {
-      std::cout << e.what() << std::endl;
-      break;
+      std::cerr << e.what() << std::endl;
+      return false;
     }
 
     if (n <= 0)
@@ -940,9 +1020,10 @@ bool Socket::IsAlive()
 
   //TEST READ
   total = 0;
+
   do
   {
-    int n = 0;
+    n = 0;
 
     try
     {
@@ -951,8 +1032,8 @@ bool Socket::IsAlive()
 
     catch (std::exception& e)
     {
-      std::cout << e.what() << std::endl;
-      break;
+      std::cerr << e.what() << std::endl;
+      return false;
     }
 
     if (n <= 0)
@@ -964,6 +1045,60 @@ bool Socket::IsAlive()
 
   return true;
 }
+
+//-----------------------------------------------------------------------------
+bool Socket::Writable()
+{
+  if (!this->IsValid())
+  {
+    return false;
+  }
+  
+  int total  = 0;
+  int n      = 0;
+  int length = 2;
+  char buff[2];
+
+  memset((void *)&buff, 255, sizeof(buff));
+
+  int flags;
+  #if defined(_WIN32) && !defined(__CYGWIN__)
+    flags = 0; //disable signal on Win boxes.
+  #elif defined(__linux__)
+    flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
+  #elif defined(__APPLE__)
+    int opt=1;
+    setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
+    flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
+  #endif
+
+  // TEST WRITE
+  do
+  {
+    n = 0;
+
+    try
+    {
+      //std::cerr <<"Sending keepalive..." <<std::endl;
+      n = send(this->m_SocketDescriptor, buff+total, length-total, flags);
+    }
+
+    catch (std::exception& e)
+    {
+      std::cerr << e.what() << std::endl;
+      return false;
+    }
+
+    if (n < 0)
+      return false;
+
+    total += n;
+
+  } while(total < length);
+
+  return true;
+}
+
 
 //-----------------------------------------------------------------------------
 int Socket::IsAbleToRW()

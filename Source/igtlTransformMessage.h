@@ -167,7 +167,7 @@ public:
 
   void SetMatrix(Matrix4x4& mat);
   void GetMatrix(Matrix4x4& mat);
-
+  void GetMatrixAsString(std::string &str);
 
 protected:
   TransformMessage();

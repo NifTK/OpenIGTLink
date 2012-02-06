@@ -748,9 +748,14 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
   char* buffer = reinterpret_cast<char*>(data);
   int total       = 0;
   int bytesRead   = 0;
-  int bytesToRead = 0;
   int rVal        = 0;
   int flags       = 0;
+
+  #if defined(_WIN32) && !defined(__CYGWIN__)
+    u_long bytesToRead = 0;
+  #else
+    int bytesToRead = 0;
+  #endif
 
   do
   {

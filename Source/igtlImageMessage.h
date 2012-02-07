@@ -239,15 +239,8 @@ public:
   int  GetEndian()             { return endian; };
 
   // TBD: Should returned value be 64-bit integer?
-  int  GetImageSize()
-  {
-    return dimensions[0]*dimensions[1]*dimensions[2]*GetScalarSize()*numComponents;
-  };
-
-  int  GetSubVolumeImageSize()
-  {
-    return subDimensions[0]*subDimensions[1]*subDimensions[2]*GetScalarSize()*numComponents;
-  };
+  int  GetImageSize();
+  int  GetSubVolumeImageSize();
 
   void  AllocateScalars();
   void* GetScalarPointer();

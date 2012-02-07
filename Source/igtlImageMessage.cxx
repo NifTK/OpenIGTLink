@@ -351,7 +351,7 @@ void* ImageMessage::GetScalarPointer()
 
 int ImageMessage::GetBodyPackSize()
 {
-  return GetSubVolumeImageSize() + IGTL_IMAGE_HEADER_SIZE;
+  return GetSubVolumeImageSize() + IGTL_IMAGE_HEADER_SIZE - IGTL_HEADER_SIZE;
 }
 
 int ImageMessage::PackBody()
@@ -456,6 +456,15 @@ int ImageMessage::UnpackBody()
     }
 }
 
+int ImageMessage::GetImageSize()
+{
+  return dimensions[0]*dimensions[1]*dimensions[2]*GetScalarSize()*numComponents;
+}
+
+int ImageMessage::GetSubVolumeImageSize()
+{
+  return subDimensions[0]*subDimensions[1]*subDimensions[2]*GetScalarSize()*numComponents;
+}
 
 void ImageMessage::SetNumComponents(int num)
 {

@@ -734,6 +734,8 @@ int Socket::Send(const void* data, int length)
 
   } while(total < length);
 
+  //std::cerr <<"Number of bytes sent: " <<total <<std::endl;
+
   return 1;
 }
 
@@ -757,94 +759,129 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
     int bytesToRead = 0;
   #endif
 
-  do
+  // Take a look at the buffer to find out the number of bytes that arrived (if any)
+  try
   {
     #if defined(_WIN32) && !defined(__CYGWIN__)
-      int trys  = 0;
+      u_long iMode = 1;
+      rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
+      rVal &= ioctlsocket(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+    #else
+      rVal = ioctl(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
     #endif
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+    return -2;
+  }
 
-    bytesRead   = 0;
-    bytesToRead = 0;
-    rVal        = 0;
+  if (rVal < 0)
+  {
+    handle_error("ioctl: ");
+    return -3;
+  }
+  
+  //std::cerr <<"Number of bytes received: " <<bytesToRead <<" Total to read: " <<length <<std::endl;
 
+  // SET BLOCKING MODE - NOT REQUIRED ON WIN
+  //#if defined(_WIN32) && !defined(__CYGWIN__)
+  //  u_long iMode = 0;
+  //  rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
+  //#endif
+  
+  if (bytesToRead == 0)       // Nothing to do, return
+  {
+    return 0;
+  }
+  else if (bytesToRead == 2)  // Receive a keepalive message
+  {
+    total = 0;
+    length = 2;
+    memset(buffer, 0, length);
+
+    // Try reading from the socket
     try
     {
-      #if defined(_WIN32) && !defined(__CYGWIN__)
-        rVal = ioctlsocket(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
-      #else
-        rVal = ioctl(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
-      #endif
+      bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
     }
     catch (std::exception& e)
     {
       std::cerr << e.what() << std::endl;
       return -2;
     }
-    
-    if (rVal == -1)
+
+    // recv() returned with error
+    if (bytesRead < 0)
     {
-      handle_error("ioctl: ");
-      return -1;
+      handle_error("recv: ");
+      return bytesRead;
+    }
+    
+    //std::cerr <<"Number of bytes actually read: " <<bytesRead <<std::endl;
+    //std::cerr <<"Chars of the message: " <<buffer[0] <<buffer[1] <<std::endl;
+    
+    //otherwise return the number of bytes
+    return bytesRead;
+  }
+
+  memset(buffer, 0, length);
+  flags = 0;
+
+  #if defined(_WIN32) && !defined(__CYGWIN__)
+    int trys  = 0;
+  #endif
+
+  // Receive a generic message
+  do
+  {
+    bytesRead   = 0;
+    rVal        = 0;
+
+    // Try reading from the socket
+    try
+    {
+      bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
+    }
+    catch (std::exception& e)
+    {
+      std::cerr << e.what() << std::endl;
+      return -2;
     }
 
-    //std::cerr <<"Received data.... no bytes: " <<p;
-    memset(buffer, 0, length);
-    flags = 0;
-
-    if (bytesToRead < 1)
+    if (bytesRead < 1)
     {
       #if defined(_WIN32) && !defined(__CYGWIN__)
         // On long messages, Windows recv sometimes fails with WSAENOBUFS, but
         // will work if you try again.
+        
+        trys++;
+        
         int error = WSAGetLastError();
-        if ((error == WSAENOBUFS) && (trys++ < 1000))
+        if (((error == WSAENOBUFS) && (trys < 1000)) || ((error == WSAEWOULDBLOCK) && (trys < 1000)))
         {
           Sleep(1);
           continue;
         }
       #endif
       
-      return bytesToRead;
-    }
-
-    // Read a keepalive message
-    else if (bytesToRead == 2)
-    {
-      total = 0;
-      length = 2;
-      try
-      {
-        bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
-      }
-      catch (std::exception& e)
-      {
-        std::cerr << e.what() << std::endl;
-        return -2;
-      }
-    }
-    // Other generic message received
-    else
-    {
-      try
-      {
-        bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
-      }
-      catch (std::exception& e)
-      {
-        std::cerr << e.what() << std::endl;
-        return -2;
-      }
-    }
-
-    if (bytesRead < 1)
-    {
-      handle_error("recv: ");
+      // Error in recv()
+      if (bytesRead < 0)
+        handle_error("recv: ");
+      
       return bytesRead;
     }
 
     total += bytesRead;
 
   } while(readFully && total < length);
+
+  //std::cerr <<"Number of bytes actually read: " <<bytesRead <<" Total: " <<total <<std::endl;
+
+  //std::cerr <<"First 15 char of the message: ";
+  //for (int oo = 0; oo < 30; oo++)
+  //  std::cerr <<buffer[oo];
+  //std::cerr <<" -END\n";
   
   return total;
 }
@@ -936,6 +973,7 @@ int Socket::Skip(int length, int skipFully/*=1*/)
 //-----------------------------------------------------------------------------
 bool Socket::IsValid()
 {
+  // This is just a silly sanity check
   if (this == NULL)
     return false;
 
@@ -1004,7 +1042,7 @@ bool Socket::IsAlive()
 
     try
     {
-      std::cerr <<"Sending keepalive..." <<std::endl;
+      //std::cerr <<"Sending keepalive..." <<std::endl;
       n = send(this->m_SocketDescriptor, buff+total, length-total, flags);
     }
 
@@ -1069,6 +1107,8 @@ bool Socket::Writable()
   int flags;
   #if defined(_WIN32) && !defined(__CYGWIN__)
     flags = 0; //disable signal on Win boxes.
+    u_long iMode = 1;
+    ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);   // Set Non-Blocking mode
   #elif defined(__linux__)
     flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
   #elif defined(__APPLE__)
@@ -1100,6 +1140,8 @@ bool Socket::Writable()
     total += n;
 
   } while(total < length);
+
+  //std::cerr <<"Number of bytes sent: " <<total <<std::endl;
 
   return true;
 }

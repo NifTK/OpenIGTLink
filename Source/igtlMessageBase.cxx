@@ -1,16 +1,16 @@
 /*=========================================================================
 
-  Program:   Open IGT Link Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink/Source/igtlMessageBase.cxx $
-  Language:  C++
-  Date:      $Date: 2010-01-17 13:38:05 -0500 (Sun, 17 Jan 2010) $
-  Version:   $Revision: 5577 $
+Program:   Open IGT Link Library
+Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink/Source/igtlMessageBase.cxx $
+Language:  C++
+Date:      $Date: 2010-01-17 13:38:05 -0500 (Sun, 17 Jan 2010) $
+Version:   $Revision: 5577 $
 
-  Copyright (c) Insight Software Consortium. All rights reserved.
+Copyright (c) Insight Software Consortium. All rights reserved.
 
-  This software is distributed WITHOUT ANY WARRANTY; without even
-  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-  PURPOSE.  See the above copyright notices for more information.
+This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
 
@@ -23,8 +23,8 @@
 
 namespace igtl {
 
-MessageBase::MessageBase():
-  Object()
+MessageBase::MessageBase()
+  : Object()
 {
   m_PackSize       = 0;
   m_Header         = NULL;
@@ -44,12 +44,12 @@ MessageBase::MessageBase():
 MessageBase::~MessageBase()
 {
   if (this->m_PackSize > 0 && this->m_Header != NULL)
-    {
+  {
     delete [] m_Header;
     m_PackSize = 0;
     m_Header = NULL;
     m_Body   = NULL;
-    }
+  }
 }
 
 void MessageBase::SetDeviceName(const char* name)
@@ -65,13 +65,13 @@ const char* MessageBase::GetDeviceName()
 const char* MessageBase::GetDeviceType()
 {
   if (m_DefaultBodyType.length() > 0)
-    {
+  {
     return m_DefaultBodyType.c_str();
-    }
+  }
   else
-    {
+  {
     return m_BodyType.c_str();
-    }
+  }
 }
 
 
@@ -106,7 +106,7 @@ int MessageBase::Pack()
 {
   PackBody();
   m_IsBodyUnpacked   = 0;
-  
+
   // pack header
   igtl_header* h = (igtl_header*) m_Header;
 
@@ -140,64 +140,64 @@ int MessageBase::Unpack(int crccheck)
 
   // Check if the pack exists and if it has not been unpacked.
   if (m_Header != NULL && m_PackSize >= IGTL_HEADER_SIZE &&
-      m_IsHeaderUnpacked == 0)
-    {
-      // Unpack (deserialize) the header
-      igtl_header* h = (igtl_header*) m_Header;
-      igtl_header_convert_byte_order(h);
-      m_TimeStampSecFraction = h->timestamp & 0xFFFFFFFF;
-      m_TimeStampSec = (h->timestamp >> 32 ) & 0xFFFFFFFF;
-      
+    m_IsHeaderUnpacked == 0)
+  {
+    // Unpack (deserialize) the header
+    igtl_header* h = (igtl_header*) m_Header;
+    igtl_header_convert_byte_order(h);
+    m_TimeStampSecFraction = h->timestamp & 0xFFFFFFFF;
+    m_TimeStampSec = (h->timestamp >> 32 ) & 0xFFFFFFFF;
 
-      if (h->version == IGTL_HEADER_VERSION)
-        {
-        m_BodySizeToRead = h->body_size;
-        
-        char bodyType[13];
-        char deviceName[21];
-        
-        bodyType[12]   = '\0';
-        deviceName[20] = '\0';
-        strncpy(bodyType, h->name, 12);
-        strncpy(deviceName, h->device_name, 20);
-        
-        m_BodyType   = bodyType;  // TODO: should check if the class is MessageBase...
-        m_DeviceName = deviceName;
-        
-        // Mark as unpacked.
-        m_IsHeaderUnpacked = 1;
-        r |= UNPACK_HEADER;
-        }
+
+    if (h->version == IGTL_HEADER_VERSION)
+    {
+      m_BodySizeToRead = h->body_size;
+
+      char bodyType[13];
+      char deviceName[21];
+
+      bodyType[12]   = '\0';
+      deviceName[20] = '\0';
+      strncpy(bodyType, h->name, 12);
+      strncpy(deviceName, h->device_name, 20);
+
+      m_BodyType   = bodyType;  // TODO: should check if the class is MessageBase...
+      m_DeviceName = deviceName;
+
+      // Mark as unpacked.
+      m_IsHeaderUnpacked = 1;
+      r |= UNPACK_HEADER;
     }
+  }
 
   // Check if the body exists and it has not been unpacked
   if (GetPackBodySize() > 0 && m_IsBodyUnpacked == 0)
+  {
+    igtl_header* h   = (igtl_header*) m_Header;
+    igtl_uint64  crc = crc64(0, 0, 0LL); // initial crc
+
+    if (crccheck)
     {
-      igtl_header* h   = (igtl_header*) m_Header;
-      igtl_uint64  crc = crc64(0, 0, 0LL); // initial crc
-
-      if (crccheck)
-        {
-          // Calculate CRC of the body
-          crc = crc64((unsigned char*)m_Body, m_BodySizeToRead, crc);
-        }
-      else
-        {
-          crc = h->crc;
-        }
-
-      if (crc == h->crc)
-        {
-          // Unpack (deserialize) the Body
-          UnpackBody();
-          m_IsBodyUnpacked = 1;
-          r |= UNPACK_BODY;
-        }
-      else
-        {
-          m_IsBodyUnpacked = 0;
-        }
+      // Calculate CRC of the body
+      crc = crc64((unsigned char*)m_Body, m_BodySizeToRead, crc);
     }
+    else
+    {
+      crc = h->crc;
+    }
+
+    if (crc == h->crc)
+    {
+      // Unpack (deserialize) the Body
+      UnpackBody();
+      m_IsBodyUnpacked = 1;
+      r |= UNPACK_BODY;
+    }
+    else
+    {
+      m_IsBodyUnpacked = 0;
+    }
+  }
 
   return r;
 }
@@ -211,7 +211,7 @@ void* MessageBase::GetPackBodyPointer()
 {
   return (void*) m_Body;
 }
- 
+
 int MessageBase::GetPackSize()
 {
   return m_PackSize;
@@ -225,15 +225,15 @@ int MessageBase::GetPackBodySize()
 void MessageBase::AllocatePack()
 {
   if (m_BodySizeToRead > 0)
-    {
-      // called after receiving general header
+  {
+    // called after receiving general header
     AllocatePack(m_BodySizeToRead);
-    }
+  }
   else
-    {
-      // called for creating pack to send
-      AllocatePack(GetBodyPackSize());
-    }
+  {
+    // called for creating pack to send
+    AllocatePack(GetBodyPackSize());
+  }
 }
 
 void MessageBase::InitPack()
@@ -253,30 +253,35 @@ void MessageBase::AllocatePack(int bodySize)
 {
 
   if (bodySize <= 0)
-    {
-      bodySize = 0;
-      m_IsBodyUnpacked = 0;
-    }
+  {
+    bodySize = 0;
+    m_IsBodyUnpacked = 0;
+  }
 
   int s = IGTL_HEADER_SIZE + bodySize;
 
   if (m_Header == NULL)
-    {
-      // For the first time
-      m_Header = new unsigned char [s];
-      m_IsHeaderUnpacked = 0;
-      m_IsBodyUnpacked = 0;
-    }
+  {
+    // For the first time
+    m_Header = new unsigned char [s];
+    memset(m_Header, 0, s);
+    m_IsHeaderUnpacked = 0;
+    m_IsBodyUnpacked = 0;
+  }
   else if (m_PackSize != s)
-    {
-      // If the pack area exists but needs to be reallocated
-      // m_IsHeaderUnpacked status is not changed in this case.
-      unsigned char* old = m_Header;
-      m_Header = new unsigned char [s];
-      memcpy(m_Header, old, IGTL_HEADER_SIZE);
-      delete [] old;
-      m_IsBodyUnpacked = 0;
-    }
+  {
+    // If the pack area exists but needs to be reallocated
+    // m_IsHeaderUnpacked status is not changed in this case.
+
+    unsigned char* old = m_Header;
+    m_Header = new unsigned char [s];
+    memset(m_Header, 0, s);
+    memcpy(m_Header, old, IGTL_HEADER_SIZE);
+
+    delete [] old;
+    m_IsBodyUnpacked = 0;
+  }
+
   m_Body   = &m_Header[IGTL_HEADER_SIZE];
   m_PackSize = s;
 }
@@ -285,10 +290,10 @@ int MessageBase::CopyHeader(const MessageBase* mb)
 {
 
   if (m_Header != NULL && mb->m_Header != NULL)
-    {
+  {
     memcpy(m_Header, mb->m_Header, IGTL_HEADER_SIZE);
     m_Body           = &m_Header[IGTL_HEADER_SIZE];
-    }
+  }
   m_PackSize             = mb->m_PackSize;
   m_BodyType             = mb->m_BodyType;
   m_DeviceName           = mb->m_DeviceName;
@@ -306,10 +311,10 @@ int MessageBase::CopyBody(const MessageBase *mb)
 {
   int s = m_PackSize - IGTL_HEADER_SIZE;
   if (m_Body != NULL && mb->m_Body != NULL && s > 0)
-    {
+  {
     memcpy(m_Body, mb->m_Body, s);
     return 1;
-    }
+  }
 
   return 0;
 }
@@ -317,43 +322,45 @@ int MessageBase::CopyBody(const MessageBase *mb)
 int MessageBase::Copy(const MessageBase* mb)
 {
   if (this == mb)
-    {
-      return 0;
-    }
+  {
+    return 0;
+  }
 
   // Check if the destination (this class) is MessageBase or
   // the source and destination class arethe same type.
   // The pack size is also checked if it is larger than the header size.
   if ((m_DefaultBodyType.length() == 0 || m_DefaultBodyType == mb->m_BodyType)
-      && mb->m_PackSize >= IGTL_HEADER_SIZE)
-    {
-      int bodySize = mb->m_PackSize - IGTL_HEADER_SIZE;
-      AllocatePack(bodySize);
-      CopyHeader(mb);
-      if (bodySize > 0)
-        {
-          CopyBody(mb);
-        }
-      return 1;
-    }
-  else
-    {
-      return 0;
-    }
-}
-
-PingMessage::PingMessage()
-  : MessageBase()
+    && mb->m_PackSize >= IGTL_HEADER_SIZE)
   {
-    this->m_DefaultBodyType  = "PING";
+    int bodySize = mb->m_PackSize - IGTL_HEADER_SIZE;
+    AllocatePack(bodySize);
+    CopyHeader(mb);
+    if (bodySize > 0)
+    {
+      CopyBody(mb);
+    }
+    return 1;
   }
+  else
+  {
+    return 0;
+  }
+}
 
-PingMessage::~PingMessage()
-{
+const char* MessageBase::GetBodyType() 
+{ 
+  return this->m_BodyType.c_str(); 
+}
+
+int MessageBase::SetMessageHeader(const MessageHeader* mb)
+{ 
+  return Copy(mb); 
+}
+
+int MessageBase::GetBodySizeToRead()
+{ 
+  return m_BodySizeToRead; 
 }
 
 
 }
-
-
-

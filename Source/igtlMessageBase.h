@@ -111,7 +111,7 @@ public:
   int   GetPackSize();
   int   GetPackBodySize();
 
-  const char* GetBodyType() { return this->m_BodyType.c_str(); };
+  const char* GetBodyType();
 
   // Allocate memory for packing / receiving buffer
   void AllocatePack();
@@ -127,8 +127,8 @@ public:
   // general header is copied.
   int Copy(const MessageBase* mb);
 
-  virtual int SetMessageHeader(const MessageHeader* mb) { return Copy(mb); };
-  int GetBodySizeToRead()                       { return m_BodySizeToRead; };
+  virtual int SetMessageHeader(const MessageHeader* mb);
+  int GetBodySizeToRead();
   
 protected:
   MessageBase();
@@ -175,31 +175,6 @@ protected:
   int            m_IsBodyUnpacked;
 
 };
-
-class IGTLCommon_EXPORT PingMessage: public MessageBase
-{
-
-public:
-
-  typedef PingMessage                    Self;
-  typedef MessageBase                    Superclass;
-  typedef SmartPointer<Self>             Pointer;
-  typedef SmartPointer<const Self>       ConstPointer;
-
-  igtlTypeMacro(igtl::PingMessage, igtl::MessageBase);
-  igtlNewMacro(igtl::PingMessage);
-
-
-protected:
-  PingMessage();
-  ~PingMessage();
-
-protected:
-  virtual int  GetBodyPackSize() { return 0; };
-  virtual int  PackBody()        { AllocatePack(); return 1; };
-  virtual int  UnpackBody()      { return 1; };
-};
-
 
 } // namespace igtl
 

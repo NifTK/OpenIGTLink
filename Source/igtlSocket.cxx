@@ -51,9 +51,6 @@
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   #define WSA_VERSION MAKEWORD(1,1)
-//  #define igtlCloseSocketMacro(sock) (closesocket(sock))
-//#else
-//  #define igtlCloseSocketMacro(sock) (close(sock))
 #endif
 
 namespace igtl
@@ -226,123 +223,6 @@ int Socket::SelectSocket(int socketdescriptor, unsigned long msec)
 }
 
 //-----------------------------------------------------------------------------
-int Socket::TestSocketRW(int socketdescriptor, unsigned long msec)
-{
-  if (!this->IsValid())
-  {
-    return -1;
-  }
-
-  int canRead  = 0;
-  int canWrite = 0;
-  int total = 0;
-
-  char buff[2];
-  int length = 2;
-  memset((void *)&buff, 1, sizeof(buff));
-
-  fd_set rset, wset;
-  FD_ZERO(&rset);
-  FD_ZERO(&wset);
-  
-  struct timeval tval;
-  struct timeval* tvalptr = 0;
-  if ( msec > 0 )
-  {
-    tval.tv_sec = msec / 1000;
-    tval.tv_usec = (msec % 1000)*1000;
-    tvalptr = &tval;
-  }
-
-  // Try to select socket with timeout
-  int res = select(socketdescriptor + 1, &rset, &wset, 0, tvalptr);
-  if (res == 0)
-  {
-    return 0;//for time limit expire
-  }
-  else if (res < 0)
-  {
-    // Some error.
-    return res;
-  }
-
-  // Set flags to disable SIGPIPE and other low-level exceptions
-  int flags;
-  #if defined(_WIN32) && !defined(__CYGWIN__)
-    flags = 0; //disable signal on Win boxes.
-  #elif defined(__linux__)
-    flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
-  #elif defined(__APPLE__)
-    int opt=1;
-    setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
-    flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
-  #endif
-
-  // TEST WRITE
-  do
-  {
-    int n = 0;
-
-    try
-    {
-      n = send(this->m_SocketDescriptor, buff+total, length-total, flags);
-    }
-
-    catch (std::exception& e)
-    {
-      std::cerr << e.what() << std::endl;
-      break;
-    }
-
-    if (n > 0)
-      canWrite = 1;
-    else
-      canWrite = 0;
-
-    total += n;
-
-  } while(total < length);
-
-  memset(&buff,0,sizeof(buff));
-
-  //TEST READ
-  total = 0;
-  do
-  {
-    int n = 0;
-
-    try
-    {
-      n = recv(this->m_SocketDescriptor, buff+total, length-total, flags);
-    }
-
-    catch (std::exception& e)
-    {
-      std::cerr << e.what() << std::endl;
-      break;
-    }
-
-    if (n > 0)
-      canRead = 1;
-    else
-      canRead = 0;
-
-    total += n;
-
-  } while(total < length);
-
-  // Return the RW status
-  if (canRead && canWrite)
-    return 3;
-  else if (canRead)
-    return 2;
-  else if (canWrite)
-    return 1;
-  else
-    return -1;
-}
-
-//-----------------------------------------------------------------------------
 int Socket::SelectSockets(const int* sockets_to_select, int size, unsigned long msec, int* selected_index)
 {
 	int i;
@@ -503,7 +383,6 @@ int Socket::ConnectNonBlocking(int soc, const char* hostName, int port)
 		
 		if (busy == true) 
 		{ 
-			//fprintf(stderr, "EINPROGRESS in connect() - selecting\n"); 
 			do 
 			{ 
 				FD_ZERO(&myset); 
@@ -525,7 +404,6 @@ int Socket::ConnectNonBlocking(int soc, const char* hostName, int port)
 				if (res < 0 && selectErr == true) 
 				{ 
           handle_error("connect");
-					//fprintf(stderr, "Error connecting %d - %s\n", errno, strerror(errno)); 
 					return -4; 
 				} 
 				else if (res > 0) 
@@ -546,7 +424,6 @@ int Socket::ConnectNonBlocking(int soc, const char* hostName, int port)
 					if (sockoptErr == true) 
 					{ 
             handle_error("getsockopt");
-						//fprintf(stderr, "Error in getsockopt() %d - %s\n", errno, strerror(errno)); 
 						return -5; 
 					} 
 					
@@ -570,7 +447,6 @@ int Socket::ConnectNonBlocking(int soc, const char* hostName, int port)
 		else 
 		{ 
       handle_error("connect");
-			//fprintf(stderr, "Error connecting %d - %s\n", errno, strerror(errno)); 
 			return -8; 
 		} 
 	} 
@@ -1010,7 +886,7 @@ bool Socket::IsValid()
 }
 
 //-----------------------------------------------------------------------------
-bool Socket::IsAlive()
+bool Socket::Poke()
 {
   if (!this->IsValid())
   {
@@ -1022,88 +898,10 @@ bool Socket::IsAlive()
   int length = 2;
   char buff[2];
 
-  memset((void *)&buff, 1, sizeof(buff));
-
-  int flags;
-  #if defined(_WIN32) && !defined(__CYGWIN__)
-    flags = 0; //disable signal on Win boxes.
-  #elif defined(__linux__)
-    flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
-  #elif defined(__APPLE__)
-    int opt=1;
-    setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
-    flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
-  #endif
-
-  // TEST WRITE
-  do
-  {
-    n = 0;
-
-    try
-    {
-      //std::cerr <<"Sending keepalive..." <<std::endl;
-      n = send(this->m_SocketDescriptor, buff+total, length-total, flags);
-    }
-
-    catch (std::exception& e)
-    {
-      std::cerr << e.what() << std::endl;
-      return false;
-    }
-
-    if (n <= 0)
-      return false;
-
-    total += n;
-
-  } while(total < length);
-
-  memset(&buff,0,sizeof(buff));
-
-  //TEST READ
-  total = 0;
-
-  do
-  {
-    n = 0;
-
-    try
-    {
-      n = recv(this->m_SocketDescriptor, buff+total, length-total, flags);
-    }
-
-    catch (std::exception& e)
-    {
-      std::cerr << e.what() << std::endl;
-      return false;
-    }
-
-    if (n <= 0)
-      return false;
-
-    total += n;
-
-  } while(total < length);
-
-  return true;
-}
-
-//-----------------------------------------------------------------------------
-bool Socket::Writable()
-{
-  if (!this->IsValid())
-  {
-    return false;
-  }
+  //Going to send "??" 
+  buff[0] = 63;
+  buff[1] = 63;
   
-  int total  = 0;
-  int n      = 0;
-  int length = 2;
-  char buff[2];
-
-  memset((void *)&buff, 255, sizeof(buff));
-
   int flags;
   #if defined(_WIN32) && !defined(__CYGWIN__)
     flags = 0; //disable signal on Win boxes.
@@ -1144,26 +942,6 @@ bool Socket::Writable()
   //std::cerr <<"Number of bytes sent: " <<total <<std::endl;
 
   return true;
-}
-
-
-//-----------------------------------------------------------------------------
-int Socket::IsAbleToRW()
-{
-  if (!this->IsValid())
-  {
-    return -1;
-  }
-  
-  int ret = this->TestSocketRW(this->m_SocketDescriptor, 100);
-  
-  if (ret < 0)
-  {
-    handle_error("test rw: ");
-    return -1;
-  }
-  else 
-    return ret;
 }
 
 //-----------------------------------------------------------------------------

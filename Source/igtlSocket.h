@@ -135,20 +135,9 @@ public:
   bool IsValid(void);
 
   // Description:
-  // This method is for checking if the socket is alive, able to read and write.
-  // Query should be performed before attempting to request action on the socket (e.g. Close())
-  // The return value has to be >0 to assume correct operation.
-  int IsAbleToRW(void);
-  
-  // Description:
-  // This method is for checking if the socket is alive or not, by trying to read and write through the socket.
-  // Query should be performed to detect disconnection. The function returns true if the socket is OK for RW.
-  bool IsAlive();
-
-  // Description:
-  // This method is for checking if the socket is alive or not, by trying to read and write through the socket.
-  // Query should be performed to detect disconnection. The function returns true if the socket is OK for RW.
-  bool Writable();
+  // This method is for checking if the socket is OK for writing or not. It sends a 2 byte message through, returns with false if not possible.
+  // Query should be performed to detect disconnection, also it can be used for "keepalive".
+  bool Poke();
 
 protected:
   Socket();
@@ -183,13 +172,6 @@ protected:
   // no timeout.
   int SelectSocket(int socketdescriptor, unsigned long msec);
   
-  // Description:
-  // Tests if the socket is able to read and write.
-  // It uses the Select() method and then checking flags, performing basic read / write with timeout.
-  // Returns 3 on RW, 2 on R only and 1 on W only, 0 on timeout; -1 on error. msec=0 implies
-  // no timeout.
-  int TestSocketRW(int socketdescriptor, unsigned long msec);
-
   // Description:
   // Accept a connection on a socket. Returns -1 on error. Otherwise
   // the descriptor of the accepted socket.

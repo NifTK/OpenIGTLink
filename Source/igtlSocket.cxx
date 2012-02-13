@@ -574,24 +574,30 @@ int Socket::Send(const void* data, int length)
     // nothing to send.
     return 1;
   }
+  //std::cerr <<"Preparing to send...";
   const char* buffer = reinterpret_cast<const char*>(data);
   int total = 0;
   int n = 0;
+
+  int flags;
+  #if defined(_WIN32) && !defined(__CYGWIN__)
+    flags = 0; //disable signal on Win boxes.
+  #elif defined(__linux__)
+    flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
+  #elif defined(__APPLE__)
+    int opt=1;
+    //int sock_buf_size = 47500;
+    int ret = 0;
+    ret = setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
+    //ret = setsockopt(this->m_SocketDescriptor, IPPROTO_TCP, TCP_NODELAY, (char *)&opt, sizeof(int) );
+    //ret = setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_SNDBUF,(char *)&sock_buf_size, sizeof(sock_buf_size) );
+    flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
+  #endif
   
   do
   {
-    int flags;
-    #if defined(_WIN32) && !defined(__CYGWIN__)
-      flags = 0; //disable signal on Win boxes.
-    #elif defined(__linux__)
-      flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
-    #elif defined(__APPLE__)
-      int opt=1;
-      setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
-      flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
-    #endif
-
     n = 0;
+
     try
     {
       n = send(this->m_SocketDescriptor, buffer+total, length-total, flags);

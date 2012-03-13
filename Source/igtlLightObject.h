@@ -38,6 +38,7 @@
 
 #include <iostream>
 #include <typeinfo>
+#include <cstring>
 
 
 namespace igtl

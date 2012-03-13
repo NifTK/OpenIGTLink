@@ -54,9 +54,10 @@
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   //#include <windows.h>
-  #include <winsock2.h> 
-  #include <Ws2tcpip.h>
-  #include <Ws2ipdef.h>
+    #include <Ws2tcpip.h>
+    //#include <winsock2.h> 
+
+  //#include <Ws2ipdef.h>
   #include "tsctime/TSCtime.h"
 #else
   #include <sys/types.h>
@@ -126,7 +127,7 @@ public:
   // 0 on error, else number of bytes read is returned. On error,
   // vtkCommand::ErrorEvent is raised.
   //int Receive(void* data, int length, int readFully=1);
-  int Receive2(void* data, int length, int readFully=1);
+  int Receive(void* data, int length, int readFully=1);
 
   // Description:
   // Check socket for pending data.

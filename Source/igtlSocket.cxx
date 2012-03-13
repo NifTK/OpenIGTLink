@@ -953,7 +953,7 @@ int Socket::CheckPendingData()
 //}
 
 //-----------------------------------------------------------------------------
-int Socket::Receive2(void* data, int length, int readFully/*=1*/)
+int Socket::Receive(void* data, int length, int readFully/*=1*/)
 {
   //ULONGLONG time_before = gethectonanotime_last(); 
   
@@ -1096,7 +1096,7 @@ int Socket::Skip(int length, int skipFully/*=1*/)
       block = remain;
     }
 
-    n = this->Receive2(dummy, block, skipFully);
+    n = this->Receive(dummy, block, skipFully);
     if (!skipFully && n <= 0)
     {
       break;

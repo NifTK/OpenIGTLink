@@ -179,15 +179,13 @@ int MulticastSocket::ReceiveMulticast(void* data, int readFully)
     u_long bytesToRead = 0;
     rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
     rVal |= ioctlsocket(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
-  #elif defined(__linux__)
-    flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
-  #elif defined(__APPLE__)
+  #else
     int bytesToRead = 0;
     rVal  = ioctl(this->m_SocketDescriptor, FIONBIO, &iMode);
     rVal |= ioctl(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
   #endif
 
-  std::cerr <<"Num of bytes to read.. " <<bytesToRead;
+  //std::cerr <<"Num of bytes to read.. " <<bytesToRead;
 
   // Receive a generic message
   do

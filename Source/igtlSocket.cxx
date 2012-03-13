@@ -653,8 +653,11 @@ int Socket::Send(const void* data, int length)
   #if defined(_WIN32) && !defined(__CYGWIN__)
     flags = 0; //disable signal on Win boxes.
     rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
+
   #elif defined(__linux__)
     flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
+    rVal |= ioctl(this->m_SocketDescriptor, FIONBIO, &iMode);
+
   #elif defined(__APPLE__)
     int opt=1;
     rVal  = setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
@@ -698,7 +701,7 @@ int Socket::Send(const void* data, int length)
           Sleep(1);
           continue;
         }
-      #elif defined(__APPLE__)
+      #else
         int error = errno;
 
         if ((error == EWOULDBLOCK) && (++trys < 1000))
@@ -708,12 +711,15 @@ int Socket::Send(const void* data, int length)
         }
       #endif
 
-      std::cerr <<"Message length: " <<length; 
+      std::cerr <<"Total sent so far: " <<total <<" Length: " << length <<std::endl;
+
       handle_error("sendfail: ");
       return -1;
     }
 
     total += n;
+
+    //std::cerr <<"Total sent so far: " <<total <<" Length: " << length <<std::endl;
 
   } while(total < length);
   
@@ -991,7 +997,7 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
           Sleep(1);
           continue;
         }
-      #elif defined(__APPLE__)
+      #else
         int error = errno;
 
         if ((error == EWOULDBLOCK) && (++trys < 1000))
@@ -1168,8 +1174,11 @@ bool Socket::Poke()
   #if defined(_WIN32) && !defined(__CYGWIN__)
     flags = 0; //disable signal on Win boxes.
     ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);   // Set Non-Blocking mode
+
   #elif defined(__linux__)
     flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
+    ioctl(this->m_SocketDescriptor, FIONBIO, &iMode);   // Set Non-Blocking mode
+
   #elif defined(__APPLE__)
     int opt=1;
     setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));

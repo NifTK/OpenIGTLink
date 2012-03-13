@@ -77,6 +77,9 @@ Socket::Socket()
   this->m_TimeoutFlag = 0;
   this->m_ConnectionTimeout.tv_sec = 5;
   this->m_ConnectionTimeout.tv_usec = 0;
+
+  m_sendTimeStamp    = 0;
+  m_receiveTimeStamp = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -119,6 +122,64 @@ int Socket::CreateSocket()
   }
   return sock;
 }
+
+//-----------------------------------------------------------------------------
+int Socket::CreateSocket(communication_protocol proto)
+{
+  
+  #if defined(_WIN32) && !defined(__CYGWIN__)
+    // Declare variables
+    WSADATA wsaData;
+    //SOCKET ListenSocket;
+    //sockaddr_in service;
+
+    //---------------------------------------
+    // Initialize Winsock
+    int iResult = WSAStartup( MAKEWORD(2,2), &wsaData );
+    if( iResult != NO_ERROR )
+    {
+      std::cerr << "Error at WSAStartup" << std::endl;
+      return -1;
+    }
+  #endif
+
+  int sock = -1;
+
+  if (proto == P_TCP)
+  {
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (sock < 0)
+    {
+      std::cerr << "Error when creating socket" << std::endl;
+      return -1;
+    }
+  
+    // Elimate windows 0.2 second delay sending (buffering) data.
+    int on = 1;
+    if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&on, sizeof(on)))
+    {
+	    return -1;
+    }
+  }
+  else if (proto == P_TCP_MULTI)
+  {
+    //sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    sock = socket(PF_INET, SOCK_DGRAM, 0);
+    
+    if (sock < 0)
+    {
+      std::cerr << "Error when creating socket" << std::endl;
+      return -1;
+    }
+  }
+
+  m_proto = proto;
+  return sock;
+}
+
+
+
 
 //-----------------------------------------------------------------------------
 int Socket::BindSocket(int socketdescriptor, int port)
@@ -566,7 +627,7 @@ int Socket::Send(const void* data, int length)
 {
   if (!this->IsValid())
   {
-    return 0;
+    return -1;
   }
 
   if (length == 0)
@@ -574,26 +635,43 @@ int Socket::Send(const void* data, int length)
     // nothing to send.
     return 1;
   }
+  
+  int rVal     = 0;
+  u_long iMode = 1;
+
+  // Will set socket to blocking mode if working on large messages
+  if (length > 1000)
+    iMode = 0;
+
   //std::cerr <<"Preparing to send...";
   const char* buffer = reinterpret_cast<const char*>(data);
   int total = 0;
-  int n = 0;
-
+  int n     = 0;
+  int trys  = 0;
+  
   int flags;
   #if defined(_WIN32) && !defined(__CYGWIN__)
     flags = 0; //disable signal on Win boxes.
+    rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
   #elif defined(__linux__)
     flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
   #elif defined(__APPLE__)
     int opt=1;
-    //int sock_buf_size = 47500;
-    int ret = 0;
-    ret = setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
-    //ret = setsockopt(this->m_SocketDescriptor, IPPROTO_TCP, TCP_NODELAY, (char *)&opt, sizeof(int) );
-    //ret = setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_SNDBUF,(char *)&sock_buf_size, sizeof(sock_buf_size) );
+    rVal  = setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
+    rVal |= ioctl(this->m_SocketDescriptor, FIONBIO, &iMode);
     flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
   #endif
+
+  if (rVal < 0)    // ioctl error
+  {
+     handle_error("ioctl: ");
+     return -2;
+  }
   
+  // Timestamp the message
+  ULONGLONG packedTimeStamp = GetOIGTLTimeTAI_last(); 
+  memcpy((void *)(buffer+34), (void *)(&packedTimeStamp), sizeof(ULONGLONG));
+
   do
   {
     n = 0;
@@ -606,15 +684,42 @@ int Socket::Send(const void* data, int length)
     catch (std::exception& e)
     {
       std::cerr << e.what() << std::endl;
-      return -1;
+      return -3;
     }
 
     if (n <= 0)
+    {   
+      #if defined(_WIN32) && !defined(__CYGWIN__)
+        int error = WSAGetLastError();
+        trys++;
+
+        if (((error == WSAENOBUFS) && (trys < 1000)) || ((error == WSAEWOULDBLOCK) && (trys < 1000)))
+        {
+          Sleep(1);
+          continue;
+        }
+      #elif defined(__APPLE__)
+        int error = errno;
+
+        if ((error == EWOULDBLOCK) && (++trys < 1000))
+        {
+          Sleep(1);
+          continue;
+        }
+      #endif
+
+      std::cerr <<"Message length: " <<length; 
+      handle_error("sendfail: ");
       return -1;
+    }
 
     total += n;
 
   } while(total < length);
+  
+  // Record the software timestamp as the message left the device
+  m_sendTimeStamp = igtl::TimeStamp::New();
+  m_sendTimeStamp->toTAI();
 
   //std::cerr <<"Number of bytes sent: " <<total <<std::endl;
 
@@ -622,19 +727,18 @@ int Socket::Send(const void* data, int length)
 }
 
 //-----------------------------------------------------------------------------
-int Socket::Receive(void* data, int length, int readFully/*=1*/)
+int Socket::CheckPendingData()
 {
+  //ULONGLONG time_before = gethectonanotime_last(); 
   if (!this->IsValid())
   {
     return -1;
   }
-
-  char* buffer = reinterpret_cast<char*>(data);
-  int total       = 0;
-  int bytesRead   = 0;
-  int rVal        = 0;
-  int flags       = 0;
-
+  
+  int rVal     = 0;
+  u_long iMode = 1;
+  igtl::TimeStamp::Pointer ts;
+  
   #if defined(_WIN32) && !defined(__CYGWIN__)
     u_long bytesToRead = 0;
   #else
@@ -645,11 +749,17 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
   try
   {
     #if defined(_WIN32) && !defined(__CYGWIN__)
-      u_long iMode = 1;
       rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
-      rVal &= ioctlsocket(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+      rVal |= ioctlsocket(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+       
+      // Record the software timestamp asap
+      ts = igtl::TimeStamp::New();
     #else
-      rVal = ioctl(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+      rVal  = ioctl(this->m_SocketDescriptor, FIONBIO, &iMode);
+      rVal |= ioctl(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+
+      // Record the software timestamp asap
+      ts = igtl::TimeStamp::New();
     #endif
   }
   catch (std::exception& e)
@@ -657,68 +767,207 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
     std::cerr << e.what() << std::endl;
     return -2;
   }
-
-  if (rVal < 0)
-  {
-    handle_error("ioctl: ");
-    return -3;
-  }
   
-  //std::cerr <<"Number of bytes received: " <<bytesToRead <<" Total to read: " <<length <<std::endl;
+   if (rVal < 0)    // ioctl error
+   {
+      handle_error("ioctl: ");
+      return -3;
+   }
 
-  // SET BLOCKING MODE - NOT REQUIRED ON WIN
-  //#if defined(_WIN32) && !defined(__CYGWIN__)
-  //  u_long iMode = 0;
-  //  rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
-  //#endif
+  switch (bytesToRead)
+  {
+    case 0:     // nothing to read
+      return 0;
+    case 2:     // Taking care of keepalive
+      char buf[2];
+      try
+      {
+        recv(this->m_SocketDescriptor,(char*)&buf, 2, 0);
+      }
+      catch (std::exception& e)
+      {
+        std::cerr << e.what() << std::endl;
+        return -4;
+      }
+      return 2; 
+    default:    // Large number of data waiting, probably message
+      m_receiveTimeStamp.operator =(ts);
+      m_receiveTimeStamp->toTAI();
+
+      //ULONGLONG time_after = gethectonanotime_last(); 
+      //std::cerr <<"Time delta: " <<time_after - time_before;
+
+      return bytesToRead;
+  }
+}
+
+////-----------------------------------------------------------------------------
+//int Socket::Receive(void* data, int length, int readFully/*=1*/)
+//{
+//  if (!this->IsValid())
+//  {
+//    return -1;
+//  }
+
+//  char* buffer = reinterpret_cast<char*>(data);
+//  int total       = 0;
+//  int bytesRead   = 0;
+//  int rVal        = 0;
+//  int flags       = 0;
+
+//  #if defined(_WIN32) && !defined(__CYGWIN__)
+//    u_long bytesToRead = 0;
+//  #else
+//    int bytesToRead = 0;
+//  #endif
+
+//  // Take a look at the buffer to find out the number of bytes that arrived (if any)
+//  try
+//  {
+//    #if defined(_WIN32) && !defined(__CYGWIN__)
+//      u_long iMode = 1;
+//      rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
+//      rVal &= ioctlsocket(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+//    #else
+//      rVal = ioctl(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
+//    #endif
+//  }
+//  catch (std::exception& e)
+//  {
+//    std::cerr << e.what() << std::endl;
+//    return -2;
+//  }
+
+//  if (rVal < 0)
+//  {
+//    handle_error("ioctl: ");
+//    return -3;
+//  }
   
-  if (bytesToRead == 0)       // Nothing to do, return
-  {
-    return 0;
-  }
-  else if (bytesToRead == 2)  // Receive a keepalive message
-  {
-    total = 0;
-    length = 2;
-    memset(buffer, 0, length);
+//  //std::cerr <<"Number of bytes received: " <<bytesToRead <<" Total to read: " <<length <<std::endl;
 
-    // Try reading from the socket
-    try
-    {
-      bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
-    }
-    catch (std::exception& e)
-    {
-      std::cerr << e.what() << std::endl;
-      return -2;
-    }
+//  // SET BLOCKING MODE - NOT REQUIRED ON WIN
+//  //#if defined(_WIN32) && !defined(__CYGWIN__)
+//  //  u_long iMode = 0;
+//  //  rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
+//  //#endif
+  
+//  if (bytesToRead == 0)       // Nothing to do, return
+//  {
+//    return 0;
+//  }
+//  else if (bytesToRead == 2)  // Receive a keepalive message
+//  {
+//    total = 0;
+//    length = 2;
+//    memset(buffer, 0, length);
 
-    // recv() returned with error
-    if (bytesRead < 0)
-    {
-      handle_error("recv: ");
-      return bytesRead;
-    }
+//    // Try reading from the socket
+//    try
+//    {
+//      bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
+//    }
+//    catch (std::exception& e)
+//    {
+//      std::cerr << e.what() << std::endl;
+//      return -2;
+//    }
+
+//    // recv() returned with error
+//    if (bytesRead < 0)
+//    {
+//      handle_error("recv: ");
+//      return bytesRead;
+//    }
     
-    //std::cerr <<"Number of bytes actually read: " <<bytesRead <<std::endl;
-    //std::cerr <<"Chars of the message: " <<buffer[0] <<buffer[1] <<std::endl;
+//    //std::cerr <<"Number of bytes actually read: " <<bytesRead <<std::endl;
+//    //std::cerr <<"Chars of the message: " <<buffer[0] <<buffer[1] <<std::endl;
     
-    //otherwise return the number of bytes
-    return bytesRead;
-  }
+//    //otherwise return the number of bytes
+//    return bytesRead;
+//  }
 
-  memset(buffer, 0, length);
-  flags = 0;
+//  // Record the software timestamp as it seems a valid message has arrived
+//  m_receiveTimeStamp = igtl::TimeStamp::New();
+//  m_receiveTimeStamp->toTAI();
 
-  #if defined(_WIN32) && !defined(__CYGWIN__)
-    int trys  = 0;
-  #endif
+//  memset(buffer, 0, length);
+//  flags = 0;
+
+//  #if defined(_WIN32) && !defined(__CYGWIN__)
+//    int trys  = 0;
+//  #endif
+
+//  // Receive a generic message
+//  do
+//  {
+//    bytesRead   = 0;
+//    rVal        = 0;
+
+//    // Try reading from the socket
+//    try
+//    {
+//      bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
+//    }
+//    catch (std::exception& e)
+//    {
+//      std::cerr << e.what() << std::endl;
+//      return -2;
+//    }
+
+//    if (bytesRead < 1)
+//    {
+//      #if defined(_WIN32) && !defined(__CYGWIN__)
+//        // On long messages, Windows recv sometimes fails with WSAENOBUFS, but
+//        // will work if you try again.
+        
+//        trys++;
+        
+//        int error = WSAGetLastError();
+//        if (((error == WSAENOBUFS) && (trys < 1000)) || ((error == WSAEWOULDBLOCK) && (trys < 1000)))
+//        {
+//          Sleep(1);
+//          continue;
+//        }
+//      #endif
+      
+//      // Error in recv()
+//      if (bytesRead < 0)
+//        handle_error("recv: ");
+      
+//      return bytesRead;
+//    }
+
+//    total += bytesRead;
+
+//  } while(readFully && total < length);
+
+//  //std::cerr <<"Number of bytes actually read: " <<bytesRead <<" Total: " <<total <<std::endl;
+
+//  //std::cerr <<"First 15 char of the message: ";
+//  //for (int oo = 0; oo < 30; oo++)
+//  //  std::cerr <<buffer[oo];
+//  //std::cerr <<" -END\n";
+  
+//  return total;
+//}
+
+//-----------------------------------------------------------------------------
+int Socket::Receive2(void* data, int length, int readFully/*=1*/)
+{
+  //ULONGLONG time_before = gethectonanotime_last(); 
+  
+  char* buffer = reinterpret_cast<char*>(data);
+  int total       = 0;
+  int bytesRead   = 0;
+  //int rVal        = 0;
+  int flags       = 0;
+  int trys        = 0;
 
   // Receive a generic message
   do
   {
     bytesRead   = 0;
-    rVal        = 0;
 
     // Try reading from the socket
     try
@@ -734,13 +983,18 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
     if (bytesRead < 1)
     {
       #if defined(_WIN32) && !defined(__CYGWIN__)
-        // On long messages, Windows recv sometimes fails with WSAENOBUFS, but
-        // will work if you try again.
-        
-        trys++;
-        
         int error = WSAGetLastError();
+        trys++;
+
         if (((error == WSAENOBUFS) && (trys < 1000)) || ((error == WSAEWOULDBLOCK) && (trys < 1000)))
+        {
+          Sleep(1);
+          continue;
+        }
+      #elif defined(__APPLE__)
+        int error = errno;
+
+        if ((error == EWOULDBLOCK) && (++trys < 1000))
         {
           Sleep(1);
           continue;
@@ -758,6 +1012,9 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
 
   } while(readFully && total < length);
 
+  //ULONGLONG time_after = gethectonanotime_last(); 
+  //std::cerr <<"Time delta: " <<time_after - time_before <<std::endl;
+  
   //std::cerr <<"Number of bytes actually read: " <<bytesRead <<" Total: " <<total <<std::endl;
 
   //std::cerr <<"First 15 char of the message: ";
@@ -767,7 +1024,6 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
   
   return total;
 }
-
 
 //-----------------------------------------------------------------------------
 int Socket::SetTimeout(int timeout)
@@ -840,7 +1096,7 @@ int Socket::Skip(int length, int skipFully/*=1*/)
       block = remain;
     }
 
-    n = this->Receive(dummy, block, skipFully);
+    n = this->Receive2(dummy, block, skipFully);
     if (!skipFully && n <= 0)
     {
       break;
@@ -898,7 +1154,7 @@ bool Socket::Poke()
   {
     return false;
   }
-  
+  u_long iMode = 1;
   int total  = 0;
   int n      = 0;
   int length = 2;
@@ -911,7 +1167,6 @@ bool Socket::Poke()
   int flags;
   #if defined(_WIN32) && !defined(__CYGWIN__)
     flags = 0; //disable signal on Win boxes.
-    u_long iMode = 1;
     ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);   // Set Non-Blocking mode
   #elif defined(__linux__)
     flags = MSG_NOSIGNAL; //disable signal on Unix boxes.
@@ -919,6 +1174,7 @@ bool Socket::Poke()
     int opt=1;
     setsockopt(this->m_SocketDescriptor, SOL_SOCKET, SO_NOSIGPIPE, (char*) &opt, sizeof(int));
     flags = SO_NOSIGPIPE; //disable signal on Mac boxes.
+    ioctl(this->m_SocketDescriptor, FIONBIO, &iMode);   // Set Non-Blocking mode
   #endif
 
   // TEST WRITE

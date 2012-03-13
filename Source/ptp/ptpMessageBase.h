@@ -14,8 +14,8 @@
 
 =========================================================================*/
 
-#ifndef __igtlMessageBase_h
-#define __igtlMessageBase_h
+#ifndef __ptpMessageBase_h
+#define __ptpMessageBase_h
 
 #include "igtlObject.h"
 #include "igtlObjectFactory.h"
@@ -23,9 +23,10 @@
 #include "igtlMacro.h"
 #include "igtlMath.h"
 #include "igtlTimeStamp.h"
-#include "igtlWin32Header.h"
 
-#include "igtlMessageHeader.h"
+#include "ptpMessageHeader.h"
+#include "ptp_datatypes.h"
+#include "ptp_constants.h"
 
 #include <string>
 
@@ -55,22 +56,23 @@
 //
 //-------------------------------------------------------------------------
 
-namespace igtl
+namespace ptp
 {
 
-class IGTLCommon_EXPORT MessageBase: public Object
+class IGTLCommon_EXPORT MessageBase: public igtl::Object
 {
 public:
 
-  typedef MessageBase               Self;
-  typedef Object                    Superclass;
-  typedef SmartPointer<Self>        Pointer;
-  typedef SmartPointer<const Self>  ConstPointer;
+  typedef ptp::MessageBase                Self;
+  typedef igtl::Object                    Superclass;
+  typedef igtl::SmartPointer<Self>        Pointer;
+  typedef igtl::SmartPointer<const Self>  ConstPointer;
 
-  igtlTypeMacro(igtl::MessageBase, igtl::Object)
-  igtlNewMacro(igtl::MessageBase);
+  igtlTypeMacro(ptp::MessageBase, igtl::Object)
+  igtlNewMacro(ptp::MessageBase);
 
-  enum {
+  enum 
+  {
     UNPACK_UNDEF   = 0x0000,
     UNPACK_HEADER  = 0x0001,
     UNPACK_BODY    = 0x0002
@@ -78,15 +80,45 @@ public:
 
 public:
 
-  void  SetDeviceName(const char* name);
-  const char* GetDeviceName();
-  const char* GetDeviceType();
-  
+  void SetTwoStepFlag(bool flag);
+  bool GetTwoStepFlag(void);
+
+  void SetVersionNumber(UInteger8 vn);
+  UInteger8 GetVersionNumber(void);
+
+  void SetDomainNumber(UInteger8 vn);
+  UInteger8 GetDomainNumber(void);
+
+  void SetPortIdentity(PortIdentity pid);
+  void GetPortIdentity(PortIdentity &pid);
+
+  Enumeration4 GetMessageType(void);
+
   int   SetTimeStamp(unsigned int sec, unsigned int frac);
   int   GetTimeStamp(unsigned int* sec, unsigned int* frac);
 
   void  SetTimeStamp(igtl::TimeStamp::Pointer& ts);
   void  GetTimeStamp(igtl::TimeStamp::Pointer& ts);
+
+
+ // Boolean        m_twoStepFlag;
+ // UInteger4      m_versionNumber;
+ // UInteger8      m_domainNumber;
+ // PortIdentity   m_portID;
+ // Enumeration4   m_msgType;
+
+ // Nibble         m_transportSpecific;
+	//UInteger16     m_messageLength;
+	//Octet          m_flagField[2];
+	//Integer64      m_correctionfield;
+	//PortIdentity   m_sourcePortIdentity;
+	//UInteger16     m_sequenceId;
+	//UInteger8      m_controlField;
+	//Integer8       m_logMessageInterval;
+
+
+
+
 
   // Pack() serializes the header and body based on the member variables.
   // PackBody() must be implemented in the child class.
@@ -112,8 +144,6 @@ public:
   int   GetPackSize();
   int   GetPackBodySize();
 
-  const char* GetBodyType();
-
   // Allocate memory for packing / receiving buffer
   void AllocatePack();
 
@@ -135,7 +165,11 @@ protected:
   MessageBase();
   ~MessageBase();
 
+//  MessageBase(const MessageBase&); 
+//  void operator=(const MessageBase&);
+
 protected:
+
   // Pack body (must be implemented in a child class)
   virtual int  GetBodyPackSize() { return 0; };
   virtual int  PackBody()        { return 0; };
@@ -162,10 +196,6 @@ protected:
 
   int            m_BodySizeToRead;
 
-  //BTX
-  std::string    m_DefaultBodyType;
-  std::string    m_BodyType;
-  std::string    m_DeviceName;
   //ETX
   unsigned int   m_TimeStampSec;
   unsigned int   m_TimeStampSecFraction;
@@ -174,10 +204,27 @@ protected:
   int            m_IsHeaderUnpacked;
   int            m_IsBodyUnpacked;
 
+  //*******************************************
+  //    Common PTP related data members
+  //*******************************************
+  Boolean        m_twoStepFlag;
+  
+  Enumeration4   m_messageType;
+  UInteger4      m_versionPTP;
+  UInteger16     m_messageLength;
+  UInteger8      m_domainNumber;
+  Integer64      m_correctionfield;
+  PortIdentity   m_sourcePortIdentity;
+  UInteger16     m_sequenceId;
+  UInteger8      m_controlField;
+  Integer8       m_logMessageInterval;
+
+  Nibble         m_transportSpecific;
+  Octet          m_flagField[2];
 };
 
-} // namespace igtl
+} // namespace ptp
 
-#endif // _igtlMessageBase_h
+#endif // _ptpMessageBase_h
 
 

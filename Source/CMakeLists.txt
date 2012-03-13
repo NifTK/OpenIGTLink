@@ -44,6 +44,7 @@ SET(OpenIGTLink_SOURCES
   igtlLightObject.cxx
   igtlMath.cxx
   igtlMessageBase.cxx
+  igtlMulticastSocket.cxx
   igtlMultiThreader.cxx
   igtlMutexLock.cxx
   igtlOSUtil.cxx
@@ -56,7 +57,20 @@ SET(OpenIGTLink_SOURCES
   igtlStatusMessage.cxx
   igtlTimeStamp.cxx
   igtlTransformMessage.cxx
-  )
+  tsctime/TSCtime.cxx
+  ptp/ptpAnnounceMessage.cxx
+  ptp/ptpMessageBase.cxx
+  ptp/ptpSenderThread.cxx
+  ptp/ptpReceiverThread.cxx
+  ptp/ptpDaemon.cxx
+  ptp/ptpDelayReqMessage.cxx
+  ptp/ptpDelayRespMessage.cxx
+  ptp/ptpFollowUpMessage.cxx
+  ptp/ptpPDelayReqMessage.cxx
+  ptp/ptpPDelayRespFollowUpMessage.cxx
+  ptp/ptpPDelayRespMessage.cxx
+  ptp/ptpSyncMessage.cxx
+)
 
 SET(OpenIGTLink_INCLUDE_FILES
   igtlutil/igtl_header.h
@@ -77,6 +91,7 @@ SET(OpenIGTLink_INCLUDE_FILES
   igtlMath.h
   igtlMessageBase.h
   igtlMessageHeader.h
+  igtlMulticastSocket.h
   igtlMultiThreader.h
   igtlMutexLock.h
   igtlObjectFactory.h
@@ -94,6 +109,20 @@ SET(OpenIGTLink_INCLUDE_FILES
   igtlTypes.h
   igtlWin32Header.h
   igtlWindows.h
+  tsctime/TSCtime.h
+  ptp/ptpAnnounceMessage.h
+  ptp/ptpMessageBase.h
+  ptp/ptpMessageHeader.h
+  ptp/ptpSenderThread.h
+  ptp/ptpReceiverThread.h
+  ptp/ptpDaemon.h
+  ptp/ptpDelayReqMessage.h
+  ptp/ptpDelayRespMessage.h
+  ptp/ptpFollowUpMessage.h
+  ptp/ptpPDelayReqMessage.h
+  ptp/ptpPDelayRespFollowUpMessage.h
+  ptp/ptpPDelayRespMessage.h
+  ptp/ptpSyncMessage.h
 )
 
 

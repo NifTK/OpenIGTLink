@@ -47,13 +47,17 @@
 #include "igtlMacro.h"
 #include "igtlWin32Header.h"
 #include "igtlMessageBase.h"
+#include "igtlTimeStamp.h"
 
 #include <iostream>
 #include <exception>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  #include <windows.h>
+  //#include <windows.h>
   #include <winsock2.h> 
+  #include <Ws2tcpip.h>
+  #include <Ws2ipdef.h>
+  #include "tsctime/TSCtime.h"
 #else
   #include <sys/types.h>
   #include <sys/socket.h>
@@ -76,6 +80,13 @@ namespace igtl
 void handle_error(const char * msg);
 
 class SocketCollection;
+
+enum communication_protocol 
+{
+  P_TCP,
+  P_TCP_MULTI,
+  P_UDP
+};
 
 // class IGTL_EXPORT Socket
 class IGTLCommon_EXPORT Socket : public Object
@@ -103,6 +114,10 @@ public:
   // Returns 1 on success, 0 on error and raises vtkCommand::ErrorEvent.
   int Send(const void* data, int length);
 
+  virtual int SendMulticast(const void* data, int length) { return -1; }
+
+  virtual int ReceiveMulticast(void* data, int readFully=1) { return -1; }
+
   // Description:
   // Receive data from the socket.
   // This call blocks until some data is read from the socket.
@@ -110,7 +125,14 @@ public:
   // requested data is read from the socket.
   // 0 on error, else number of bytes read is returned. On error,
   // vtkCommand::ErrorEvent is raised.
-  int Receive(void* data, int length, int readFully=1);
+  //int Receive(void* data, int length, int readFully=1);
+  int Receive2(void* data, int length, int readFully=1);
+
+  // Description:
+  // Check socket for pending data.
+  // This call returns the amount of data that can be read in a single call, 
+  // which may not be the same as the total amount of data queued on the socket. 
+  int CheckPendingData(void);
 
   // Description:
   // Set timeout for the existing socket in millisecond.
@@ -139,6 +161,13 @@ public:
   // Query should be performed to detect disconnection, also it can be used for "keepalive".
   bool Poke();
 
+  // Description:
+  // Methods for getting the send and receive timestamps from the socket
+  inline void GetReceiveTimestamp(igtl::TimeStamp::Pointer &rts) {rts.operator =(m_receiveTimeStamp); }
+  inline void GetSendTimestamp(igtl::TimeStamp::Pointer &sts)    {sts.operator =(m_sendTimeStamp); }
+  inline igtl::TimeStamp::Pointer GetReceiveTimestamp(void) { return m_receiveTimeStamp; }
+  inline igtl::TimeStamp::Pointer GetSendTimestamp(void)    { return m_sendTimeStamp; }
+
 protected:
   Socket();
   ~Socket();
@@ -156,6 +185,11 @@ protected:
   // Creates an endpoint for communication and returns the descriptor.
   // -1 indicates error.
   int CreateSocket();
+
+    // Description:
+  // Creates an endpoint with the given communication protocol and returns the descriptor.
+  // -1 indicates error.
+  int CreateSocket(communication_protocol proto);
 
   // Description:
   // Close the socket.
@@ -211,8 +245,12 @@ private:
   struct timeval m_Timeout;
   struct timeval m_OrigTimeout;
 #endif
-  struct timeval m_ConnectionTimeout;
   int m_TimeoutFlag;
+  struct timeval           m_ConnectionTimeout;
+  communication_protocol   m_proto;
+  igtl::TimeStamp::Pointer m_receiveTimeStamp;
+  igtl::TimeStamp::Pointer m_sendTimeStamp;
+
 };
 
 }

@@ -24,14 +24,21 @@
   #include <ctime>
   #include "tsctime/TSCtime.h"
 #else
-  #define __forceinline __attribute__((always_inline))
+  #if (__GNUC__ == 4 && __GNUC_MINOR__ == 6 && __GNUC_PATCHLEVEL__ == 3 )
+    #define __forceinline
+  #else
+    #define __forceinline __attribute__ ((always_inline))
+  #endif
+
   #include <sys/time.h>
   #include <stdint.h>
-  
+
   #ifndef ULONGLONG
     #define ULONGLONG uint64_t
   #endif
 #endif
+
+
 
 namespace igtl
 {

@@ -24,7 +24,7 @@
   #include <ctime>
   #include "tsctime/TSCtime.h"
 #else
-  #if (__GNUC__ == 4 && __GNUC_MINOR__ == 6 && __GNUC_PATCHLEVEL__ == 3 )
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 && __GNUC_PATCHLEVEL__ >= 1 )
     #define __forceinline
   #else
     #define __forceinline __attribute__ ((always_inline))

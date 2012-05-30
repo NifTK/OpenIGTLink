@@ -43,6 +43,8 @@
 
 =========================================================================*/
 
+//The good old comment is back for further testing
+
 #include "igtlSocket.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)

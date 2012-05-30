@@ -43,7 +43,7 @@ protected:
   ~GetTransformMessage();
   
 protected:
-  virtual int  GetBodyPackSize() { return 0; };
+  virtual int  GetBodyPackSize() { return 0; }
   virtual int  PackBody()        { AllocatePack(); return 1; };
   virtual int  UnpackBody()      { return 1; };
 };
@@ -51,9 +51,9 @@ protected:
 class IGTLCommon_EXPORT StartTransformMessage: public GetTransformMessage
 {
 public:
-  typedef StartTransformMessage             Self;
-  typedef GetTransformMessage               Superclass;
-  typedef SmartPointer<Self>	            Pointer;
+  typedef StartTransformMessage         Self;
+  typedef GetTransformMessage           Superclass;
+  typedef SmartPointer<Self>	          Pointer;
   typedef SmartPointer<const Self>			ConstPointer;
 
   igtlTypeMacro(igtl::StartTransformMessage, igtl::GetTransformMessage);

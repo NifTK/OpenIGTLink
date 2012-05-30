@@ -21,10 +21,15 @@
 #include "igtlObject.h"
 #include "igtlObjectFactory.h"
 #include "igtlTypes.h"
+#include "igtlOSUtil.h"
 
 #if defined(WIN32) || defined(_WIN32)
-#include <ctime>
-#endif
+  #include <windows.h>
+  #include <ctime>
+  #include "tsctime/TSCtime.h"
+#else
+  #include <sys/time.h>
+#endif  // defined(WIN32) || defined(_WIN32)
 
 namespace igtl
 {
@@ -45,10 +50,16 @@ public:
   igtlGetConstMacro(Second,     igtlUint32);
   igtlGetConstMacro(Nanosecond, igtlUint32);
 
-  void   GetTime();
-  void   SetTime(double tm);
-  void   SetTime(igtlUint32 second, igtlUint32 nanosecond);
-  void   SetTime(igtlUint64 tm);  /* 64-bit fixed-point expression used in OpenIGTLink */
+  void GetTime();
+  void GetTime_TAI();
+  
+  void toUTC();
+  void toTAI();
+  inline bool isUTC() {return m_UTC; }
+  
+  void SetTime(double tm);
+  void SetTime(igtlUint32 second, igtlUint32 nanosecond);
+  void SetTime(igtlUint64 tm);  /* 64-bit fixed-point expression used in OpenIGTLink */
 
   double GetTimeStamp();
   void   GetTimeStamp(igtlUint32* second, igtlUint32* nanosecond);
@@ -68,24 +79,10 @@ protected:
 
 private:
 
-  igtlInt32       m_Frequency;   /* Clock frequency (Hz)*/
-  igtlInt32       m_Second;      /* Second part of the time relative to 00:00:00 January 1, 1970 UTC */
-  igtlInt32       m_Nanosecond;  /* Nano-second part of -- */
-
-
-#if defined(WIN32) || defined(_WIN32)
-  //typedef double        TimeStampType;
-  //typedef double        FrequencyType;
-  //
-  //FrequencyType   m_WinFrequency;
-  //TimeStampType   m_WinDifference;
-  //TimeStampType   m_WinOrigin;
-
-  time_t  m_WinTimeOrigin;
-  clock_t m_WinClockOrigin;
-
-#endif
-
+  igtlUint32       m_Frequency;   /* Clock frequency (Hz)*/
+  igtlUint32       m_Second;      /* Second part of the time relative to 00:00:00 January 1, 1970 UTC */
+  igtlUint32       m_Nanosecond;  /* Nano-second part of -- */
+  bool            m_UTC;
 };
 
 } // end of namespace igtl

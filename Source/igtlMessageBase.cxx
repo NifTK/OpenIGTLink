@@ -46,9 +46,10 @@ MessageBase::~MessageBase()
   if (this->m_PackSize > 0 && this->m_Header != NULL)
   {
     delete [] m_Header;
+
     m_PackSize = 0;
     m_Header = NULL;
-    m_Body   = NULL;
+    //m_Body   = NULL;
   }
 }
 

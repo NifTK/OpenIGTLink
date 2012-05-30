@@ -28,7 +28,7 @@ ImageMessage::ImageMessage():
   for (int i = 0; i < 3; i ++)
     {
       dimensions[i] = 0;
-      spacing[i]    = 0.0;
+      spacing[i]    = 1.0;
       subDimensions[i] = 0;
       subOffset[i] = 0;
     }
@@ -52,6 +52,10 @@ ImageMessage::ImageMessage():
   m_Image       = NULL;
   numComponents = 1;
 
+  spacingSet = false;
+  normalsSet = false;
+  originSet  = false;
+
   m_DefaultBodyType  = "IMAGE";
 
   ScalarSizeTable[0] = 0;
@@ -70,6 +74,7 @@ ImageMessage::ImageMessage():
 
 ImageMessage::~ImageMessage()
 {
+  //std::cerr <<"ImageMsg destructor";
 }
 
 void ImageMessage::SetDimensions(int s[3])
@@ -182,30 +187,34 @@ void ImageMessage::GetSubVolume(int &dimi, int &dimj, int &dimk,
 
 void ImageMessage::SetSpacing(float s[3])
 {
-  spacing[0] = s[0];
-  spacing[1] = s[1];
-  spacing[2] = s[2];
+  this->spacing[0] = s[0];
+  this->spacing[1] = s[1];
+  this->spacing[2] = s[2];
+
+  spacingSet = true;
 }
 
 void ImageMessage::SetSpacing(float si, float sj, float sk)
 {
-  spacing[0] = si;
-  spacing[1] = sj;
-  spacing[2] = sk;
+  this->spacing[0] = si;
+  this->spacing[1] = sj;
+  this->spacing[2] = sk;
+  
+  spacingSet = true;
 }
 
 void ImageMessage::GetSpacing(float s[3])
 {
-  s[0] = spacing[0];
-  s[1] = spacing[1];
-  s[2] = spacing[2];
+  s[0] = this->spacing[0];
+  s[1] = this->spacing[1];
+  s[2] = this->spacing[2];
 }
 
 void ImageMessage::GetSpacing(float &si, float &sj, float &sk)
 {
-  si = spacing[0];
-  sj = spacing[1];
-  sk = spacing[2];
+  si = this->spacing[0];
+  sj = this->spacing[1];
+  sk = this->spacing[2];
 }
   
 void ImageMessage::SetOrigin(float p[3])
@@ -213,6 +222,8 @@ void ImageMessage::SetOrigin(float p[3])
   matrix[0][3] = p[0];
   matrix[1][3] = p[1];
   matrix[2][3] = p[2];
+
+  originSet = true;
 }
 
 void ImageMessage::SetOrigin(float px, float py, float pz)
@@ -220,6 +231,8 @@ void ImageMessage::SetOrigin(float px, float py, float pz)
   matrix[0][3] = px;
   matrix[1][3] = py;
   matrix[2][3] = pz;
+
+  originSet = true;
 }
 
 void ImageMessage::GetOrigin(float p[3])
@@ -247,6 +260,8 @@ void ImageMessage::SetNormals(float o[3][3])
   matrix[2][0] = o[2][0];
   matrix[2][1] = o[2][1];
   matrix[2][2] = o[2][2];
+
+  normalsSet = true;
 }
 
 void ImageMessage::SetNormals(float t[3], float s[3], float n[3])
@@ -260,6 +275,8 @@ void ImageMessage::SetNormals(float t[3], float s[3], float n[3])
   matrix[0][2] = n[0];
   matrix[1][2] = n[1];
   matrix[2][2] = n[2];
+
+  normalsSet = true;
 }
 
 void ImageMessage::GetNormals(float o[3][3])
@@ -351,7 +368,7 @@ void* ImageMessage::GetScalarPointer()
 
 int ImageMessage::GetBodyPackSize()
 {
-  return GetSubVolumeImageSize() + IGTL_IMAGE_HEADER_SIZE - IGTL_HEADER_SIZE;
+  return GetSubVolumeImageSize() + IGTL_IMAGE_HEADER_SIZE;// - IGTL_HEADER_SIZE;
 }
 
 int ImageMessage::PackBody()
@@ -377,18 +394,40 @@ int ImageMessage::PackBody()
   float norm_i[3];
   float norm_j[3];
   float norm_k[3];
+  float rspacing[3];
 
-  for (int i = 0; i < 3; i ++) {
+  if (!normalsSet) for (int i = 0; i < 3; i ++)
+  {
+    norm_i[i] = 1.0f;
+    norm_j[i] = 1.0f;
+    norm_k[i] = 1.0f;
+  }
+  else for (int i = 0; i < 3; i ++)
+  {
     norm_i[i] = matrix[i][0];
     norm_j[i] = matrix[i][1];
     norm_k[i] = matrix[i][2];
+  }
+
+  if (!originSet) for (int i = 0; i < 3; i ++)
+  {
+    origin[i] = 0.0f;
+  }
+  else for (int i = 0; i < 3; i++)
+  {
     origin[i] = matrix[i][3];
   }
 
-  igtl_image_set_matrix(this->spacing, origin,
-                        norm_i, norm_j, norm_k,
-                        image_header);
+  if (!spacingSet) for (int i = 0; i < 3; i ++)
+  {
+    rspacing[i] = 1.0f;
+  }
+  else for (int i = 0; i < 3; i ++)
+  {
+    rspacing[i] = this->spacing[i];
+  }
 
+  igtl_image_set_matrix(rspacing, origin, norm_i, norm_j, norm_k, image_header);
   igtl_image_convert_byte_order(image_header);
 
   return 1;
@@ -421,22 +460,43 @@ int ImageMessage::UnpackBody()
       this->subDimensions[2] = image_header->subvol_size[2];
 
       // Set image orientation
-      float rspacing[3];
-      float origin[3];
-      float norm_i[3];
-      float norm_j[3];
-      float norm_k[3];
+    float rspacing[3]; memset(&rspacing, 0, 3*sizeof(float));
+      float origin[3]; memset(&origin,   0, 3*sizeof(float));
+      float norm_i[3]; memset(&norm_i,   0, 3*sizeof(float));
+      float norm_j[3]; memset(&norm_j,   0, 3*sizeof(float));
+      float norm_k[3]; memset(&norm_k,   0, 3*sizeof(float));
 
-      igtl_image_get_matrix(rspacing, origin,
-                            norm_i, norm_j, norm_k,
-                            image_header);
+      igtl_image_get_matrix(rspacing, origin, norm_i, norm_j, norm_k, image_header);
 
-      for (int i = 0; i < 3; i ++) {
-        this->spacing[i] = rspacing[i];
+      if (!normalsSet) for (int i = 0; i < 3; i ++)
+      {
+        matrix[i][0] = 1.0f;
+        matrix[i][1] = 1.0f;
+        matrix[i][2] = 1.0f;
+      }
+      else for (int i = 0; i < 3; i ++)
+      {
         matrix[i][0] = norm_i[i];
         matrix[i][1] = norm_j[i];
         matrix[i][2] = norm_k[i];
+      }
+
+      if (!originSet) for (int i = 0; i < 3; i ++)
+      {
+        matrix[i][3] = 0.0f;
+      }
+      else for (int i = 0; i < 3; i++)
+      {
         matrix[i][3] = origin[i];
+      }
+
+      if (!spacingSet) for (int i = 0; i < 3; i ++)
+      {
+        this->spacing[i] = 1.0f;
+      }
+      else for (int i = 0; i < 3; i ++)
+      {
+        this->spacing[i] = rspacing[i];
       }
 
       matrix[3][0] = 0.0;

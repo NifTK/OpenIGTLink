@@ -272,6 +272,10 @@ protected:
   int    scalarType;
   int    coordinate;
 
+  bool spacingSet;
+  bool normalsSet;
+  bool originSet;
+
   unsigned char*  m_ImageHeader;
   unsigned char*  m_Image;
 

@@ -103,7 +103,7 @@ class IGTLCommon_EXPORT Socket : public Object
 
 public:
 
-  // ----- Status API ----
+ // ----- Status API ----
 
   // Description:
   // Close the socket.
@@ -126,7 +126,6 @@ public:
   // requested data is read from the socket.
   // 0 on error, else number of bytes read is returned. On error,
   // vtkCommand::ErrorEvent is raised.
-  //int Receive(void* data, int length, int readFully=1);
   int Receive(void* data, int length, int readFully=1);
 
   // Description:
@@ -134,9 +133,8 @@ public:
   // This call returns the amount of data that can be read in a single call, 
   // which may not be the same as the total amount of data queued on the socket. 
   int CheckPendingData(void);
-
   // Description:
-  // Set timeout for the existing socket in millisecond.
+  // Set sending/receiving timeout for the existing socket in millisecond.
   // This function should be called after opening the socket.
   int SetTimeout(int timeout);
 
@@ -144,6 +142,9 @@ public:
   // Set connection timeout for the client socket in millisecond.
   // This function should be called before connecting.
   int SetConnectionTimeout(int timeout);
+  // Description:
+  // Get socket address
+  int GetSocketAddressAndPort(std::string& address, int & port);
 
   // Description:
   // Skip reading data from the socket.
@@ -187,7 +188,7 @@ protected:
   // -1 indicates error.
   int CreateSocket();
 
-    // Description:
+  // Description:
   // Creates an endpoint with the given communication protocol and returns the descriptor.
   // -1 indicates error.
   int CreateSocket(communication_protocol proto);
@@ -206,7 +207,7 @@ protected:
   // Returns 1 on success; 0 on timeout; -1 on error. msec=0 implies
   // no timeout.
   int SelectSocket(int socketdescriptor, unsigned long msec);
-  
+
   // Description:
   // Accept a connection on a socket. Returns -1 on error. Otherwise
   // the descriptor of the accepted socket.

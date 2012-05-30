@@ -86,40 +86,40 @@ Socket::Socket()
 Socket::~Socket()
 {
   if (this->m_SocketDescriptor != -1)
-  {
+    {
     this->CloseSocket(this->m_SocketDescriptor);
     this->m_SocketDescriptor = -1;
-  }
+    }
 }
 
 //-----------------------------------------------------------------------------
 int Socket::CreateSocket()
 {
 
-  #if defined(_WIN32) && !defined(__CYGWIN__)
-    // Declare variables
-    WSADATA wsaData;
-    //SOCKET ListenSocket;
-    //sockaddr_in service;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // Declare variables
+  WSADATA wsaData;
+  //SOCKET ListenSocket;
+  //sockaddr_in service;
 
-    //---------------------------------------
-    // Initialize Winsock
-    int iResult = WSAStartup( MAKEWORD(2,2), &wsaData );
-    if( iResult != NO_ERROR )
+  //---------------------------------------
+  // Initialize Winsock
+  int iResult = WSAStartup( MAKEWORD(2,2), &wsaData );
+  if( iResult != NO_ERROR )
     {
-      std::cerr << "Error at WSAStartup" << std::endl;
-      return -1;
+    std::cerr << "Error at WSAStartup" << std::endl;
+    return -1;
     }
-  #endif
+#endif
 
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   
   // Elimate windows 0.2 second delay sending (buffering) data.
   int on = 1;
   if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&on, sizeof(on)))
-  {
-	  return -1;
-  }
+    {
+    return -1;
+    }
   return sock;
 }
 
@@ -369,7 +369,7 @@ int Socket::Connect(int socketdescriptor, const char* hostName, int port)
 
 int Socket::ConnectNonBlocking(int soc, const char* hostName, int port)
 {
-  if (soc < 0)
+  if (!this->IsValid())
   {
     return -1;
   }
@@ -545,17 +545,17 @@ int Socket::GetPort(int sock)
   struct sockaddr_in sockinfo;
   memset(&sockinfo, 0, sizeof(sockinfo));
 
-  #if defined(OpenIGTLink_HAVE_GETSOCKNAME_WITH_SOCKLEN_T)
-    socklen_t sizebuf = sizeof(sockinfo);
-  #else
-    int sizebuf = sizeof(sockinfo);
-  #endif
+#if defined(OpenIGTLink_HAVE_GETSOCKNAME_WITH_SOCKLEN_T)
+  socklen_t sizebuf = sizeof(sockinfo);
+#else
+  int sizebuf = sizeof(sockinfo);
+#endif
   
-  // FIXME: Setup configuration for VTK_HAVE_GETSOCKNAME_WITH_SOCKLEN_T so we can uncomment these lines
+//  FIXME: Setup configuration for VTK_HAVE_GETSOCKNAME_WITH_SOCKLEN_T so we can uncomment these lines
   if(getsockname(sock, reinterpret_cast<sockaddr*>(&sockinfo), &sizebuf) != 0)
-  {
+    {
     return 0;
-  }
+    }
   return ntohs(sockinfo.sin_port);
 }
 //-----------------------------------------------------------------------------
@@ -807,161 +807,14 @@ int Socket::CheckPendingData()
   }
 }
 
-////-----------------------------------------------------------------------------
-//int Socket::Receive(void* data, int length, int readFully/*=1*/)
-//{
-//  if (!this->IsValid())
-//  {
-//    return -1;
-//  }
-
-//  char* buffer = reinterpret_cast<char*>(data);
-//  int total       = 0;
-//  int bytesRead   = 0;
-//  int rVal        = 0;
-//  int flags       = 0;
-
-//  #if defined(_WIN32) && !defined(__CYGWIN__)
-//    u_long bytesToRead = 0;
-//  #else
-//    int bytesToRead = 0;
-//  #endif
-
-//  // Take a look at the buffer to find out the number of bytes that arrived (if any)
-//  try
-//  {
-//    #if defined(_WIN32) && !defined(__CYGWIN__)
-//      u_long iMode = 1;
-//      rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
-//      rVal &= ioctlsocket(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
-//    #else
-//      rVal = ioctl(this->m_SocketDescriptor, FIONREAD, &bytesToRead);
-//    #endif
-//  }
-//  catch (std::exception& e)
-//  {
-//    std::cerr << e.what() << std::endl;
-//    return -2;
-//  }
-
-//  if (rVal < 0)
-//  {
-//    handle_error("ioctl: ");
-//    return -3;
-//  }
-  
-//  //std::cerr <<"Number of bytes received: " <<bytesToRead <<" Total to read: " <<length <<std::endl;
-
-//  // SET BLOCKING MODE - NOT REQUIRED ON WIN
-//  //#if defined(_WIN32) && !defined(__CYGWIN__)
-//  //  u_long iMode = 0;
-//  //  rVal  = ioctlsocket(this->m_SocketDescriptor, FIONBIO, &iMode);
-//  //#endif
-  
-//  if (bytesToRead == 0)       // Nothing to do, return
-//  {
-//    return 0;
-//  }
-//  else if (bytesToRead == 2)  // Receive a keepalive message
-//  {
-//    total = 0;
-//    length = 2;
-//    memset(buffer, 0, length);
-
-//    // Try reading from the socket
-//    try
-//    {
-//      bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
-//    }
-//    catch (std::exception& e)
-//    {
-//      std::cerr << e.what() << std::endl;
-//      return -2;
-//    }
-
-//    // recv() returned with error
-//    if (bytesRead < 0)
-//    {
-//      handle_error("recv: ");
-//      return bytesRead;
-//    }
-    
-//    //std::cerr <<"Number of bytes actually read: " <<bytesRead <<std::endl;
-//    //std::cerr <<"Chars of the message: " <<buffer[0] <<buffer[1] <<std::endl;
-    
-//    //otherwise return the number of bytes
-//    return bytesRead;
-//  }
-
-//  // Record the software timestamp as it seems a valid message has arrived
-//  m_receiveTimeStamp = igtl::TimeStamp::New();
-//  m_receiveTimeStamp->toTAI();
-
-//  memset(buffer, 0, length);
-//  flags = 0;
-
-//  #if defined(_WIN32) && !defined(__CYGWIN__)
-//    int trys  = 0;
-//  #endif
-
-//  // Receive a generic message
-//  do
-//  {
-//    bytesRead   = 0;
-//    rVal        = 0;
-
-//    // Try reading from the socket
-//    try
-//    {
-//      bytesRead = recv(this->m_SocketDescriptor, buffer+total, length-total, flags);
-//    }
-//    catch (std::exception& e)
-//    {
-//      std::cerr << e.what() << std::endl;
-//      return -2;
-//    }
-
-//    if (bytesRead < 1)
-//    {
-//      #if defined(_WIN32) && !defined(__CYGWIN__)
-//        // On long messages, Windows recv sometimes fails with WSAENOBUFS, but
-//        // will work if you try again.
-        
-//        trys++;
-        
-//        int error = WSAGetLastError();
-//        if (((error == WSAENOBUFS) && (trys < 1000)) || ((error == WSAEWOULDBLOCK) && (trys < 1000)))
-//        {
-//          Sleep(1);
-//          continue;
-//        }
-//      #endif
-      
-//      // Error in recv()
-//      if (bytesRead < 0)
-//        handle_error("recv: ");
-      
-//      return bytesRead;
-//    }
-
-//    total += bytesRead;
-
-//  } while(readFully && total < length);
-
-//  //std::cerr <<"Number of bytes actually read: " <<bytesRead <<" Total: " <<total <<std::endl;
-
-//  //std::cerr <<"First 15 char of the message: ";
-//  //for (int oo = 0; oo < 30; oo++)
-//  //  std::cerr <<buffer[oo];
-//  //std::cerr <<" -END\n";
-  
-//  return total;
-//}
-
 //-----------------------------------------------------------------------------
 int Socket::Receive(void* data, int length, int readFully/*=1*/)
 {
-  //ULONGLONG time_before = gethectonanotime_last(); 
+  if (!this->IsValid())
+  {
+    return -1;
+  }
+  
   
   char* buffer = reinterpret_cast<char*>(data);
   int total       = 0;
@@ -1031,6 +884,7 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
   return total;
 }
 
+
 //-----------------------------------------------------------------------------
 int Socket::SetTimeout(int timeout)
 {
@@ -1083,8 +937,42 @@ int Socket::SetConnectionTimeout(int timeout)
 
 
 //-----------------------------------------------------------------------------
+int Socket::GetSocketAddressAndPort(std::string& address, int& port)
+{
+  struct sockaddr_in sockinfo;
+
+  memset(&sockinfo, 0, sizeof(sockinfo));
+
+#if defined(OpenIGTLink_HAVE_GETSOCKNAME_WITH_SOCKLEN_T)
+  socklen_t sizebuf = sizeof(sockinfo);
+#else
+  int sizebuf = sizeof(sockinfo);
+#endif
+  
+  if( getsockname(this->m_SocketDescriptor, reinterpret_cast<sockaddr*>(&sockinfo), &sizebuf) != 0)
+    {
+    return 0;
+    }
+  const char* a = inet_ntoa(sockinfo.sin_addr);
+  if ( a == NULL )
+    {
+    return 0;
+    }
+  address = a;
+  port = ntohs(sockinfo.sin_port);
+
+  return 1;
+}
+
+
+//-----------------------------------------------------------------------------
 int Socket::Skip(int length, int skipFully/*=1*/)
 {
+  if (length == 0)
+  {
+    return 0;
+  }
+
   if (!this->IsValid())
   {
     return -1;
@@ -1096,19 +984,19 @@ int Socket::Skip(int length, int skipFully/*=1*/)
   int remain = length;
 
   do
-  {
-    if (remain < block)
     {
+    if (remain < block)
+      {
       block = remain;
-    }
-
+      }
+    
     n = this->Receive(dummy, block, skipFully);
     if (!skipFully && n <= 0)
-    {
+      {
       break;
-    }
+      }
     remain -= n;
-  }
+    }
   while (remain > 0 || (skipFully && n < block));
 
   return (length - remain);

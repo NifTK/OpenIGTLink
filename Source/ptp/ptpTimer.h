@@ -87,7 +87,7 @@ HANDLE TimerQueue;
 #endif
 
 /** Elaspsed time (allocated one integer per PTP port) */
- int elapsed[10];
+ static int elapsed[10];
 
 #ifdef LIMIT_RUNTIME
 /* Variables to allow for limited run time (i.e. terminate the

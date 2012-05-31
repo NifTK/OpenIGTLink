@@ -3,6 +3,9 @@
 
 namespace ptp
 {
+  //Definition of static member variable
+  int Timer::elapsed[10];
+ 
 
 
 /* catch_alarm:

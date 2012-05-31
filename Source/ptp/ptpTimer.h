@@ -62,15 +62,15 @@ public:
   void timerStop(UInteger16 index, IntervalTimer *itimer);
   void timerStart(UInteger16 index, UInteger16 interval, IntervalTimer *itimer);
   Boolean timerExpired(UInteger16 index, IntervalTimer *itimer, int port_id);
-  
-protected:
-  Timer();
-  ~Timer();
-
-//  MessageBase(const MessageBase&); 
-//  void operator=(const MessageBase&);
 
 protected:
+  Timer() : igtl::Object() {}
+ ~Timer() {}
+
+protected:
+
+ /** Elaspsed time (allocated one integer per PTP port) */
+ static int elapsed[10];
 
 /**
  * TIMER_INTERVAL is based on number of "TICKS" as set
@@ -83,11 +83,8 @@ protected:
 /* Timer global variables */
 
 #if defined(__WINDOWS__) || defined(_WIN32)
-HANDLE TimerQueue;
+  HANDLE TimerQueue;
 #endif
-
-/** Elaspsed time (allocated one integer per PTP port) */
- static int elapsed[10];
 
 #ifdef LIMIT_RUNTIME
 /* Variables to allow for limited run time (i.e. terminate the

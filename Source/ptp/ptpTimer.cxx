@@ -132,7 +132,7 @@ void Timer::timerUpdate(IntervalTimer *itimer, int port_id)
     if(itimer[i].interval > 0 && (itimer[i].left -= delta) <= 0)
     {
       itimer[i].left   = itimer[i].interval;
-      itimer[i].expire = TRUE;
+      itimer[i].expire = true;
       //DBGV("timerUpdate: timer index %u expired (interval=%d delta=%d)\n",i,itimer[i].interval,delta);
     }
   }
@@ -152,7 +152,7 @@ void Timer::timerStart(UInteger16 index, UInteger16 interval, IntervalTimer *iti
   if(index >= TIMER_ARRAY_SIZE)
     return;
   
-  itimer[index].expire   = FALSE;
+  itimer[index].expire   = false;
   itimer[index].left     = interval;
   itimer[index].interval = itimer[index].left;
   
@@ -165,14 +165,14 @@ Boolean Timer::timerExpired(UInteger16 index, IntervalTimer *itimer, int port_id
   timerUpdate(itimer, port_id);
   
   if(index >= TIMER_ARRAY_SIZE)
-    return FALSE;                // ERROR:index out of range, return false
+    return false;                // ERROR:index out of range, return false
   
   if(!itimer[index].expire)
-    return FALSE;                // Timer not expired, return FALSE
+    return false;                // Timer not expired, return FALSE
   
   //DBGV("timerExpired: timer index %d has expired\n", index);
-  itimer[index].expire = FALSE;  // Clear expired flag
-  return TRUE;                   // Return TRUE
+  itimer[index].expire = false;  // Clear expired flag
+  return true;                   // Return TRUE
 }
 
 }

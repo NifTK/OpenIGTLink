@@ -186,6 +186,23 @@ typedef struct {
  */
 typedef Octet ClockIdentity[CLOCK_IDENTITY_LENGTH];
 
+/** 
+ * Internal time structure used by ptpv2d.  
+ * Uses time in signed seconds and signed nanoseconds
+ */
+typedef struct 
+{
+  Integer32 seconds;
+  Integer32 nanoseconds;  
+} TimeInternal;
+
+typedef struct 
+{
+  Integer32  interval;
+  Integer32  left;
+  Boolean    expire;
+} IntervalTimer;
+
 /**
 * \brief The Timestamp type represents a positive time with respect to the epoch
  */

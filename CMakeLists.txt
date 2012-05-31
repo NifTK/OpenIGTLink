@@ -20,6 +20,11 @@ ELSE(OpenIGTLink_PROTOCOL_VERSION_2)
   SET(OpenIGTLink_PROTOCOL_VERSION "1")
 ENDIF(OpenIGTLink_PROTOCOL_VERSION_2)
 
+IF(WIN32)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX /W2")
+  SET(CMAKE_CXX_WARNING_LEVEL 2)
+ENDIF(WIN32)
+
 
 #-----------------------------------------------------------------------------
 # OpenIGTLink build configuration options.

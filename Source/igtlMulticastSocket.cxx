@@ -170,7 +170,7 @@ int MulticastSocket::ReceiveMulticast(void* data, int readFully)
   int trys        = 0;
 
   unsigned int dwSenderSize = 0;
-  sockaddr_in sender;
+  //sockaddr_in sender;
 
   int rVal     = 0;
   u_long iMode = 1;

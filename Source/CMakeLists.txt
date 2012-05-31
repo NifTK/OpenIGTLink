@@ -70,6 +70,7 @@ SET(OpenIGTLink_SOURCES
   ptp/ptpPDelayRespFollowUpMessage.cxx
   ptp/ptpPDelayRespMessage.cxx
   ptp/ptpSyncMessage.cxx
+  ptp/ptpTimer.cxx
 )
 
 SET(OpenIGTLink_INCLUDE_FILES
@@ -123,6 +124,7 @@ SET(OpenIGTLink_INCLUDE_FILES
   ptp/ptpPDelayRespFollowUpMessage.h
   ptp/ptpPDelayRespMessage.h
   ptp/ptpSyncMessage.h
+  ptp/ptpTimer.h
 )
 
 

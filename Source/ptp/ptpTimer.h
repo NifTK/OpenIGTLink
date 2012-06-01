@@ -28,8 +28,8 @@
 #include "ptp_datatypes.h"
 #include "ptp_constants.h"
 
-#include <string>
-
+#include <string.h>
+#include <signal.h>
 //-------------------------------------------------------------------------
 // PTP Timer
 //-------------------------------------------------------------------------

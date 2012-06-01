@@ -47,7 +47,6 @@ SET(OpenIGTLink_SOURCES
   igtlMulticastSocket.cxx
   igtlMultiThreader.cxx
   igtlMutexLock.cxx
-  igtlOSUtil.cxx
   igtlObject.cxx
   igtlObjectFactoryBase.cxx
   igtlPositionMessage.cxx

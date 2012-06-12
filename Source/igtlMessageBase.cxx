@@ -225,7 +225,9 @@ int MessageBase::GetPackBodySize()
 
 void MessageBase::AllocatePack()
 {
-  if (m_BodySizeToRead > 0)
+  int bodyPackSize = GetBodyPackSize();
+ 
+  if (m_BodySizeToRead > bodyPackSize)
   {
     // called after receiving general header
     AllocatePack(m_BodySizeToRead);
@@ -233,7 +235,7 @@ void MessageBase::AllocatePack()
   else
   {
     // called for creating pack to send
-    AllocatePack(GetBodyPackSize());
+    AllocatePack(bodyPackSize);
   }
 }
 
@@ -274,12 +276,13 @@ void MessageBase::AllocatePack(int bodySize)
     // If the pack area exists but needs to be reallocated
     // m_IsHeaderUnpacked status is not changed in this case.
 
-    unsigned char* old = m_Header;
-    m_Header = new unsigned char [s];
-    memset(m_Header, 0, s);
-    memcpy(m_Header, old, IGTL_HEADER_SIZE);
+    unsigned char * newHeader = new unsigned char [s];
+    memset(newHeader, 0, s);
+    memcpy(newHeader, m_Header, IGTL_HEADER_SIZE);
 
-    delete [] old;
+    delete [] m_Header;
+    m_Header = newHeader;
+
     m_IsBodyUnpacked = 0;
   }
 

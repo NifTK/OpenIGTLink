@@ -368,7 +368,7 @@ void* ImageMessage::GetScalarPointer()
 
 int ImageMessage::GetBodyPackSize()
 {
-  return GetSubVolumeImageSize() + IGTL_IMAGE_HEADER_SIZE;// - IGTL_HEADER_SIZE;
+  return GetSubVolumeImageSize() + IGTL_IMAGE_HEADER_SIZE;
 }
 
 int ImageMessage::PackBody()
@@ -553,6 +553,7 @@ StartImageMessage::StartImageMessage():
   GetImageMessage()
 {
   this->m_DefaultBodyType = "STT_IMAGE";
+  this->m_Resolution = 0;
 }
 
 
@@ -563,7 +564,6 @@ StartImageMessage::~StartImageMessage()
 void StartImageMessage::SetResolution(igtlUint64 res)
 {
   this->m_Resolution = res; 
-  this->m_Resolution = 0;
 }
 
 

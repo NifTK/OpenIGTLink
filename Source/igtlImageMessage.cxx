@@ -327,10 +327,7 @@ void ImageMessage::SetMatrix(Matrix4x4& mat)
   matrix[2][3] = mat[2][3];
   matrix[3][3] = mat[3][3];
  
-	//This could be buggy, with divide by zero errors later on
-	spacingSet = true;
-  normalsSet = true;
-  originSet  = true;
+	setMatrix=true;
 }
 
 void ImageMessage::GetMatrix(Matrix4x4& mat)

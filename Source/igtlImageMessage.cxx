@@ -326,6 +326,8 @@ void ImageMessage::SetMatrix(Matrix4x4& mat)
   matrix[1][3] = mat[1][3];
   matrix[2][3] = mat[2][3];
   matrix[3][3] = mat[3][3];
+ 
+	matrixSet=true;
 }
 
 void ImageMessage::GetMatrix(Matrix4x4& mat)
@@ -427,7 +429,11 @@ int ImageMessage::PackBody()
     rspacing[i] = this->spacing[i];
   }
 
-  igtl_image_set_matrix(rspacing, origin, norm_i, norm_j, norm_k, image_header);
+  if ( !matrixSet )
+		igtl_image_set_matrix(rspacing, origin, norm_i, norm_j, norm_k, image_header);
+	else 
+		igtl_image_set_matrix_1(matrix, image_header);
+
   igtl_image_convert_byte_order(image_header);
 
   return 1;
@@ -444,7 +450,7 @@ int ImageMessage::UnpackBody()
 
   if (image_header->version == IGTL_IMAGE_HEADER_VERSION)
     {
-      // Image format version 1
+      // Image format version 2
       this->scalarType       = image_header->scalar_type;
       this->numComponents    = image_header->num_components;
       this->endian           = image_header->endian;
@@ -465,44 +471,49 @@ int ImageMessage::UnpackBody()
       float norm_i[3]; memset(&norm_i,   0, 3*sizeof(float));
       float norm_j[3]; memset(&norm_j,   0, 3*sizeof(float));
       float norm_k[3]; memset(&norm_k,   0, 3*sizeof(float));
+			
+			if ( normalsSet || originSet || spacingSet ) 
+			{
+      	
+			  igtl_image_get_matrix(rspacing, origin, norm_i, norm_j, norm_k, image_header);
+        if (!normalsSet) for (int i = 0; i < 3; i ++)
+        {
+          matrix[i][0] = 1.0f;
+          matrix[i][1] = 1.0f;
+          matrix[i][2] = 1.0f;
+        }
+        else for (int i = 0; i < 3; i ++)
+        {
+          matrix[i][0] = norm_i[i];
+          matrix[i][1] = norm_j[i];
+          matrix[i][2] = norm_k[i];
+        }
 
-      igtl_image_get_matrix(rspacing, origin, norm_i, norm_j, norm_k, image_header);
+        if (!originSet) for (int i = 0; i < 3; i ++)
+        {
+          matrix[i][3] = 0.0f;
+        }
+        else for (int i = 0; i < 3; i++)
+        {
+          matrix[i][3] = origin[i];
+        }
 
-      if (!normalsSet) for (int i = 0; i < 3; i ++)
-      {
-        matrix[i][0] = 1.0f;
-        matrix[i][1] = 1.0f;
-        matrix[i][2] = 1.0f;
-      }
-      else for (int i = 0; i < 3; i ++)
-      {
-        matrix[i][0] = norm_i[i];
-        matrix[i][1] = norm_j[i];
-        matrix[i][2] = norm_k[i];
-      }
+        if (!spacingSet) for (int i = 0; i < 3; i ++)
+        {
+          this->spacing[i] = 1.0f;
+        }
+        else for (int i = 0; i < 3; i ++)
+        {
+          this->spacing[i] = rspacing[i];
+        }
 
-      if (!originSet) for (int i = 0; i < 3; i ++)
-      {
-        matrix[i][3] = 0.0f;
-      }
-      else for (int i = 0; i < 3; i++)
-      {
-        matrix[i][3] = origin[i];
-      }
-
-      if (!spacingSet) for (int i = 0; i < 3; i ++)
-      {
-        this->spacing[i] = 1.0f;
-      }
-      else for (int i = 0; i < 3; i ++)
-      {
-        this->spacing[i] = rspacing[i];
-      }
-
-      matrix[3][0] = 0.0;
-      matrix[3][1] = 0.0;
-      matrix[3][2] = 0.0;
-      matrix[3][3] = 1.0;
+        matrix[3][0] = 0.0;
+        matrix[3][1] = 0.0;
+        matrix[3][2] = 0.0;
+        matrix[3][3] = 1.0;
+			}
+			else
+				igtl_image_get_matrix_1(matrix, image_header);
 
       m_ImageHeader = m_Body;
       m_Image       = &m_ImageHeader[IGTL_IMAGE_HEADER_SIZE];

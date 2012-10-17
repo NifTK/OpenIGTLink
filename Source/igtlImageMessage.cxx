@@ -327,7 +327,7 @@ void ImageMessage::SetMatrix(Matrix4x4& mat)
   matrix[2][3] = mat[2][3];
   matrix[3][3] = mat[3][3];
  
-	setMatrix=true;
+	matrixSet=true;
 }
 
 void ImageMessage::GetMatrix(Matrix4x4& mat)

@@ -22,8 +22,8 @@
 #include "igtl_types.h"
 #include "igtl_win32header.h"
 
-#define IGTL_IMAGE_HEADER_VERSION       1
-#define IGTL_IMAGE_HEADER_SIZE          72
+#define IGTL_IMAGE_HEADER_VERSION       2
+#define IGTL_IMAGE_HEADER_SIZE          88
 
 /* Data type */
 #define IGTL_IMAGE_DTYPE_SCALAR         1
@@ -76,11 +76,12 @@ typedef struct {
                                    /* (1:big, 2:little)               */ 
   igtl_uint8     coord;            /* coordinate system (1:RAS 2:LPS) */
   igtl_uint16    size[3];          /* entire image volume size        */
-  igtl_float32   matrix[12];       /* orientation / origin of image   */
+  igtl_float32   matrix[16];       /* orientation / origin of image   */
                                    /*  - matrix[0-2]: norm_i * pix_i  */
-                                   /*  - matrix[3-5]: norm_j * pix_j  */
-                                   /*  - matrix[6-8]: norm_k * pix_k  */
-                                   /*  - matrix[9-11]:origin          */
+                                   /*  - matrix[4-6]: norm_j * pix_j  */
+                                   /*  - matrix[8-10]: norm_k * pix_k */
+                                   /*  - matrix[12-14]:origin         */
+                                   /*  - matrix[3,7,11,15] 0,0,0,1    */
                                    /* where norm_* are normal vectors */
                                    /* along each index, and pix_* are */
                                    /* pixel size in each direction    */
@@ -116,6 +117,10 @@ void igtl_export igtl_image_set_matrix(float spacing[3], float origin[3],
 void igtl_export igtl_image_get_matrix(float spacing[3], float origin[3],
                             float norm_i[3], float norm_j[3], float norm_k[3],
                             igtl_image_header * header);
+
+void igtl_export igtl_image_set_matrix_1(float _matrix[4][4],igtl_image_header * header);
+
+void igtl_export igtl_image_get_matrix_1(float _matrix[4][4],igtl_image_header * header);
 
 /*
  * Byte order conversion for the header structure

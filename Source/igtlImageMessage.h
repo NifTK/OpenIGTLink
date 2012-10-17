@@ -275,6 +275,7 @@ protected:
   bool spacingSet;
   bool normalsSet;
   bool originSet;
+	bool matrixSet;
 
   unsigned char*  m_ImageHeader;
   unsigned char*  m_Image;

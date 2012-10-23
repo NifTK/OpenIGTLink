@@ -18,3 +18,6 @@ TARGET_LINK_LIBRARIES(ImagerClient2 OpenIGTLink)
 ADD_EXECUTABLE(ImagerServer   ImagerServer.cxx)
 TARGET_LINK_LIBRARIES(ImagerServer OpenIGTLink)
 
+ADD_EXECUTABLE(niftyImagerClient   niftyImagerClient.cxx)
+TARGET_LINK_LIBRARIES(niftyImagerClient OpenIGTLink)
+

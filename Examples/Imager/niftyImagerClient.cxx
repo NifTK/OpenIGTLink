@@ -144,13 +144,17 @@ int main(int argc, char** argv)
 
 	// Create a string message to initiate the connection
 	igtl::StringMessage::Pointer infoMsg = igtl::StringMessage::New();
+	char infoString [512];
+
 	switch ( messagetype ) 
 	{
 		case IMAGE_MESSAGE:
-			infoMsg->SetString("<ClientDescriptor><Device CommunicationType=\"Porta Dummy\" DeviceName=\"Ultrasonix\" PortName=\"\" DeviceType=\"Imager\"/><Client ClientIP=\"UNKNOWN\" ClientPort=\"3200\"/></ClientDescriptor>");
+			sprintf (infoString, "<ClientDescriptor><Device CommunicationType=\"Porta Interface\" DeviceName=\"Ultrasonix\" PortName=\"\" DeviceType=\"Imager\"/><Client ClientIP=\"UNKNOWN\" ClientPort=\"%d\"/></ClientDescriptor>", port);
+			infoMsg->SetString(infoString);
 			break;
 		case TRACKING_MESSAGE:
-			infoMsg->SetString("<ClientDescriptor><Device CommunicationType=\"Serial\" DeviceName=\"NDI Polaris Vicra\" PortName=\"\" DeviceType=\"Tracker\"/><Client ClientIP=\"UNKNOWN\" ClientPort=\"3200\"/></ClientDescriptor>");
+			sprintf ( infoString, "<TrackerClientDescriptor><Device CommunicationType=\"Serial\" DeviceName=\"NDI Polaris Vicra\" PortName=\"\" DeviceType=\"Tracker\"/><Client ClientIP=\"UNKNOWN\" ClientPort=\"%d\"/></TrackerClientDescriptor>", port);
+			infoMsg->SetString(infoString);
 			break;
 		default:
 			infoMsg->SetString("<ClientDescriptor><Device CommunicationType=\"UNKNOWN\" DeviceName=\"UNKNOWN\" PortName=\"\" DeviceType=\"UNKNOWN\"/><Client ClientIP=\"UNKNOWN\" ClientPort=\"3200\"/></ClientDescriptor>");

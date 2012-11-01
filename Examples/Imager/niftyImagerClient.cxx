@@ -45,6 +45,7 @@ void usage ( char * argv[])
     std::cerr << "                             (usually, in the Examples/Imager/img directory.)" << std::endl;
     std::cerr << "    --repeats <repeats>    : Number of messages to send [20]" << std::endl;
     std::cerr << "    --messagetype <type>   : Type of message to send (image or trackingdata)" << std::endl;
+		std::cerr << "    --pause <s>	           : Wait s seconds after connection before sending data" << std::endl;
     exit(0);
 }
 int main(int argc, char** argv)
@@ -60,6 +61,8 @@ int main(int argc, char** argv)
 	strcpy ( hostname , "localhost"); 
 	strcpy (filedir,  "../Examples/Imager/img/");																
 	bool filedirSet=false;
+	int pause = 0;
+	
 	while ( argc > 1 ) 
 	{
 		bool ok = false; 
@@ -121,6 +124,15 @@ int main(int argc, char** argv)
 			argv++;
 			ok=true;
 		}
+		if (( ok == false ) && ( strcmp(argv[1],"--pause") == 0 ))
+		{
+			argc--;
+			argv++;
+			pause = atoi (argv[1]);
+			argc--;
+			argv++;
+			ok = true;
+		}
 		if ( ok == false ) 
 			usage (argv) ;
 	}
@@ -153,7 +165,7 @@ int main(int argc, char** argv)
 			infoMsg->SetString(infoString);
 			break;
 		case TRACKING_MESSAGE:
-			sprintf ( infoString, "<TrackerClientDescriptor><Device CommunicationType=\"Serial\" DeviceName=\"NDI Polaris Vicra\" PortName=\"\" DeviceType=\"Tracker\"/><Client ClientIP=\"UNKNOWN\" ClientPort=\"%d\"/></TrackerClientDescriptor>", port);
+			sprintf ( infoString, "<TrackerClientDescriptor><Device CommunicationType=\"Serial\" DeviceName=\"NDI Polaris Vicra\" PortName=\"\" DeviceType=\"Tracker\"/><Client ClientIP=\"UNKNOWN\" ClientPort=\"%d\"/><TrackerTool Name=\"8700338.rom\"/></TrackerClientDescriptor>", port);
 			infoMsg->SetString(infoString);
 			break;
 		default:
@@ -162,6 +174,7 @@ int main(int argc, char** argv)
 
   infoMsg->Pack();
   socket->Send(infoMsg->GetPackPointer(), infoMsg->GetPackSize());
+	sleep (pause);
   //------------------------------------------------------------
   // loop
   for (int i = 0; i < repeats; i ++)

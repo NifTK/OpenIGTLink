@@ -222,6 +222,10 @@ public:
   void SetMatrix(Matrix4x4& mat);
   void GetMatrix(Matrix4x4& mat);
 
+	// Set matrix set flag to prevent the matrix being thrown away during pack() and 
+	// unpack(). This is useful when receiving message
+	void PreserveMatrix();
+
   // Image scalar type
   void SetScalarType(int t)    { scalarType = t; };
   void SetScalarTypeToInt8()   { scalarType = TYPE_INT8; };

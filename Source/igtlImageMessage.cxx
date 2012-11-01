@@ -330,6 +330,11 @@ void ImageMessage::SetMatrix(Matrix4x4& mat)
 	matrixSet=true;
 }
 
+void ImageMessage::PreserveMatrix()
+{
+	matrixSet=true;
+}
+
 void ImageMessage::GetMatrix(Matrix4x4& mat)
 {
   mat[0][0] = matrix[0][0];

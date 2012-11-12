@@ -156,129 +156,6 @@ void TrackingDataElement::GetMatrix(Matrix4x4& mat)
 }
 
 //----------------------------------------------------------------------
-// igtl::TrackingDataMessage class
-
-TrackingDataMessage::TrackingDataMessage():
-  MessageBase()
-{
-  this->m_DefaultBodyType = "TDATA";
-  this->m_TrackingDataList.clear();
-}
-
-
-TrackingDataMessage::~TrackingDataMessage()
-{
-}
-
-
-int TrackingDataMessage::AddTrackingDataElement(TrackingDataElement::Pointer& elem)
-{
-  this->m_TrackingDataList.push_back(elem);
-  return this->m_TrackingDataList.size();
-}
-
-
-void TrackingDataMessage::ClearTrackingDataElements()
-{
-  this->m_TrackingDataList.clear();
-}
-
-
-int TrackingDataMessage::GetNumberOfTrackingDataElements()
-{
-  return this->m_TrackingDataList.size();
-}
-
-
-void TrackingDataMessage::GetTrackingDataElement(int index, TrackingDataElement::Pointer& elem)
-{
-  if (index >= 0 && index < (int)this->m_TrackingDataList.size())
-    {
-    elem = this->m_TrackingDataList[index];
-    }
-}
-
-
-int TrackingDataMessage::GetBodyPackSize()
-{
-  // The body size sum of the header size and status message size.
-  return IGTL_TDATA_ELEMENT_SIZE * this->m_TrackingDataList.size();
-}
-
-
-int TrackingDataMessage::PackBody()
-{
-  // allocate pack
-  AllocatePack();
-  
-  igtl_tdata_element* element;
-  element = (igtl_tdata_element*)this->m_Body;
-  std::vector<TrackingDataElement::Pointer>::iterator iter;
-
-  for (iter = this->m_TrackingDataList.begin(); iter != this->m_TrackingDataList.end(); iter ++)
-    {
-    strncpy((char*)element->name, (*iter)->GetName(), IGTL_TDATA_LEN_NAME);
-    element->type = (*iter)->GetType();
-
-    Matrix4x4 matrix;
-    (*iter)->GetMatrix(matrix);
-    for (int i = 0; i < 3; i ++)
-      {
-      element->transform[i]   = matrix[i][0];
-      element->transform[i+3] = matrix[i][1];
-      element->transform[i+6] = matrix[i][2];
-      element->transform[i+9] = matrix[i][3];
-      }
-    element ++;
-    }
-  
-  igtl_tdata_convert_byte_order((igtl_tdata_element*)this->m_Body, this->m_TrackingDataList.size());
-  
-  return 1;
-}
-
-int TrackingDataMessage::UnpackBody()
-{
-
-  this->m_TrackingDataList.clear();
-
-  igtl_tdata_element* element = (igtl_tdata_element*) this->m_Body;
-  int nElement = igtl_tdata_get_data_n(this->m_BodySizeToRead);
-
-  igtl_tdata_convert_byte_order(element, nElement);
-  
-  char strbuf[128];
-  for (int i = 0; i < nElement; i ++)
-    {
-    TrackingDataElement::Pointer elemClass = TrackingDataElement::New();
-
-    // Add '\n' at the end of each string
-    // (neccesary for a case, where a string reaches the maximum length.)
-    strbuf[IGTL_TDATA_LEN_NAME] = '\n';
-    strncpy(strbuf, (char*)element->name, IGTL_TDATA_LEN_NAME);
-    elemClass->SetName((const char*)strbuf);
-    elemClass->SetType(element->type);
-
-    Matrix4x4 matrix;
-    IdentityMatrix(matrix);
-    for (int j = 0; j < 3; j ++)
-      {
-      matrix[j][0] = element->transform[j];
-      matrix[j][1] = element->transform[j+3];
-      matrix[j][2] = element->transform[j+6];
-      matrix[j][3] = element->transform[j+9];
-      }
-    elemClass->SetMatrix(matrix);
-
-    this->m_TrackingDataList.push_back(elemClass);
-
-    element ++;
-    }
-
-  return 1;
-}
-
-//----------------------------------------------------------------------
 // igtl::GetTrackingDataMessage class
 
 GetTrackingDataMessage::GetTrackingDataMessage() 
@@ -415,7 +292,128 @@ int RTSTrackingDataMessage::UnpackBody()
 
   return 1; 
 }
+//----------------------------------------------------------------------
+// igtl::TrackingDataMessage class
 
+TrackingDataMessage::TrackingDataMessage():
+  MessageBase()
+{
+  this->m_DefaultBodyType = "TDATA";
+  this->m_TrackingDataList.clear();
+}
+
+
+TrackingDataMessage::~TrackingDataMessage()
+{
+}
+
+
+int TrackingDataMessage::AddTrackingDataElement(TrackingDataElement::Pointer& elem)
+{
+  this->m_TrackingDataList.push_back(elem);
+  return this->m_TrackingDataList.size();
+}
+
+
+void TrackingDataMessage::ClearTrackingDataElements()
+{
+  this->m_TrackingDataList.clear();
+}
+
+
+int TrackingDataMessage::GetNumberOfTrackingDataElements()
+{
+  return this->m_TrackingDataList.size();
+}
+
+
+void TrackingDataMessage::GetTrackingDataElement(int index, TrackingDataElement::Pointer& elem)
+{
+  if (index >= 0 && index < (int)this->m_TrackingDataList.size())
+    {
+    elem = this->m_TrackingDataList[index];
+    }
+}
+
+
+int TrackingDataMessage::GetBodyPackSize()
+{
+  // The body size sum of the header size and status message size.
+  return IGTL_TDATA_ELEMENT_SIZE * this->m_TrackingDataList.size();
+}
+
+
+int TrackingDataMessage::PackBody()
+{
+  // allocate pack
+  AllocatePack();
+  
+  igtl_tdata_element* element;
+  element = (igtl_tdata_element*)this->m_Body;
+  std::vector<TrackingDataElement::Pointer>::iterator iter;
+
+  for (iter = this->m_TrackingDataList.begin(); iter != this->m_TrackingDataList.end(); iter ++)
+    {
+    strncpy((char*)element->name, (*iter)->GetName(), IGTL_TDATA_LEN_NAME);
+    element->type = (*iter)->GetType();
+
+    Matrix4x4 matrix;
+    (*iter)->GetMatrix(matrix);
+    for (int i = 0; i < 3; i ++)
+      {
+      element->transform[i]   = matrix[i][0];
+      element->transform[i+3] = matrix[i][1];
+      element->transform[i+6] = matrix[i][2];
+      element->transform[i+9] = matrix[i][3];
+      }
+    element ++;
+    }
+  
+  igtl_tdata_convert_byte_order((igtl_tdata_element*)this->m_Body, this->m_TrackingDataList.size());
+  
+  return 1;
+}
+
+int TrackingDataMessage::UnpackBody()
+{
+
+  this->m_TrackingDataList.clear();
+
+  igtl_tdata_element* element = (igtl_tdata_element*) this->m_Body;
+  int nElement = igtl_tdata_get_data_n(this->m_BodySizeToRead);
+
+  igtl_tdata_convert_byte_order(element, nElement);
+  
+  char strbuf[128];
+  for (int i = 0; i < nElement; i ++)
+    {
+    TrackingDataElement::Pointer elemClass = TrackingDataElement::New();
+
+    // Add '\n' at the end of each string
+    // (neccesary for a case, where a string reaches the maximum length.)
+    strbuf[IGTL_TDATA_LEN_NAME] = '\n';
+    strncpy(strbuf, (char*)element->name, IGTL_TDATA_LEN_NAME);
+    elemClass->SetName((const char*)strbuf);
+    elemClass->SetType(element->type);
+
+    Matrix4x4 matrix;
+    IdentityMatrix(matrix);
+    for (int j = 0; j < 3; j ++)
+      {
+      matrix[j][0] = element->transform[j];
+      matrix[j][1] = element->transform[j+3];
+      matrix[j][2] = element->transform[j+6];
+      matrix[j][3] = element->transform[j+9];
+      }
+    elemClass->SetMatrix(matrix);
+
+    this->m_TrackingDataList.push_back(elemClass);
+
+    element ++;
+    }
+
+  return 1;
+}
 } // namespace igtl
 
 

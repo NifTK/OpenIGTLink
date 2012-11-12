@@ -30,6 +30,57 @@
 namespace igtl
 {
 
+class IGTLCommon_EXPORT QuaternionTrackingDataElement: public Object
+{
+public:
+  typedef QuaternionTrackingDataElement  Self;
+  typedef Object                         Superclass;
+  typedef SmartPointer<Self>             Pointer;
+  typedef SmartPointer<const Self>       ConstPointer;
+
+  igtlTypeMacro(igtl::QuaternionTrackingDataElement, igtl::Object);
+  igtlNewMacro(igtl::QuaternionTrackingDataElement);
+
+  // Tracking data type
+  enum {
+    TYPE_TRACKER  = 1,  /* Tracker */
+    TYPE_6D       = 2,  /* 6D instrument (regular instrument) */
+    TYPE_3D       = 3,  /* 3D instrument (only tip of the instrument defined) */
+    TYPE_5D       = 4,  /* 5D instrument (tip and handle are defined,
+                           but not the normal vector) */
+  };
+
+public:
+  int           SetName(const char* name);
+  const char*   GetName()                            { return this->m_Name.c_str(); };
+
+  int           SetType(igtlUint8 type);
+  igtlUint8     GetType()                            { return this->m_Type; };
+
+  void SetPosition(float p[3]);
+  void GetPosition(float p[3]);
+
+  void SetPosition(float px, float py, float pz);
+  void GetPosition(float* px, float* py, float* pz);
+
+  void SetQuaternion(float q[4]);
+  void GetQuaternion(float q[4]);
+
+  void SetQuaternion(float qx, float qy, float qz, float w);
+  void GetQuaternion(float* qx, float* qy, float* qz, float* w);
+
+protected:
+  QuaternionTrackingDataElement();
+  ~QuaternionTrackingDataElement();
+
+protected:
+
+  std::string   m_Name;          /* Name / description (< 20 bytes) */
+  igtlUint8     m_Type;          /* Tracking data type (TYPE_TRACKER, TYPE_6D, TYPE_3D, TYPE_5D) */
+  igtlFloat32   m_position[3];   /* position (x, y, z) */
+  igtlFloat32   m_quaternion[4]; /* orientation as quaternion (qx, qy, qz, w) */
+};
+
 class IGTLCommon_EXPORT GetQuaternionTrackingDataMessage: public MessageBase
 {
 
@@ -145,58 +196,6 @@ protected:
 
 };
 
-
-
-class IGTLCommon_EXPORT QuaternionTrackingDataElement: public Object
-{
-public:
-  typedef QuaternionTrackingDataElement  Self;
-  typedef Object                         Superclass;
-  typedef SmartPointer<Self>             Pointer;
-  typedef SmartPointer<const Self>       ConstPointer;
-
-  igtlTypeMacro(igtl::QuaternionTrackingDataElement, igtl::Object);
-  igtlNewMacro(igtl::QuaternionTrackingDataElement);
-
-  // Tracking data type
-  enum {
-    TYPE_TRACKER  = 1,  /* Tracker */
-    TYPE_6D       = 2,  /* 6D instrument (regular instrument) */
-    TYPE_3D       = 3,  /* 3D instrument (only tip of the instrument defined) */
-    TYPE_5D       = 4,  /* 5D instrument (tip and handle are defined,
-                           but not the normal vector) */
-  };
-
-public:
-  int           SetName(const char* name);
-  const char*   GetName()                            { return this->m_Name.c_str(); };
-
-  int           SetType(igtlUint8 type);
-  igtlUint8     GetType()                            { return this->m_Type; };
-
-  void SetPosition(float p[3]);
-  void GetPosition(float p[3]);
-
-  void SetPosition(float px, float py, float pz);
-  void GetPosition(float* px, float* py, float* pz);
-
-  void SetQuaternion(float q[4]);
-  void GetQuaternion(float q[4]);
-
-  void SetQuaternion(float qx, float qy, float qz, float w);
-  void GetQuaternion(float* qx, float* qy, float* qz, float* w);
-
-protected:
-  QuaternionTrackingDataElement();
-  ~QuaternionTrackingDataElement();
-
-protected:
-
-  std::string   m_Name;          /* Name / description (< 20 bytes) */
-  igtlUint8     m_Type;          /* Tracking data type (TYPE_TRACKER, TYPE_6D, TYPE_3D, TYPE_5D) */
-  igtlFloat32   m_position[3];   /* position (x, y, z) */
-  igtlFloat32   m_quaternion[4]; /* orientation as quaternion (qx, qy, qz, w) */
-};
 
 class IGTLCommon_EXPORT QuaternionTrackingDataMessage: public MessageBase
 {

@@ -120,7 +120,8 @@ int SessionManager::Connect()
       this->m_Socket = serverSocket->WaitForConnection(10000);
       }
     
-    if (this->m_Socket.IsNotNull() && this->m_Socket->GetConnected()) // if client connected
+    //if (this->m_Socket.IsNotNull() && this->m_Socket->GetConnected()) // if client connected
+    if (this->m_Socket.IsNotNull() && this->m_Socket->IsValid()) // if client connected
       {
       this->m_Socket->DebugOff();
       }
@@ -130,7 +131,7 @@ int SessionManager::Connect()
       }
     }
 
-  this->m_Socket->SetReceiveBlocking(0); // Psuedo non-blocking
+  //this->m_Socket->SetReceiveBlocking(0); // Psuedo non-blocking
   this->m_CurrentReadIndex = 0;
   this->m_HeaderDeserialized = 0;
   return 1;
@@ -293,7 +294,8 @@ int SessionManager::ProcessMessage()
 int SessionManager::PushMessage(MessageBase* message)
 {
   
-  if (message && this->m_Socket.IsNotNull() && this->m_Socket->GetConnected()) // if client connected
+  //if (message && this->m_Socket.IsNotNull() && this->m_Socket->GetConnected()) // if client connected
+  if (message && this->m_Socket.IsNotNull() && this->m_Socket->IsValid()) // if client connected
     {
     return this->m_Socket->Send(message->GetPackPointer(), message->GetPackSize());
     }

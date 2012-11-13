@@ -51,25 +51,13 @@ SET(OpenIGTLink_SOURCES
   igtlObjectFactoryBase.cxx
   igtlPositionMessage.cxx
   igtlServerSocket.cxx
+  igtlSessionManager.cxx
   igtlSimpleFastMutexLock.cxx
   igtlSocket.cxx
   igtlStatusMessage.cxx
   igtlTimeStamp.cxx
   igtlTransformMessage.cxx
   tsctime/TSCtime.cxx
-  ptp/ptpAnnounceMessage.cxx
-  ptp/ptpMessageBase.cxx
-  ptp/ptpSenderThread.cxx
-  ptp/ptpReceiverThread.cxx
-  ptp/ptpDaemon.cxx
-  ptp/ptpDelayReqMessage.cxx
-  ptp/ptpDelayRespMessage.cxx
-  ptp/ptpFollowUpMessage.cxx
-  ptp/ptpPDelayReqMessage.cxx
-  ptp/ptpPDelayRespFollowUpMessage.cxx
-  ptp/ptpPDelayRespMessage.cxx
-  ptp/ptpSyncMessage.cxx
-  ptp/ptpTimer.cxx
 )
 
 SET(OpenIGTLink_INCLUDE_FILES
@@ -80,6 +68,7 @@ SET(OpenIGTLink_INCLUDE_FILES
   igtlutil/igtl_types.h
   igtlutil/igtl_util.h
   igtlutil/igtl_capability.h
+  igtlMessageHandler.h
   igtlClientSocket.h
   igtlConditionVariable.h
   igtlCreateObjectFunction.h
@@ -100,6 +89,7 @@ SET(OpenIGTLink_INCLUDE_FILES
   igtlObjectFactoryBase.h
   igtlPositionMessage.h
   igtlServerSocket.h
+  igtlSessionManager.h
   igtlSimpleFastMutexLock.h
   igtlSmartPointer.h
   igtlSocket.h
@@ -110,20 +100,6 @@ SET(OpenIGTLink_INCLUDE_FILES
   igtlWin32Header.h
   igtlWindows.h
   tsctime/TSCtime.h
-  ptp/ptpAnnounceMessage.h
-  ptp/ptpMessageBase.h
-  ptp/ptpMessageHeader.h
-  ptp/ptpSenderThread.h
-  ptp/ptpReceiverThread.h
-  ptp/ptpDaemon.h
-  ptp/ptpDelayReqMessage.h
-  ptp/ptpDelayRespMessage.h
-  ptp/ptpFollowUpMessage.h
-  ptp/ptpPDelayReqMessage.h
-  ptp/ptpPDelayRespFollowUpMessage.h
-  ptp/ptpPDelayRespMessage.h
-  ptp/ptpSyncMessage.h
-  ptp/ptpTimer.h
 )
 
 

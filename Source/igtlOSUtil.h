@@ -52,7 +52,7 @@ namespace igtl
 
 // Current TAI to UTC offset
 // Will change to 35 on 2012 JUL  1
-#define TAI_UTC 34
+#define TAI_UTC 35
 
 
 /** Stop the program for the duration specified in millisecond

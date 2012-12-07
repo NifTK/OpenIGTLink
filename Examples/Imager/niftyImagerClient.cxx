@@ -19,11 +19,11 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "igtlOSUtil.h"
-#include "igtlImageMessage.h"
-#include "igtlTrackingDataMessage.h"
-#include "igtlStringMessage.h"
 #include "igtlClientSocket.h"
+#include "igtlStringMessage.h"
+#include "igtlTrackingDataMessage.h"
+#include "igtlImageMessage.h"
+#include "igtlOSUtil.h"
 
 int GetTestImage(igtl::ImageMessage::Pointer& msg, const char* dir, int i);
 int GetTestMatrix(igtl::TrackingDataElement::Pointer& msg, const char* dir, int i);
@@ -174,7 +174,7 @@ int main(int argc, char** argv)
 
   infoMsg->Pack();
   socket->Send(infoMsg->GetPackPointer(), infoMsg->GetPackSize());
-	sleep (pause);
+  igtl::Sleep (pause);
   //------------------------------------------------------------
   // loop
   for (int i = 0; i < repeats; i ++)

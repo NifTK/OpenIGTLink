@@ -93,13 +93,13 @@ int MessageBase::GetTimeStamp(unsigned int* sec, unsigned int* frac)
 void MessageBase::SetTimeStamp(igtl::TimeStamp::Pointer& ts)
 {
   m_TimeStampSec = ts->GetSecond();
-  m_TimeStampSecFraction = igtl_nanosec_to_frac(ts->GetNanosecond());
+  m_TimeStampSecFraction = ts->GetNanosecond();
 
 }
 
 void MessageBase::GetTimeStamp(igtl::TimeStamp::Pointer& ts)
 {
-  ts->SetTime(m_TimeStampSec, igtl_frac_to_nanosec(m_TimeStampSecFraction));
+  ts->SetTime(m_TimeStampSec, m_TimeStampSecFraction);
 }
 
 

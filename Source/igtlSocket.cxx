@@ -671,10 +671,6 @@ int Socket::Send(const void* data, int length)
      return -2;
   }
   
-  // Timestamp the message
-  ULONGLONG packedTimeStamp = GetOIGTLTimeTAI_last(); 
-  memcpy((void *)(buffer+34), (void *)(&packedTimeStamp), sizeof(ULONGLONG));
-
   do
   {
     n = 0;

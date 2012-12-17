@@ -82,7 +82,7 @@ private:
   igtlUint32       m_Frequency;   /* Clock frequency (Hz)*/
   igtlUint32       m_Second;      /* Second part of the time relative to 00:00:00 January 1, 1970 UTC */
   igtlUint32       m_Nanosecond;  /* Nano-second part of -- */
-  bool            m_UTC;
+  bool             m_UTC;
 };
 
 } // end of namespace igtl

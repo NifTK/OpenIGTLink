@@ -58,7 +58,6 @@
     //#include <winsock2.h> 
 
   //#include <Ws2ipdef.h>
-  #include "tsctime/TSCtime.h"
 #else
   #include <sys/types.h>
   #include <sys/socket.h>

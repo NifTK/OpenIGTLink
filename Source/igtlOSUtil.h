@@ -24,7 +24,6 @@
 
 #if defined(WIN32) || defined(_WIN32)
   #include <ctime>
-  #include "tsctime/TSCtime.h"
 #else
   #define __forceinline inline __attribute__((always_inline))
 
@@ -44,7 +43,7 @@
 namespace igtl
 {
 
-  // Windows epoch for hectonanotime is January 1, 1601 UTC,
+// Windows epoch for hectonanotime is January 1, 1601 UTC,
 // so subtract 11644473600 seconds to get Unix time.
 // (369 years, 89 of which are leap years  = 134774 days)
 
@@ -100,6 +99,27 @@ __forceinline void IGTLCommon_EXPORT Sleep(int milliseconds)
 #endif
 }
 
+/**
+ * \brief Gets the time since Windows epoch (January 1, 1601) in hectonanoseconds.
+ *
+ * This method was created to replace the gethectonanotime_first that was, prior
+ * to this commit being called in GetTimeUTC. The problem observed was the
+ * the recalibration routines within the TSC library were causing unacceptable clock
+ * jumps of the order of 77-80 seconds on Win XP and Win 7.
+ */
+#if defined(WIN32) || defined(_WIN32)
+
+__forceinline ULONGLONG IGTLCommon_EXPORT GetHectoNanotime()
+{
+  FILETIME fileTime;
+  GetSystemTimeAsFileTime(&fileTime);
+
+  ULONGLONG hectoNanoSeconds = fileTime.dwHighDateTime*10000000 + fileTime.dwLowDateTime;
+  return hectoNanoSeconds;
+}
+
+#endif
+
 // Get the current system time in different formats
 __forceinline void IGTLCommon_EXPORT GetTimeUTC(igtlUint32 &second, igtlUint32 &nanosecond)
 {
@@ -107,7 +127,7 @@ __forceinline void IGTLCommon_EXPORT GetTimeUTC(igtlUint32 &second, igtlUint32 &
 #if defined(WIN32) || defined(_WIN32)
 
   // This call returns the time elapsed since the Windows epoch (January 1, 1601) in hectonanoseconds
-  ULONGLONG curTime = gethectonanotime_first();
+  ULONGLONG curTime = GetHectoNanotime();
 
   // Need to convert this to Unix time (UTC, epoch January 1, 1970), so subtract 11644473600 seconds
   // (369 years, 89 of which are leap years = 134774 days)
@@ -144,7 +164,7 @@ __forceinline void IGTLCommon_EXPORT GetTimeUTC_last(igtlUint32 &second, igtlUin
 #if defined(WIN32) || defined(_WIN32)
 
   // This call returns the time elapsed since the Windows epoch (January 1, 1601) in hectonanoseconds
-  ULONGLONG curTime = gethectonanotime_last();
+  ULONGLONG curTime = GetHectoNanotime();
 
   // Need to convert this to Unix time (UTC, epoch January 1, 1970), so subtract 11644473600 seconds
   // (369 years, 89 of which are leap years = 134774 days)
@@ -180,7 +200,7 @@ __forceinline ULONGLONG IGTLCommon_EXPORT GetNanoTimeUTC(void)
 #if defined(WIN32) || defined(_WIN32)
 
   // This call returns the time elapsed since the Windows epoch (January 1, 1601) in hectonanoseconds
-  ULONGLONG curTime = gethectonanotime_first();
+  ULONGLONG curTime = GetHectoNanotime();
 
   // Need to convert this to Unix time (UTC, epoch January 1, 1970), so subtract 11644473600 seconds
   // (369 years, 89 of which are leap years = 134774 days)
@@ -215,7 +235,7 @@ __forceinline ULONGLONG IGTLCommon_EXPORT GetNanoTimeUTC_last(void)
   #if defined(WIN32) || defined(_WIN32)
 
   // This call returns the time elapsed since the Windows epoch (January 1, 1601) in hectonanoseconds
-  ULONGLONG curTime = gethectonanotime_last();
+  ULONGLONG curTime = GetHectoNanotime();
 
   // Need to convert this to Unix time (UTC, epoch January 1, 1970), so subtract 11644473600 seconds
   // (369 years, 89 of which are leap years = 134774 days)

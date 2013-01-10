@@ -26,7 +26,6 @@
 #if defined(WIN32) || defined(_WIN32)
   #include <windows.h>
   #include <ctime>
-  #include "tsctime/TSCtime.h"
 #else
   #include <sys/time.h>
 #endif  // defined(WIN32) || defined(_WIN32)
@@ -64,7 +63,6 @@ public:
   double GetTimeStamp();
   void   GetTimeStamp(igtlUint32* second, igtlUint32* nanosecond);
   igtlUint64 GetTimeStampUint64();     /* 64-bit fixed-point expression used in OpenIGTLink */
-
 
 protected:
 

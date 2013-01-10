@@ -114,7 +114,10 @@ __forceinline ULONGLONG IGTLCommon_EXPORT GetHectoNanotime()
   FILETIME fileTime;
   GetSystemTimeAsFileTime(&fileTime);
 
-  ULONGLONG hectoNanoSeconds = fileTime.dwHighDateTime*10000000 + fileTime.dwLowDateTime;
+  ULONGLONG hectoNanoSeconds = fileTime.dwHighDateTime;
+  hectoNanoSeconds <<= 32;
+  hectoNanoSeconds |= fileTime.dwLowDateTime;
+
   return hectoNanoSeconds;
 }
 

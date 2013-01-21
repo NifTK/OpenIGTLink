@@ -77,7 +77,7 @@ void TimeStamp::toUTC()
   
   //Need to subtract the offset
   this->m_Second -= TAI_UTC;
-  m_UTC = false;
+  m_UTC = true;
 }
 
 void TimeStamp::toTAI()
@@ -86,7 +86,7 @@ void TimeStamp::toTAI()
     return;
   
   this->m_Second += TAI_UTC;
-  m_UTC = true;
+  m_UTC = false;
 }
 
 

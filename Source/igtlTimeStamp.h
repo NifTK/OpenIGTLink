@@ -49,20 +49,28 @@ public:
   igtlGetConstMacro(Second,     igtlUint32);
   igtlGetConstMacro(Nanosecond, igtlUint32);
 
-  void GetTime();
-  void GetTime_TAI();
-  
-  void toUTC();
-  void toTAI();
+  /** Update the timestamp to match current system time in UTC */
+  void Update();
+
   inline bool isUTC() {return m_UTC; }
   
-  void SetTime(double tm);
+  // Set time in human readable form
   void SetTime(igtlUint32 second, igtlUint32 nanosecond);
-  void SetTime(igtlUint64 tm);  /* 64-bit fixed-point expression used in OpenIGTLink */
 
-  double GetTimeStamp();
-  void   GetTimeStamp(igtlUint32* second, igtlUint32* nanosecond);
-  igtlUint64 GetTimeStampUint64();     /* 64-bit fixed-point expression used in OpenIGTLink */
+    // Get time in human readable form
+  void   GetTime(igtlUint32* second, igtlUint32* nanosecond);
+  
+  // Set time as the number of seconds since epoch in double
+  void SetTimeInSeconds(double totalSeconds);
+
+  // Get time  as the number of seconds since epoch in double
+  double GetTimeInSeconds();
+
+  // Set time in the OpenIGTLink compatible form
+  void SetTimeUint64(igtlUint64 totalNanos);  /* 64-bit fixed-point expression used in OpenIGTLink */
+
+  // Get time in the OpenIGTLink compatible form
+  igtlUint64 GetTimeUint64();        /* 64-bit fixed-point expression used in OpenIGTLink */
 
 protected:
 

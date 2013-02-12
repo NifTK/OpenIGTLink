@@ -62,8 +62,8 @@ igtl_uint64 igtl_export crc64(unsigned char *data, igtl_uint64 len, igtl_uint64 
  * Convert nanosecond to fraction / fraction to nanosec
  */
 
-igtl_uint32 igtl_export igtl_nanosec_to_frac(igtl_uint32 nanosec);
-igtl_uint32 igtl_export igtl_frac_to_nanosec(igtl_uint32 frac);
+//igtl_uint32 igtl_export igtl_nanosec_to_frac(igtl_uint32 nanosec);
+//igtl_uint32 igtl_export igtl_frac_to_nanosec(igtl_uint32 frac);
 void igtl_export igtl_message_dump_hex(FILE* stream, const void* message, int max_size);
 
 /*

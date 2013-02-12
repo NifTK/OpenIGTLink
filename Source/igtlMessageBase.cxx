@@ -76,30 +76,30 @@ const char* MessageBase::GetDeviceType()
 }
 
 
-int MessageBase::SetTimeStamp(unsigned int sec, unsigned int frac)
+int MessageBase::SetTimeStamp(unsigned int sec, unsigned int nanosec)
 {
-  m_TimeStampSec         = sec;
-  m_TimeStampSecFraction = frac;
+  m_TimeStampSec     = sec;
+  m_TimeStampNanosec = nanosec;
   return 1;
 }
 
-int MessageBase::GetTimeStamp(unsigned int* sec, unsigned int* frac)
+int MessageBase::GetTimeStamp(unsigned int* sec, unsigned int* nanosec)
 {
-  *sec  = m_TimeStampSec;
-  *frac = m_TimeStampSecFraction;
+  *sec     = m_TimeStampSec;
+  *nanosec = m_TimeStampNanosec;
   return 1;
 }
 
 void MessageBase::SetTimeStamp(igtl::TimeStamp::Pointer& ts)
 {
-  m_TimeStampSec = ts->GetSecond();
-  m_TimeStampSecFraction = ts->GetNanosecond();
+  m_TimeStampSec     = ts->GetSecond();
+  m_TimeStampNanosec = ts->GetNanosecond();
 
 }
 
 void MessageBase::GetTimeStamp(igtl::TimeStamp::Pointer& ts)
 {
-  ts->SetTime(m_TimeStampSec, m_TimeStampSecFraction);
+  ts->SetTime(m_TimeStampSec, m_TimeStampNanosec);
 }
 
 
@@ -114,11 +114,10 @@ int MessageBase::Pack()
   igtl_uint64 crc = crc64(0, 0, 0LL); // initial crc
 
   h->version   = IGTL_HEADER_VERSION;
+  
+  // Our preferred method for timestamping
+  h->timestamp = (igtlUint64)m_TimeStampSec * 1000000000 + (igtlUint64)m_TimeStampNanosec;
 
-  igtl_uint64 ts  =  m_TimeStampSec & 0xFFFFFFFF;
-  ts = (ts << 32) | (m_TimeStampSecFraction & 0xFFFFFFFF);
-
-  h->timestamp = ts;
   h->body_size = GetBodyPackSize();
   h->crc       = crc64((unsigned char*)m_Body, GetBodyPackSize(), crc);
 
@@ -146,9 +145,9 @@ int MessageBase::Unpack(int crccheck)
     // Unpack (deserialize) the header
     igtl_header* h = (igtl_header*) m_Header;
     igtl_header_convert_byte_order(h);
-    m_TimeStampSecFraction = h->timestamp & 0xFFFFFFFF;
-    m_TimeStampSec = (h->timestamp >> 32 ) & 0xFFFFFFFF;
 
+    m_TimeStampSec = (igtlUint64)h->timestamp / (igtlUint64)1000000000;
+    m_TimeStampNanosec = (igtlUint64)h->timestamp % (igtlUint64)1000000000;
 
     if (h->version == IGTL_HEADER_VERSION)
     {
@@ -302,7 +301,7 @@ int MessageBase::CopyHeader(const MessageBase* mb)
   m_BodyType             = mb->m_BodyType;
   m_DeviceName           = mb->m_DeviceName;
   m_TimeStampSec         = mb->m_TimeStampSec;
-  m_TimeStampSecFraction = mb->m_TimeStampSecFraction;
+  m_TimeStampNanosec     = mb->m_TimeStampNanosec;
   m_IsHeaderUnpacked     = mb->m_IsHeaderUnpacked;
   m_IsBodyUnpacked       = mb->m_IsBodyUnpacked;
 

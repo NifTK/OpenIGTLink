@@ -82,8 +82,8 @@ public:
   const char* GetDeviceName();
   const char* GetDeviceType();
   
-  int   SetTimeStamp(unsigned int sec, unsigned int frac);
-  int   GetTimeStamp(unsigned int* sec, unsigned int* frac);
+  int   SetTimeStamp(unsigned int sec, unsigned int nanosec);
+  int   GetTimeStamp(unsigned int* sec, unsigned int* nanosec);
 
   void  SetTimeStamp(igtl::TimeStamp::Pointer& ts);
   void  GetTimeStamp(igtl::TimeStamp::Pointer& ts);
@@ -168,7 +168,7 @@ protected:
   std::string    m_DeviceName;
   //ETX
   unsigned int   m_TimeStampSec;
-  unsigned int   m_TimeStampSecFraction;
+  unsigned int   m_TimeStampNanosec;
 
   // Unpacking status (0: --   1: unpacked)
   int            m_IsHeaderUnpacked;

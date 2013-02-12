@@ -523,10 +523,9 @@ int ImageMessage2::Pack()
 
   h->version   = IGTL_HEADER_VERSION;
 
-  igtl_uint64 ts  =  m_TimeStampSec & 0xFFFFFFFF;
-  ts = (ts << 32) | (m_TimeStampSecFraction & 0xFFFFFFFF);
+  // Our preferred method for timestamping
+  h->timestamp = (igtlUint64)m_TimeStampSec * 1000000000 + (igtlUint64)m_TimeStampNanosec;
 
-  h->timestamp = ts;
   h->body_size = GetBodyPackSize();
 
   // Note pack fragment #0 is the OpenIGTLink general hearder.

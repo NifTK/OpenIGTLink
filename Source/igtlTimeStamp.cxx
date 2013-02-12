@@ -58,43 +58,25 @@ TimeStamp::~TimeStamp()
 }
 
 
-void TimeStamp::GetTime()
+void TimeStamp::Update()
 {
   GetTimeUTC(this->m_Second, this->m_Nanosecond);
   m_UTC = true;
 }
 
-void TimeStamp::GetTime_TAI()
+void TimeStamp::SetTimeInSeconds(double totalSeconds)
 {
-  GetTimeTAI(this->m_Second, this->m_Nanosecond);
-  m_UTC = false;
-}
-
-void TimeStamp::toUTC()
-{
-  if (m_UTC)  //currently UTC
-    return;
-  
-  //Need to subtract the offset
-  this->m_Second -= TAI_UTC;
-  m_UTC = true;
-}
-
-void TimeStamp::toTAI()
-{
-  if (!m_UTC)  //currently TAI
-    return;
-  
-  this->m_Second += TAI_UTC;
-  m_UTC = false;
-}
-
-
-void TimeStamp::SetTime(double tm)
-{
-  double second = floor(tm);
+  double second = floor(totalSeconds);
   this->m_Second = static_cast<igtlUint32>(second);
-  this->m_Nanosecond = static_cast<igtlUint32>((tm - second)*1e9);
+  this->m_Nanosecond = static_cast<igtlUint32>((totalSeconds - second)*1e9);
+}
+
+double TimeStamp::GetTimeInSeconds()
+{
+  double tm;
+  tm = static_cast<double>(this->m_Second) + static_cast<double>(this->m_Nanosecond) / 1e9;
+
+  return tm;
 }
 
 void TimeStamp::SetTime(igtlUint32 second, igtlUint32 nanosecond)
@@ -106,42 +88,32 @@ void TimeStamp::SetTime(igtlUint32 second, igtlUint32 nanosecond)
     }
 }
 
-
-void TimeStamp::SetTime(igtlUint64 tm)
-{
-  // Export from 64-bit fixed-point expression used in OpenIGTLink
-  igtlUint32 sec      = static_cast<igtlUint32>((tm >> 32 ) & 0xFFFFFFFF);
-  igtlUint32 fraction = static_cast<igtlUint32>(tm & 0xFFFFFFFF);
-  this->m_Second     = sec;
-  this->m_Nanosecond = igtl_frac_to_nanosec(static_cast<igtlUint32>(fraction));
-}
-
-
-double TimeStamp::GetTimeStamp()
-{
-  double tm;
-  tm = static_cast<double>(this->m_Second) + static_cast<double>(this->m_Nanosecond) / 1e9;
-
-  return tm;
-}
-
-void TimeStamp::GetTimeStamp(igtlUint32* second, igtlUint32* nanosecond)
+void TimeStamp::GetTime(igtlUint32* second, igtlUint32* nanosecond)
 {
   *second     = this->m_Second;
   *nanosecond = this->m_Nanosecond;
 }
   
+
+void TimeStamp::SetTimeUint64(igtlUint64 totalNanos)
+{
+  // Export from 64-bit fixed-point expression used in OpenIGTLink
+  igtlUint32 seconds, nanoseconds;
+
+  seconds = (igtlUint64)totalNanos / (igtlUint64)1000000000;
+  nanoseconds = (igtlUint64)totalNanos % (igtlUint64)1000000000;
+
+  this->m_Second = seconds;
+  this->m_Nanosecond = nanoseconds;
+}
+
   
-igtlUint64 TimeStamp::GetTimeStampUint64()
+igtlUint64 TimeStamp::GetTimeUint64()
 {
   // Export as 64-bit fixed-point expression used in OpenIGTLink
-  igtlUint32 sec      = this->m_Second;
-  igtlUint32 fraction = igtl_nanosec_to_frac(this->m_Nanosecond);
 
-  igtlUint64 ts  =  sec & 0xFFFFFFFF;
-  ts = (ts << 32) | (fraction & 0xFFFFFFFF);
-
-  return ts;
+  igtlUint64 result = (igtlUint64)m_Second * 1000000000 + (igtlUint64)m_Nanosecond;
+  return result;
 }
 
 
@@ -160,5 +132,29 @@ void TimeStamp::PrintSelf( std::ostream& os) const
 }
 
 }
+//void TimeStamp::GetTime_TAI()
+//{
+//  GetTimeTAI(this->m_Second, this->m_Nanosecond);
+//  m_UTC = false;
+//}
+
+//void TimeStamp::toUTC()
+//{
+//  if (m_UTC)  //currently UTC
+//    return;
+//  
+//  //Need to subtract the offset
+//  this->m_Second -= TAI_UTC;
+//  m_UTC = true;
+//}
+//
+//void TimeStamp::toTAI()
+//{
+//  if (!m_UTC)  //currently TAI
+//    return;
+//  
+//  this->m_Second += TAI_UTC;
+//  m_UTC = false;
+//}
 
 

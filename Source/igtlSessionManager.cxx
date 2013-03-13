@@ -243,7 +243,7 @@ int SessionManager::ProcessMessage()
     igtlUint32 nanosec;
    
     this->m_Header->GetTimeStamp(this->m_TimeStamp);
-    this->m_TimeStamp->GetTimeStamp(&sec, &nanosec);
+    this->m_TimeStamp->GetTime(&sec, &nanosec);
     //std::cerr << "Time stamp: "
     //          << sec << "." << std::setw(9) << std::setfill('0') 
     //          << nanosec << std::endl;

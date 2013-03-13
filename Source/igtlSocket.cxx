@@ -640,8 +640,8 @@ int Socket::Send(const void* data, int length)
   u_long iMode = 1;
 
   // Will set socket to blocking mode if working on large messages
-  if (length > 1000)
-    iMode = 0;
+  //if (length > 1000)
+  //  iMode = 0;
 
   //std::cerr <<"Preparing to send...";
   const char* buffer = reinterpret_cast<const char*>(data);
@@ -707,7 +707,7 @@ int Socket::Send(const void* data, int length)
         }
       #endif
 
-      std::cerr <<"Total sent so far: " <<total <<" Length: " << length <<std::endl;
+      //std::cerr <<"Total sent so far: " <<total <<" Length: " << length <<std::endl;
 
       handle_error("sendfail: ");
       return -1;
@@ -721,7 +721,7 @@ int Socket::Send(const void* data, int length)
   
   // Record the software timestamp as the message left the device
   m_sendTimeStamp = igtl::TimeStamp::New();
-  m_sendTimeStamp->toTAI();
+  //m_sendTimeStamp->toTAI();
 
   //std::cerr <<"Number of bytes sent: " <<total <<std::endl;
 
@@ -731,14 +731,13 @@ int Socket::Send(const void* data, int length)
 //-----------------------------------------------------------------------------
 int Socket::CheckPendingData()
 {
-  //ULONGLONG time_before = gethectonanotime_last(); 
   if (!this->IsValid())
   {
     return -1;
   }
   
   int rVal     = 0;
-  u_long iMode = 1;
+  u_long iMode = 1; // non-blocking mode
   igtl::TimeStamp::Pointer ts;
   
   #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -794,10 +793,6 @@ int Socket::CheckPendingData()
       return 2; 
     default:    // Large number of data waiting, probably message
       m_receiveTimeStamp.operator =(ts);
-      m_receiveTimeStamp->toTAI();
-
-      //ULONGLONG time_after = gethectonanotime_last(); 
-      //std::cerr <<"Time delta: " <<time_after - time_before;
 
       return bytesToRead;
   }
@@ -810,8 +805,7 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
   {
     return -1;
   }
-  
-  
+
   char* buffer = reinterpret_cast<char*>(data);
   int total       = 0;
   int bytesRead   = 0;
@@ -867,9 +861,6 @@ int Socket::Receive(void* data, int length, int readFully/*=1*/)
 
   } while(readFully && total < length);
 
-  //ULONGLONG time_after = gethectonanotime_last(); 
-  //std::cerr <<"Time delta: " <<time_after - time_before <<std::endl;
-  
   //std::cerr <<"Number of bytes actually read: " <<bytesRead <<" Total: " <<total <<std::endl;
 
   //std::cerr <<"First 15 char of the message: ";

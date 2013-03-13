@@ -133,9 +133,7 @@ int BindMessage::GetChildMessage(unsigned int i, igtl::MessageBase * child)
     strncpy( header->device_name, this->m_ChildMessages[i].name.c_str(), IGTL_HEADER_NAME_SIZE);
 
     // Time stamp -- same as the bind message
-    igtl_uint64 ts  =  m_TimeStampSec & 0xFFFFFFFF;
-    ts = (ts << 32) | (m_TimeStampSecFraction & 0xFFFFFFFF);
-    header->timestamp = ts;
+    header->timestamp = (igtlUint64)m_TimeStampSec * 1000000000 + (igtlUint64)m_TimeStampNanosec;
     header->body_size = this->m_ChildMessages[i].size;
     header->crc = 0;
 

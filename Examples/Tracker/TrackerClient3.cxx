@@ -18,7 +18,7 @@
 #include <math.h>
 #include <cstdlib>
 
-#include "igtlOSUtil.h"
+//#include "igtlOSUtil.h"
 #include "igtlTransformMessage.h"
 #include "igtlClientSocket.h"
 
@@ -104,13 +104,13 @@ int main(int argc, char* argv[])
       igtl::Matrix4x4 matrix;
       GetRandomTestMatrix(matrix, phi[i], theta[i]);
       transMsg->SetMatrix(matrix);
-      ts->GetTime();
+      ts->Update();
       transMsg->SetTimeStamp(ts);
       transMsg->Pack();
 
       igtlUint32 sec;
       igtlUint32 nsec;
-      ts->GetTimeStamp(&sec, &nsec);
+      ts->GetTime(&sec, &nsec);
       std::cerr << "Time Stamp: sec = " << sec << ", nsec = " << nsec << std::endl;
       socket->Send(transMsg->GetPackPointer(), transMsg->GetPackSize());
       phi[i]   = phi[i] + 0.2*incr[i];

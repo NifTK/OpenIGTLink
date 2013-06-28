@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "igtlOSUtil.h"
+//#include "igtlOSUtil.h"
 #include "igtlQuaternionTrackingDataMessage.h"
 #include "igtlClientSocket.h"
 

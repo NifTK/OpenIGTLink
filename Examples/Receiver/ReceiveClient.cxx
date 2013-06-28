@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "igtlOSUtil.h"
+//#include "igtlOSUtil.h"
 #include "igtlMessageHeader.h"
 #include "igtlTransformMessage.h"
 #include "igtlPositionMessage.h"
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
       igtlUint32 nanosec;
 
       headerMsg->GetTimeStamp(ts);
-      ts->GetTimeStamp(&sec, &nanosec);
+      ts->GetTime(&sec, &nanosec);
 
       std::cerr << "Time stamp: "
                 << sec << "." << std::setw(9) << std::setfill('0') 

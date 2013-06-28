@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "igtlOSUtil.h"
+//#include "igtlOSUtil.h"
 #include "igtlImageMessage.h"
 #include "igtlImageMetaMessage.h"
 #include "igtlClientSocket.h"
@@ -139,7 +139,7 @@ int ReceiveImageMeta(igtl::ClientSocket::Pointer& socket, igtl::MessageHeader::P
 
       igtl::TimeStamp::Pointer ts;
       imgMetaElement->GetTimeStamp(ts);
-      double time = ts->GetTimeStamp();
+      double time = ts->GetTimeInSeconds();
 
       std::cerr << "========== Element #" << i << " ==========" << std::endl;
       std::cerr << " Name       : " << imgMetaElement->GetName() << std::endl;

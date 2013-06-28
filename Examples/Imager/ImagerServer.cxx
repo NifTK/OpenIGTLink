@@ -19,7 +19,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "igtlOSUtil.h"
+//#include "igtlOSUtil.h"
 #include "igtlImageMessage.h"
 #include "igtlServerSocket.h"
 

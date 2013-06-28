@@ -1,10 +1,8 @@
 /*=========================================================================
 
-  Program:   Open IGT Link Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink/Source/igtlImageMessage.cxx $
+  Program:   The OpenIGTLink Library
   Language:  C++
-  Date:      $Date: 2011-03-24 00:08:23 -0400 (Thu, 24 Mar 2011) $
-  Version:   $Revision: 7354 $
+  Web page:  http://openigtlink.org/
 
   Copyright (c) Insight Software Consortium. All rights reserved.
 
@@ -437,7 +435,7 @@ int ImageMessage::PackBody()
   if ( !matrixSet )
     igtl_image_set_matrix(rspacing, origin, norm_i, norm_j, norm_k, image_header);
   else 
-    igtl_image_set_matrix_1(matrix, image_header);
+    igtl_image_set_matrix_4x4(matrix, image_header);
 
   igtl_image_convert_byte_order(image_header);
 
@@ -455,7 +453,7 @@ int ImageMessage::UnpackBody()
 
   if (image_header->version == IGTL_IMAGE_HEADER_VERSION)
     {
-      // Image format version 2
+      // Image format version 1
       this->scalarType       = image_header->scalar_type;
       this->numComponents    = image_header->num_components;
       this->endian           = image_header->endian;
@@ -471,11 +469,11 @@ int ImageMessage::UnpackBody()
       this->subDimensions[2] = image_header->subvol_size[2];
 
       // Set image orientation
-    float rspacing[3]; memset(&rspacing, 0, 3*sizeof(float));
-      float origin[3]; memset(&origin,   0, 3*sizeof(float));
-      float norm_i[3]; memset(&norm_i,   0, 3*sizeof(float));
-      float norm_j[3]; memset(&norm_j,   0, 3*sizeof(float));
-      float norm_k[3]; memset(&norm_k,   0, 3*sizeof(float));
+      float rspacing[3]; memset(&rspacing, 0, 3*sizeof(float));
+      float origin[3];   memset(&origin,   0, 3*sizeof(float));
+      float norm_i[3];   memset(&norm_i,   0, 3*sizeof(float));
+      float norm_j[3];   memset(&norm_j,   0, 3*sizeof(float));
+      float norm_k[3];   memset(&norm_k,   0, 3*sizeof(float));
 
       if ( normalsSet || originSet || spacingSet ) 
       {
@@ -518,7 +516,7 @@ int ImageMessage::UnpackBody()
         matrix[3][3] = 1.0;
       }
       else
-        igtl_image_get_matrix_1(matrix, image_header);
+        igtl_image_get_matrix_4x4(matrix, image_header);
 
       m_ImageHeader = m_Body;
       m_Image       = &m_ImageHeader[IGTL_IMAGE_HEADER_SIZE];

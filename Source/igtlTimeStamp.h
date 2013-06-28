@@ -61,7 +61,7 @@ public:
   void SetTime(igtlUint32 second, igtlUint32 nanosecond);
 
     // Get time in human readable form
-  void   GetTime(igtlUint32* second, igtlUint32* nanosecond);
+  void GetTime(igtlUint32* second, igtlUint32* nanosecond);
   
   // Set time as the number of seconds since epoch in double
   void SetTimeInSeconds(double totalSeconds);

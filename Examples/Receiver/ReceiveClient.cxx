@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 
-//#include "igtlOSUtil.h"
+#include "igtlOSUtil.h"
 #include "igtlMessageHeader.h"
 #include "igtlTransformMessage.h"
 #include "igtlPositionMessage.h"

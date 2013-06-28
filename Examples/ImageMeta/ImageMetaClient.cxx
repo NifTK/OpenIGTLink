@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <cstring>
 
-//#include "igtlOSUtil.h"
+#include "igtlOSUtil.h"
 #include "igtlImageMessage.h"
 #include "igtlImageMetaMessage.h"
 #include "igtlClientSocket.h"

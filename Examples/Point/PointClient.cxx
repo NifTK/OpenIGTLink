@@ -18,7 +18,7 @@
 #include <math.h>
 #include <cstdlib>
 
-//#include "igtlOSUtil.h"
+#include "igtlOSUtil.h"
 #include "igtlPointMessage.h"
 #include "igtlClientSocket.h"
 

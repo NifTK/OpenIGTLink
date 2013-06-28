@@ -49,7 +49,8 @@
 #if defined(_WIN32)
   // Include the windows header here only if requested by user code.
 # if defined(IGTL_INCLUDE_WINDOWS_H)
-#  include <windows.h>
+   #include <winsock2.h>
+   #include <windows.h>
    // Define types from the windows header file.
    typedef DWORD igtlWindowsDWORD;
    typedef PVOID igtlWindowsPVOID;

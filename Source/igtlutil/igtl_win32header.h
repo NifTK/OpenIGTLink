@@ -12,8 +12,8 @@
 
 =========================================================================*/
 
-#ifndef __IGTL_WIN32HEADER_H
-#define __IGTL_WIN32HEADER_H
+#ifndef __IGTL_WIN32HEADER_H2
+#define __IGTL_WIN32HEADER_H2
 
 #include "igtl_typeconfig.h"
 
@@ -29,7 +29,8 @@
 #endif
 
 #if defined(_WIN32)
-#  include <windows.h>
+  #include <winsock2.h>
+  #include <windows.h>
 #endif
 
 #if defined(_MSC_VER)

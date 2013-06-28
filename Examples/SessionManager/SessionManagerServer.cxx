@@ -17,7 +17,7 @@
 #include <cstdlib>
 #include <cstring>
 
-//#include "igtlOSUtil.h"
+#include "igtlOSUtil.h"
 #include "igtlMessageHeader.h"
 #include "igtlMessageHandler.h"
 #include "igtlMessageHandlerMacro.h"

@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <cstring>
 
-//#include "igtlOSUtil.h"
+#include "igtlOSUtil.h"
 #include "igtlMessageHeader.h"
 #include "igtlImageMessage.h"
 #include "igtlImageMetaMessage.h"

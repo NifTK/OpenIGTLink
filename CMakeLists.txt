@@ -10,7 +10,7 @@ if(COMMAND cmake_policy)
 # OpenIGTlink version number.
 SET(OpenIGTLink_VERSION_MAJOR "1")
 SET(OpenIGTLink_VERSION_MINOR "9")
-SET(OpenIGTLink_VERSION_PATCH "7")
+SET(OpenIGTLink_VERSION_PATCH "8")
 
 option(OpenIGTLink_PROTOCOL_VERSION_2 "Build Library for Protocol Version 2" ON)
 
@@ -274,7 +274,6 @@ SET(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${OpenIGTLink_REQUIR
 
 ADD_SUBDIRECTORY( Source    )
 ADD_SUBDIRECTORY( Tools     )
-#ADD_SUBDIRECTORY( Documents )
 
 IF(OpenIGTLink_BUILD_TESTING)
   ADD_SUBDIRECTORY( Testing )

@@ -1,10 +1,8 @@
 /*=========================================================================
 
-  Program:   Open IGT Link Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink2_beta/Source/igtlSensorMessage.cxx $
+  Program:   The OpenIGTLink Library
   Language:  C++
-  Date:      $Date: 2010-01-17 13:04:20 -0500 (Sun, 17 Jan 2010) $
-  Version:   $Revision: 5575 $
+  Web page:  http://openigtlink.org/
 
   Copyright (c) Insight Software Consortium. All rights reserved.
 
@@ -29,12 +27,12 @@ namespace igtl {
 SensorMessage::SensorMessage():
   MessageBase()
 {
+  m_DefaultBodyType  = "SENSOR";
+
   this->m_Length = 0;
   this->m_Status = 0;
   this->m_Unit   = 0;
   this->m_Array.clear();
-
-  this->m_DefaultBodyType = "SENSOR";
 }
 
 

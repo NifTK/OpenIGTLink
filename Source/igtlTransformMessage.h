@@ -1,10 +1,8 @@
 /*=========================================================================
 
-  Program:   Open IGT Link Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink/Source/igtlTransformMessage.h $
+  Program:   The OpenIGTLink Library
   Language:  C++
-  Date:      $Date: 2008-12-22 19:05:42 -0500 (Mon, 22 Dec 2008) $
-  Version:   $Revision: 3460 $
+  Web page:  http://openigtlink.org/
 
   Copyright (c) Insight Software Consortium. All rights reserved.
 
@@ -24,6 +22,7 @@
 namespace igtl
 {
 
+/// A class for the GET_TRANS message type.
 class IGTLCommon_EXPORT GetTransformMessage: public MessageBase
 {
 
@@ -137,6 +136,11 @@ protected:
 
 };
 
+/// The TRANSFORM data type is used to transfer a homogeneous linear transformation
+/// in 4-by-4 matrix form. One such matrix was shown earlier in equation (1).
+/// Note that if a device is sending only translation and rotation, then TRANSFORM
+/// is equivalent to POSITION. But TRANSFORM can also be used to transfer affine
+/// transformations or simple scaling. Like IMAGE and POSITION, TRANSFORM carries
 class IGTLCommon_EXPORT TransformMessage: public MessageBase
 {
 
@@ -153,20 +157,37 @@ public:
 
 public:
 
+  /// Sets a position (or a translation vector) in the RAS coordinate system.
   void SetPosition(float p[3]);
+
+  /// Gets a position (or a translation vector) in the RAS coordinate system. 
   void GetPosition(float p[3]);
 
+  /// Sets a position (or a translation vector) in the RAS coordinate system. 
   void SetPosition(float px, float py, float pz);
+
+  /// Gets a position (or a translation vector) in the RAS coordinate system. 
   void GetPosition(float* px, float* py, float* pz);
 
+  /// Sets normal vectors (or a rotation matrix) in the RAS coordinate system.
   void SetNormals(float o[3][3]);
+
+  /// Gets normal vectors (or a rotation matrix) in the RAS coordinate system.
   void GetNormals(float o[3][3]);
 
+  /// Sets normal vectors (or a rotation matrix) in the RAS coordinate system.
   void SetNormals(float t[3], float s[3], float n[3]);
+
+  /// Gets normal vectors (or a rotation matrix) in the RAS coordinate system.
   void GetNormals(float t[3], float s[3], float n[3]);
 
+  /// Sets rotation matrix using igtl::Matrix4x4. 
   void SetMatrix(Matrix4x4& mat);
+
+  /// Gets rotation matrix using igtl::Matrix4x4. 
   void GetMatrix(Matrix4x4& mat);
+  
+  /// Gets rotation matrix as string 
   void GetMatrixAsString(std::string &str);
 
 protected:
@@ -179,8 +200,10 @@ protected:
   virtual int  PackBody();
   virtual int  UnpackBody();
   
+  /// The transformation matrix.
   Matrix4x4 matrix;
 
+  /// The byte array for the serialized transform data.
   unsigned char*  m_Transform;
 
 };

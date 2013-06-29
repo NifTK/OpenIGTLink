@@ -69,11 +69,11 @@ public:
   // Get time  as the number of seconds since epoch in double
   double GetTimeInSeconds();
 
-  // Set time in the OpenIGTLink compatible form
-  void SetTimeUint64(igtlUint64 totalNanos);  /* 64-bit fixed-point expression used in OpenIGTLink */
+  // Set time the as igtlUint64 in nanoseconds since Epoch
+  void SetTimeInNanoSeconds(igtlUint64 totalNanos);  /* 64-bit fixed-point expression used in OpenIGTLink */
 
-  // Get time in the OpenIGTLink compatible form
-  igtlUint64 GetTimeUint64();        /* 64-bit fixed-point expression used in OpenIGTLink */
+  // Get time the as igtlUint64 in nanoseconds since Epoch
+  igtlUint64 GetTimeInNanoSeconds();                 /* 64-bit fixed-point expression used in OpenIGTLink */
 
 protected:
 

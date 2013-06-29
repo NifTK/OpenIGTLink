@@ -257,7 +257,7 @@ int ImageMetaMessage::PackBody()
 
     igtl::TimeStamp::Pointer ts;
     (*iter)->GetTimeStamp(ts);
-    element->timestamp = ts->GetTimeUint64();
+    element->timestamp = ts->GetTimeInNanoSeconds();
     igtlUint16 size[3];
     (*iter)->GetSize(size);
     element->size[0] = size[0];
@@ -311,7 +311,7 @@ int ImageMetaMessage::UnpackBody()
     elemClass->SetPatientID(strbuf);
     
     TimeStamp::Pointer ts = TimeStamp::New();
-    ts->SetTimeUint64(element->timestamp);
+    ts->SetTimeInNanoSeconds(element->timestamp);
     elemClass->SetTimeStamp(ts);
 
     elemClass->SetSize(element->size);

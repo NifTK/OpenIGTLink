@@ -93,7 +93,7 @@ void TimeStamp::GetTime(igtlUint32* second, igtlUint32* nanosecond)
 }
   
 
-void TimeStamp::SetTimeUint64(igtlUint64 totalNanos)
+void TimeStamp::SetTimeInNanoSeconds(igtlUint64 totalNanos)
 {
   // Export from 64-bit fixed-point expression used in OpenIGTLink
   igtlUint32 seconds, nanoseconds;
@@ -106,7 +106,7 @@ void TimeStamp::SetTimeUint64(igtlUint64 totalNanos)
 }
 
   
-igtlUint64 TimeStamp::GetTimeUint64()
+igtlUint64 TimeStamp::GetTimeInNanoSeconds()
 {
   // Export as 64-bit fixed-point expression used in OpenIGTLink
 

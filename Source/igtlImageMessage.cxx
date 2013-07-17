@@ -16,6 +16,7 @@
 
 #include "igtl_header.h"
 #include "igtl_image.h"
+#include <cstring>
 
 namespace igtl {
 

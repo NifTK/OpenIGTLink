@@ -1,10 +1,8 @@
 /*=========================================================================
 
-  Program:   OpenIGTLink Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink/Source/igtlutil/igtl_image.c $
+  Program:   The OpenIGTLink Library
   Language:  C
-  Date:      $Date: 2011-06-24 11:08:51 -0400 (Fri, 24 Jun 2011) $
-  Version:   $Revision: 7603 $
+  Web page:  http://openigtlink.org/
 
   Copyright (c) Insight Software Consortium. All rights reserved.
 
@@ -62,39 +60,31 @@ void igtl_export igtl_image_set_matrix(float spacing[3], float origin[3],
   header->matrix[0]  = (igtl_float32) (norm_i[0] * spacing[0]);
   header->matrix[1]  = (igtl_float32) (norm_i[1] * spacing[0]);
   header->matrix[2]  = (igtl_float32) (norm_i[2] * spacing[0]);
-  header->matrix[3]  = 0.0;
-  header->matrix[4]  = (igtl_float32) (norm_j[0] * spacing[1]);
-  header->matrix[5]  = (igtl_float32) (norm_j[1] * spacing[1]);
-  header->matrix[6]  = (igtl_float32) (norm_j[2] * spacing[1]);
-  header->matrix[7]  = 0.0;
-  header->matrix[8]  = (igtl_float32) (norm_k[0] * spacing[2]);
-  header->matrix[9]  = (igtl_float32) (norm_k[1] * spacing[2]);
-  header->matrix[10]  = (igtl_float32) (norm_k[2] * spacing[2]);
-  header->matrix[11]  = 0.0;
-  header->matrix[12]  = (igtl_float32) (origin[0]);
-  header->matrix[13] = (igtl_float32) (origin[1]);
-  header->matrix[14] = (igtl_float32) (origin[2]);
-  header->matrix[15] = 1.0;
+  header->matrix[3]  = (igtl_float32) (norm_j[0] * spacing[1]);
+  header->matrix[4]  = (igtl_float32) (norm_j[1] * spacing[1]);
+  header->matrix[5]  = (igtl_float32) (norm_j[2] * spacing[1]);
+  header->matrix[6]  = (igtl_float32) (norm_k[0] * spacing[2]);
+  header->matrix[7]  = (igtl_float32) (norm_k[1] * spacing[2]);
+  header->matrix[8]  = (igtl_float32) (norm_k[2] * spacing[2]);
+  header->matrix[9]  = (igtl_float32) (origin[0]);
+  header->matrix[10] = (igtl_float32) (origin[1]);
+  header->matrix[11] = (igtl_float32) (origin[2]);
 }
 
-void igtl_export igtl_image_set_matrix_1(float _matrix [4][4], igtl_image_header * header)
+void igtl_export igtl_image_set_matrix_4x4(float _matrix [4][4], igtl_image_header * header)
 {
-  header->matrix[0] = _matrix[0][0];
-  header->matrix[1] = _matrix[1][0];
-  header->matrix[2] = _matrix[2][0];
-  header->matrix[3] = _matrix[3][0];
-  header->matrix[4] = _matrix[0][1];
-  header->matrix[5] = _matrix[1][1];
-  header->matrix[6] = _matrix[2][1];
-  header->matrix[7] = _matrix[3][1];
-  header->matrix[8] = _matrix[0][2];
-  header->matrix[9] = _matrix[1][2];
-  header->matrix[10] = _matrix[2][2];
-  header->matrix[11] = _matrix[3][2];
-  header->matrix[12] = _matrix[0][3];
-  header->matrix[13] = _matrix[1][3];
-  header->matrix[14] = _matrix[2][3];
-  header->matrix[15] = _matrix[3][3];
+  header->matrix[0]  = _matrix[0][0];
+  header->matrix[1]  = _matrix[0][1];
+  header->matrix[2]  = _matrix[0][2];
+  header->matrix[3]  = _matrix[1][0];
+  header->matrix[4]  = _matrix[1][1];
+  header->matrix[5]  = _matrix[1][2];
+  header->matrix[6]  = _matrix[2][0];
+  header->matrix[7]  = _matrix[2][1];
+  header->matrix[8]  = _matrix[2][2];
+  header->matrix[9]  = _matrix[0][3];
+  header->matrix[10] = _matrix[1][3];
+  header->matrix[11] = _matrix[2][3];
 }	
 
 void igtl_export igtl_image_get_matrix(float spacing[3], float origin[3],
@@ -117,18 +107,15 @@ void igtl_export igtl_image_get_matrix(float spacing[3], float origin[3],
   tx = (float) header->matrix[0];
   ty = (float) header->matrix[1];
   tz = (float) header->matrix[2];
-  //skip the last row
-  sx = (float) header->matrix[4];
-  sy = (float) header->matrix[5];
-  sz = (float) header->matrix[6];
-  //skip the last row
-  nx = (float) header->matrix[8];
-  ny = (float) header->matrix[9];
-  nz = (float) header->matrix[10];
-  //skip the last row
-  px = (float) header->matrix[12];
-  py = (float) header->matrix[13];
-  pz = (float) header->matrix[14];
+  sx = (float) header->matrix[3];
+  sy = (float) header->matrix[4];
+  sz = (float) header->matrix[5];
+  nx = (float) header->matrix[6];
+  ny = (float) header->matrix[7];
+  nz = (float) header->matrix[8];
+  px = (float) header->matrix[9];
+  py = (float) header->matrix[10];
+  pz = (float) header->matrix[11];
 
   spacing[0] = sqrtf(tx*tx + ty*ty + tz*tz);
   spacing[1] = sqrtf(sx*sx + sy*sy + sz*sz);
@@ -142,48 +129,50 @@ void igtl_export igtl_image_get_matrix(float spacing[3], float origin[3],
   }
   if (spacing[1] != 0)
   {
-    norm_j[0] = header->matrix[4] / spacing[1];
-    norm_j[1] = header->matrix[5] / spacing[1];
-    norm_j[2] = header->matrix[6] / spacing[1];
+    norm_j[0] = header->matrix[3] / spacing[1];
+    norm_j[1] = header->matrix[4] / spacing[1];
+    norm_j[2] = header->matrix[5] / spacing[1];
   }
   if (spacing[2] != 0)
   {
-    norm_k[0] = header->matrix[8] / spacing[2];
-    norm_k[1] = header->matrix[9] / spacing[2];
-    norm_k[2] = header->matrix[10] / spacing[2];
+    norm_k[0] = header->matrix[6] / spacing[2];
+    norm_k[1] = header->matrix[7] / spacing[2];
+    norm_k[2] = header->matrix[8] / spacing[2];
   }
 
-  origin[0] = header->matrix[12];
-  origin[1] = header->matrix[13];
-  origin[2] = header->matrix[14];
+  origin[0] = header->matrix[9];
+  origin[1] = header->matrix[10];
+  origin[2] = header->matrix[11];
 
 }
 
-void igtl_export igtl_image_get_matrix_1(float _matrix[4][4], igtl_image_header * header)
+void igtl_export igtl_image_get_matrix_4x4(float _matrix[4][4], igtl_image_header * header)
 {
-  _matrix[0][0] = 	header->matrix[0]; 
-  _matrix[1][0] = 	header->matrix[1]; 
-  _matrix[2][0] = 	header->matrix[2]; 
-  _matrix[3][0] = 	header->matrix[3]; 
-  _matrix[0][1] = 	header->matrix[4]; 
-  _matrix[1][1] = 	header->matrix[5]; 
-  _matrix[2][1] = 	header->matrix[6]; 
-  _matrix[3][1] = 	header->matrix[7]; 
-  _matrix[0][2] = 	header->matrix[8]; 
-  _matrix[1][2] = 	header->matrix[9]; 
-  _matrix[2][2] = 	header->matrix[10]; 
-  _matrix[3][2] = 	header->matrix[11]; 
-  _matrix[0][3] = 	header->matrix[12]; 
-  _matrix[1][3] = 	header->matrix[13]; 
-  _matrix[2][3] = 	header->matrix[14]; 
-  _matrix[3][3] = 	header->matrix[15]; 
+  _matrix[0][0] = header->matrix[0];
+  _matrix[0][1] = header->matrix[1];
+  _matrix[0][2] = header->matrix[2];
+  _matrix[1][0] = header->matrix[3];
+  _matrix[1][1] = header->matrix[4];
+  _matrix[1][2] = header->matrix[5];
+  _matrix[2][0] = header->matrix[6];
+  _matrix[2][1] = header->matrix[7];
+  _matrix[2][2] = header->matrix[8];
+  
+  _matrix[0][3] = header->matrix[9];
+  _matrix[1][3] = header->matrix[10];
+  _matrix[2][3] = header->matrix[11];
+
+  _matrix[3][0] = 0; 
+  _matrix[3][1] = 0; 
+  _matrix[3][2] = 0; 
+  _matrix[3][3] = 1; 
 }	
 
 
 void igtl_export igtl_image_convert_byte_order(igtl_image_header * header)
 {
   int i;
-  igtl_uint32 tmp[16];
+  igtl_uint32 tmp[12];
 
   if (igtl_is_little_endian()) 
     {
@@ -197,7 +186,7 @@ void igtl_export igtl_image_convert_byte_order(igtl_image_header * header)
       header->subvol_offset[i] = BYTE_SWAP_INT16(header->subvol_offset[i]);
       }
 
-    memcpy(tmp, header->matrix, sizeof(igtl_uint32)*16);
+    memcpy(tmp, header->matrix, sizeof(igtl_uint32)*12);
 
     /* 
      * TODO: The following loop may cause segmentation fault, when it is compiled
@@ -205,11 +194,11 @@ void igtl_export igtl_image_convert_byte_order(igtl_image_header * header)
      * ('-ftree-vectorize' becomes active, when '-O3' optimization is specified.)
      * -- code has been updated on June 24 -- needs test
      */
-    for (i = 0; i < 16; i ++) 
+    for (i = 0; i < 12; i ++) 
       {
       tmp[i] =  BYTE_SWAP_INT32(tmp[i]);
       }
-    memcpy(header->matrix, tmp, sizeof(igtl_uint32)*16);
+    memcpy(header->matrix, tmp, sizeof(igtl_uint32)*12);
 
   }
 }

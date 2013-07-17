@@ -1,10 +1,8 @@
 /*=========================================================================
 
-  Program:   Open IGT Link Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink/Source/igtlTimeStamp.cxx $
+  Program:   The OpenIGTLink Library
   Language:  C++
-  Date:      $Date: 2011-03-24 00:08:23 -0400 (Thu, 24 Mar 2011) $
-  Version:   $Revision: 7354 $
+  Web page:  http://openigtlink.org/
 
   Copyright (c) Insight Software Consortium. All rights reserved.
 
@@ -95,7 +93,7 @@ void TimeStamp::GetTime(igtlUint32* second, igtlUint32* nanosecond)
 }
   
 
-void TimeStamp::SetTimeUint64(igtlUint64 totalNanos)
+void TimeStamp::SetTimeInNanoSeconds(igtlUint64 totalNanos)
 {
   // Export from 64-bit fixed-point expression used in OpenIGTLink
   igtlUint32 seconds, nanoseconds;
@@ -108,7 +106,7 @@ void TimeStamp::SetTimeUint64(igtlUint64 totalNanos)
 }
 
   
-igtlUint64 TimeStamp::GetTimeUint64()
+igtlUint64 TimeStamp::GetTimeInNanoSeconds()
 {
   // Export as 64-bit fixed-point expression used in OpenIGTLink
 
@@ -132,29 +130,5 @@ void TimeStamp::PrintSelf( std::ostream& os) const
 }
 
 }
-//void TimeStamp::GetTime_TAI()
-//{
-//  GetTimeTAI(this->m_Second, this->m_Nanosecond);
-//  m_UTC = false;
-//}
-
-//void TimeStamp::toUTC()
-//{
-//  if (m_UTC)  //currently UTC
-//    return;
-//  
-//  //Need to subtract the offset
-//  this->m_Second -= TAI_UTC;
-//  m_UTC = true;
-//}
-//
-//void TimeStamp::toTAI()
-//{
-//  if (!m_UTC)  //currently TAI
-//    return;
-//  
-//  this->m_Second += TAI_UTC;
-//  m_UTC = false;
-//}
 
 

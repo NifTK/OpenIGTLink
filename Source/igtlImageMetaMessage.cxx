@@ -1,10 +1,8 @@
 /*=========================================================================
 
-  Program:   Open IGT Link Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink2_beta/Source/igtlStatusMessage.cxx $
+  Program:   The OpenIGTLink Library
   Language:  C++
-  Date:      $Date: 2010-01-17 13:04:20 -0500 (Sun, 17 Jan 2010) $
-  Version:   $Revision: 5575 $
+  Web page:  http://openigtlink.org/
 
   Copyright (c) Insight Software Consortium. All rights reserved.
 
@@ -137,11 +135,11 @@ void ImageMetaElement::SetSize(igtlUint16 size[3])
 }
 
 
-void ImageMetaElement::SetSize(igtlUint16 sx, igtlUint16 sy, igtlUint16 sz)
+void ImageMetaElement::SetSize(igtlUint16 si, igtlUint16 sj, igtlUint16 sk)
 {
-  this->m_Size[0] = sx;
-  this->m_Size[1] = sy;
-  this->m_Size[2] = sz;
+  this->m_Size[0] = si;
+  this->m_Size[1] = sj;
+  this->m_Size[2] = sk;
 }
 
 
@@ -153,11 +151,11 @@ void ImageMetaElement::GetSize(igtlUint16* size)
 }
 
 
-void ImageMetaElement::GetSize(igtlUint16& sx, igtlUint16& sy, igtlUint16& sz)
+void ImageMetaElement::GetSize(igtlUint16& si, igtlUint16& sj, igtlUint16& sk)
 {
-  sx = this->m_Size[0];
-  sy = this->m_Size[1];
-  sz = this->m_Size[2];
+  si = this->m_Size[0];
+  sj = this->m_Size[1];
+  sk = this->m_Size[2];
 }
 
 
@@ -259,7 +257,7 @@ int ImageMetaMessage::PackBody()
 
     igtl::TimeStamp::Pointer ts;
     (*iter)->GetTimeStamp(ts);
-    element->timestamp = ts->GetTimeUint64();
+    element->timestamp = ts->GetTimeInNanoSeconds();
     igtlUint16 size[3];
     (*iter)->GetSize(size);
     element->size[0] = size[0];
@@ -313,7 +311,7 @@ int ImageMetaMessage::UnpackBody()
     elemClass->SetPatientID(strbuf);
     
     TimeStamp::Pointer ts = TimeStamp::New();
-    ts->SetTimeUint64(element->timestamp);
+    ts->SetTimeInNanoSeconds(element->timestamp);
     elemClass->SetTimeStamp(ts);
 
     elemClass->SetSize(element->size);

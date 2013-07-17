@@ -1,10 +1,8 @@
 /*=========================================================================
 
-  Program:   Open IGT Link Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink/Source/igtlWin32Header.h $
+  Program:   The OpenIGTLink Library
   Language:  C++
-  Date:      $Date: 2010-01-17 13:38:05 -0500 (Sun, 17 Jan 2010) $
-  Version:   $Revision: 5577 $
+  Web page:  http://openigtlink.org/
 
   Copyright (c) Insight Software Consortium. All rights reserved.
 
@@ -51,7 +49,8 @@
 #if defined(_WIN32)
   // Include the windows header here only if requested by user code.
 # if defined(IGTL_INCLUDE_WINDOWS_H)
-#  include <windows.h>
+   #include <winsock2.h>
+   #include <windows.h>
    // Define types from the windows header file.
    typedef DWORD igtlWindowsDWORD;
    typedef PVOID igtlWindowsPVOID;

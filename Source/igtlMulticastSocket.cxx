@@ -28,6 +28,7 @@
 
 =========================================================================*/
 #include "igtlMulticastSocket.h"
+#include <cstring>
 
 namespace igtl
 {

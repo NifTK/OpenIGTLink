@@ -1,10 +1,8 @@
 /*=========================================================================
 
-  Program:   Open IGT Link Library
-  Module:    $HeadURL: http://svn.na-mic.org/NAMICSandBox/trunk/OpenIGTLink/Source/igtlTimeStamp.h $
+  Program:   The OpenIGTLink Library
   Language:  C++
-  Date:      $Date: 2011-03-24 00:08:23 -0400 (Thu, 24 Mar 2011) $
-  Version:   $Revision: 7354 $
+  Web page:  http://openigtlink.org/
 
   Copyright (c) Insight Software Consortium. All rights reserved.
 
@@ -44,21 +42,26 @@ public:
   igtlTypeMacro(TimeStamp, Object);
   igtlNewMacro(Self);
 
-  /** Returns the frequency of a clock */
+  /// Gets the frequency of a clock.
   igtlGetConstMacro(Frequency,  igtlUint32);
+
+  /// Gets the second part of the time stamp.
   igtlGetConstMacro(Second,     igtlUint32);
+
+  /// Gets the fraction of second part of the time stamp.
   igtlGetConstMacro(Nanosecond, igtlUint32);
 
-  /** Update the timestamp to match current system time in UTC */
+  /// Gets the current time from the system's clock and save it as a time stamp in UTC.
   void Update();
 
+  /// Checks if the time stamp is in UTC format.
   inline bool isUTC() {return m_UTC; }
   
   // Set time in human readable form
   void SetTime(igtlUint32 second, igtlUint32 nanosecond);
 
     // Get time in human readable form
-  void   GetTime(igtlUint32* second, igtlUint32* nanosecond);
+  void GetTime(igtlUint32* second, igtlUint32* nanosecond);
   
   // Set time as the number of seconds since epoch in double
   void SetTimeInSeconds(double totalSeconds);
@@ -66,11 +69,11 @@ public:
   // Get time  as the number of seconds since epoch in double
   double GetTimeInSeconds();
 
-  // Set time in the OpenIGTLink compatible form
-  void SetTimeUint64(igtlUint64 totalNanos);  /* 64-bit fixed-point expression used in OpenIGTLink */
+  // Set time the as igtlUint64 in nanoseconds since Epoch
+  void SetTimeInNanoSeconds(igtlUint64 totalNanos);  /* 64-bit fixed-point expression used in OpenIGTLink */
 
-  // Get time in the OpenIGTLink compatible form
-  igtlUint64 GetTimeUint64();        /* 64-bit fixed-point expression used in OpenIGTLink */
+  // Get time the as igtlUint64 in nanoseconds since Epoch
+  igtlUint64 GetTimeInNanoSeconds();                 /* 64-bit fixed-point expression used in OpenIGTLink */
 
 protected:
 
@@ -85,8 +88,13 @@ protected:
 
 private:
 
+  /// Clock frequency (Hz)
   igtlUint32       m_Frequency;   /* Clock frequency (Hz)*/
+
+  /// Second part of the time relative to 00:00:00 January 1, 1970 UTC
   igtlUint32       m_Second;      /* Second part of the time relative to 00:00:00 January 1, 1970 UTC */
+
+  /// Nano-second part of the time stamp
   igtlUint32       m_Nanosecond;  /* Nano-second part of -- */
   bool             m_UTC;
 };

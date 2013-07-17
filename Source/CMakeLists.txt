@@ -57,7 +57,6 @@ SET(OpenIGTLink_SOURCES
   igtlStatusMessage.cxx
   igtlTimeStamp.cxx
   igtlTransformMessage.cxx
-  tsctime/TSCtime.cxx
 )
 
 SET(OpenIGTLink_INCLUDE_FILES
@@ -69,6 +68,7 @@ SET(OpenIGTLink_INCLUDE_FILES
   igtlutil/igtl_util.h
   igtlutil/igtl_capability.h
   igtlMessageHandler.h
+  igtlMessageHandlerMacro.h
   igtlClientSocket.h
   igtlConditionVariable.h
   igtlCreateObjectFunction.h
@@ -99,7 +99,6 @@ SET(OpenIGTLink_INCLUDE_FILES
   igtlTypes.h
   igtlWin32Header.h
   igtlWindows.h
-  tsctime/TSCtime.h
 )
 
 
@@ -121,6 +120,7 @@ if (${OpenIGTLink_PROTOCOL_VERSION} STREQUAL "2")
     igtlutil/igtl_qtrans.c
     igtlutil/igtl_polydata.c
     igtlColorTableMessage.cxx
+    igtlCapabilityMessage.cxx
     igtlImageMetaMessage.cxx
     igtlLabelMetaMessage.cxx
     igtlPointMessage.cxx
@@ -151,6 +151,7 @@ if (${OpenIGTLink_PROTOCOL_VERSION} STREQUAL "2")
     igtlutil/igtl_qtrans.h
     igtlutil/igtl_polydata.h
     igtlColorTableMessage.h
+    igtlCapabilityMessage.h
     igtlImageMetaMessage.h
     igtlLabelMetaMessage.h
     igtlPointMessage.h

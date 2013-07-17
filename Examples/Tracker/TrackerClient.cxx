@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     {
     igtl::Matrix4x4 matrix;
     GetRandomTestMatrix(matrix);
-    ts->GetTime();
+    ts->Update();
     transMsg->SetMatrix(matrix);
     transMsg->SetTimeStamp(ts);
     transMsg->Pack();

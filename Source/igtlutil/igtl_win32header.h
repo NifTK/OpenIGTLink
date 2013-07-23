@@ -29,8 +29,10 @@
 #endif
 
 #if defined(_WIN32)
-  #include <winsock2.h>
-  #include <windows.h>
+  #if defined(IGTL_INCLUDE_WINDOWS_H)
+    #include <winsock2.h>
+    #include <windows.h>
+  #endif
 #endif
 
 #if defined(_MSC_VER)

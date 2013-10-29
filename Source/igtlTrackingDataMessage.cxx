@@ -153,6 +153,16 @@ void TrackingDataElement::GetMatrix(Matrix4x4& mat)
   mat[3][3] = m_Matrix[3][3];
 }
 
+void TrackingDataElement::SetError (float error )
+{
+  m_Error = error;
+}
+
+float TrackingDataElement::GetError ()
+{
+  return m_Error;
+}
+
 //----------------------------------------------------------------------
 // igtl::GetTrackingDataMessage class
 

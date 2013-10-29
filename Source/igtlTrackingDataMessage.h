@@ -82,6 +82,12 @@ public:
   /// Gets the 4-by-4 transformation matrix. 
   void GetMatrix(Matrix4x4& mat);
 
+  /// Sets the tracking error
+  void SetError (float error);
+
+  /// Gets the tracking error
+  float GetError ();
+
 protected:
   TrackingDataElement();
   ~TrackingDataElement();
@@ -96,6 +102,9 @@ protected:
 
   /// Transform matrix
   Matrix4x4     m_Matrix;
+
+  /// The tracking error 
+  float         m_Error;
 };
 
 

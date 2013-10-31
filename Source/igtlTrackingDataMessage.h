@@ -273,7 +273,8 @@ public:
   /// Gets the tracking data element specified by 'index'.
   void GetTrackingDataElement(int index, TrackingDataElement::Pointer& elem);
 
-
+  /// Set to use full tracking data message (enables tranmission of error metrix and 4x4 matrix;
+  void UseFullTData();
 protected:
   TrackingDataMessage();
   ~TrackingDataMessage();
@@ -286,6 +287,9 @@ protected:
 
   /// The list of trakcing data elements.  
   std::vector<TrackingDataElement::Pointer> m_TrackingDataList;
+
+  /// Use fulltracking data message (enables transmission of an error metric and a full 4x4 matrix)
+  bool m_UseFullTData;
   
 };
 

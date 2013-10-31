@@ -17,6 +17,7 @@
 
 #include "igtl_header.h"
 #include "igtl_tdata.h"
+#include "igtl_fulltdata.h"
 
 // Disable warning C4996 (strncpy() may be unsafe) in Windows. 
 #define _CRT_SECURE_NO_WARNINGS
@@ -307,6 +308,7 @@ TrackingDataMessage::TrackingDataMessage():
   MessageBase()
 {
   this->m_DefaultBodyType = "TDATA";
+  this->m_UseFullTData = false;
   this->m_TrackingDataList.clear();
 }
 
@@ -343,11 +345,23 @@ void TrackingDataMessage::GetTrackingDataElement(int index, TrackingDataElement:
     }
 }
 
+void TrackingDataMessage::UseFullTData()
+{
+  this->m_UseFullTData=true;
+  this->m_DefaultBodyType = "FULLTDATA";
+}
 
 int TrackingDataMessage::GetBodyPackSize()
 {
   // The body size sum of the header size and status message size.
-  return IGTL_TDATA_ELEMENT_SIZE * this->m_TrackingDataList.size();
+  if ( m_UseFullTData )
+  {
+    return IGTL_FULLTDATA_ELEMENT_SIZE * this->m_TrackingDataList.size();
+  }
+  else
+  {
+    return IGTL_TDATA_ELEMENT_SIZE * this->m_TrackingDataList.size();
+  }
 }
 
 
@@ -355,33 +369,59 @@ int TrackingDataMessage::PackBody()
 {
   // allocate pack
   AllocatePack();
-  
-  igtl_tdata_element* element;
-  element = (igtl_tdata_element*)this->m_Body;
-  std::vector<TrackingDataElement::Pointer>::iterator iter;
+  if ( m_UseFullTData )
+  {
+    igtl_fulltdata_element* element;
+    element = (igtl_fulltdata_element*)this->m_Body;
+    std::vector<TrackingDataElement::Pointer>::iterator iter;
 
-  for (iter = this->m_TrackingDataList.begin(); iter != this->m_TrackingDataList.end(); iter ++)
+    for (iter = this->m_TrackingDataList.begin(); iter != this->m_TrackingDataList.end(); iter ++)
     {
-    strncpy((char*)element->name, (*iter)->GetName(), IGTL_TDATA_LEN_NAME);
-    element->type = (*iter)->GetType();
+      strncpy((char*)element->name, (*iter)->GetName(), IGTL_TDATA_LEN_NAME);
+      element->type = (*iter)->GetType();
 
-    Matrix4x4 matrix;
-    (*iter)->GetMatrix(matrix);
-    for (int i = 0; i < 3; i ++)
+      Matrix4x4 matrix;
+      (*iter)->GetMatrix(matrix);
+      for (int i = 0; i < 3; i ++)
       {
-      element->transform[i]   = matrix[i][0];
-      element->transform[i+3] = matrix[i][1];
-      element->transform[i+6] = matrix[i][2];
-      element->transform[i+9] = matrix[i][3];
+        element->transform[i]   = matrix[i][0];
+        element->transform[i+3] = matrix[i][1];
+        element->transform[i+6] = matrix[i][2];
+        element->transform[i+9] = matrix[i][3];
       }
-    float error;
-    error = (*iter)->GetError();
-    element->error = error;
-    element ++;
+      float error;
+      error = (*iter)->GetError();
+      element->error = error;
+      element ++;
     }
   
-  igtl_tdata_convert_byte_order((igtl_tdata_element*)this->m_Body, this->m_TrackingDataList.size());
+    igtl_fulltdata_convert_byte_order((igtl_fulltdata_element*)this->m_Body, this->m_TrackingDataList.size());
+  }
+  else
+  {
+    igtl_tdata_element* element;
+    element = (igtl_tdata_element*)this->m_Body;
+    std::vector<TrackingDataElement::Pointer>::iterator iter;
+
+    for (iter = this->m_TrackingDataList.begin(); iter != this->m_TrackingDataList.end(); iter ++)
+    {
+      strncpy((char*)element->name, (*iter)->GetName(), IGTL_TDATA_LEN_NAME);
+      element->type = (*iter)->GetType();
+
+      Matrix4x4 matrix;
+      (*iter)->GetMatrix(matrix);
+      for (int i = 0; i < 3; i ++)
+      {
+        element->transform[i]   = matrix[i][0];
+        element->transform[i+3] = matrix[i][1];
+        element->transform[i+6] = matrix[i][2];
+        element->transform[i+9] = matrix[i][3];
+      }
+      element ++;
+    }
   
+    igtl_tdata_convert_byte_order((igtl_tdata_element*)this->m_Body, this->m_TrackingDataList.size());
+  }
   return 1;
 }
 
@@ -390,42 +430,79 @@ int TrackingDataMessage::UnpackBody()
 
   this->m_TrackingDataList.clear();
 
-  igtl_tdata_element* element = (igtl_tdata_element*) this->m_Body;
-  int nElement = igtl_tdata_get_data_n(this->m_BodySizeToRead);
+  if ( m_UseFullTData ) 
+  {
+    igtl_fulltdata_element* element = (igtl_fulltdata_element*) this->m_Body;
+    int nElement = igtl_fulltdata_get_data_n(this->m_BodySizeToRead);
 
-  igtl_tdata_convert_byte_order(element, nElement);
+    igtl_fulltdata_convert_byte_order(element, nElement);
   
-  char strbuf[128];
-  for (int i = 0; i < nElement; i ++)
+    char strbuf[128];
+    for (int i = 0; i < nElement; i ++)
     {
-    TrackingDataElement::Pointer elemClass = TrackingDataElement::New();
+      TrackingDataElement::Pointer elemClass = TrackingDataElement::New();
 
-    // Add '\n' at the end of each string
-    // (neccesary for a case, where a string reaches the maximum length.)
-    strbuf[IGTL_TDATA_LEN_NAME] = '\n';
-    strncpy(strbuf, (char*)element->name, IGTL_TDATA_LEN_NAME);
-    elemClass->SetName((const char*)strbuf);
-    elemClass->SetType(element->type);
+      // Add '\n' at the end of each string
+      // (neccesary for a case, where a string reaches the maximum length.)
+      strbuf[IGTL_TDATA_LEN_NAME] = '\n';
+      strncpy(strbuf, (char*)element->name, IGTL_TDATA_LEN_NAME);
+      elemClass->SetName((const char*)strbuf);
+      elemClass->SetType(element->type);
 
-    Matrix4x4 matrix;
-    IdentityMatrix(matrix);
-    for (int j = 0; j < 3; j ++)
+      Matrix4x4 matrix;
+      IdentityMatrix(matrix);
+      for (int j = 0; j < 3; j ++)
       {
-      matrix[j][0] = element->transform[j];
-      matrix[j][1] = element->transform[j+3];
-      matrix[j][2] = element->transform[j+6];
-      matrix[j][3] = element->transform[j+9];
+        matrix[j][0] = element->transform[j];
+        matrix[j][1] = element->transform[j+3];
+        matrix[j][2] = element->transform[j+6];
+        matrix[j][3] = element->transform[j+9];
       }
-    elemClass->SetMatrix(matrix);
-    float error;
-    error = element->error;
-    elemClass->SetError(error);
+      elemClass->SetMatrix(matrix);
+      float error;
+      error = element->error;
+      elemClass->SetError(error);
 
-    this->m_TrackingDataList.push_back(elemClass);
+      this->m_TrackingDataList.push_back(elemClass);
 
-    element ++;
+      element ++;
     }
+  }
+  else
+  {
+    igtl_tdata_element* element = (igtl_tdata_element*) this->m_Body;
+    int nElement = igtl_tdata_get_data_n(this->m_BodySizeToRead);
 
+    igtl_tdata_convert_byte_order(element, nElement);
+  
+    char strbuf[128];
+    for (int i = 0; i < nElement; i ++)
+    {
+      TrackingDataElement::Pointer elemClass = TrackingDataElement::New();
+
+      // Add '\n' at the end of each string
+      // (neccesary for a case, where a string reaches the maximum length.)
+      strbuf[IGTL_TDATA_LEN_NAME] = '\n';
+      strncpy(strbuf, (char*)element->name, IGTL_TDATA_LEN_NAME);
+      elemClass->SetName((const char*)strbuf);
+      elemClass->SetType(element->type);
+
+      Matrix4x4 matrix;
+      IdentityMatrix(matrix);
+      for (int j = 0; j < 3; j ++)
+      {
+        matrix[j][0] = element->transform[j];
+        matrix[j][1] = element->transform[j+3];
+        matrix[j][2] = element->transform[j+6];
+        matrix[j][3] = element->transform[j+9];
+      }
+      elemClass->SetMatrix(matrix);
+
+      this->m_TrackingDataList.push_back(elemClass);
+
+      element ++;
+    }
+  }
   return 1;
 }
 } // namespace igtl

@@ -104,9 +104,6 @@ int main( int argc, char * argv [] )
   message.tlist[2].transform[11] = 46.0531f;
   message.tlist[2].error = 46.0531f;
 
-    s = IGTL_HEADER_SIZE+IGTL_TDATA_ELEMENT_SIZE*TEST_TDATA_NUM;
-    igtl_message_dump_hex(stdout, (const void*)&message, s);
-
   /* Swap byte order if necessary */
   igtl_tdata_convert_byte_order(message.tlist, TEST_TDATA_NUM);
 

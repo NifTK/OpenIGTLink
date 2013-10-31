@@ -374,6 +374,9 @@ int TrackingDataMessage::PackBody()
       element->transform[i+6] = matrix[i][2];
       element->transform[i+9] = matrix[i][3];
       }
+    float error;
+    error = (*iter)->GetError();
+    element->error = error;
     element ++;
     }
   
@@ -414,6 +417,9 @@ int TrackingDataMessage::UnpackBody()
       matrix[j][3] = element->transform[j+9];
       }
     elemClass->SetMatrix(matrix);
+    float error;
+    error = element->error;
+    elemClass->SetError(error);
 
     this->m_TrackingDataList.push_back(elemClass);
 

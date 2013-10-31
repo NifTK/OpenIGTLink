@@ -19,7 +19,7 @@
 #include "igtl_util.h"
 #include "igtl_types.h"
 
-#define  IGTL_TDATA_ELEMENT_SIZE           74
+#define  IGTL_TDATA_ELEMENT_SIZE           70
 #define  IGTL_STT_TDATA_SIZE               36
 #define  IGTL_RTS_TDATA_SIZE               1
 
@@ -45,7 +45,6 @@ typedef struct {
   igtl_uint8   type;           /* Tracking data type (1-4) */
   igtl_uint8   reserved;       /* Reserved byte */
   igtl_float32 transform[12];  /* same as TRANSFORM */
-  igtl_float32 error;          /* the tracking error */
 } igtl_tdata_element;
 
 

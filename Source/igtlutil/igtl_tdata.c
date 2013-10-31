@@ -35,10 +35,7 @@ void igtl_export igtl_tdata_convert_byte_order(igtl_tdata_element* tdatalist, in
         tmp = (igtl_int32*)&(elem->transform[j]);
         *tmp = BYTE_SWAP_INT32(*tmp);
         }
-      tmp = ( igtl_int32*)&(elem->error);
-      *tmp = BYTE_SWAP_INT32(*tmp);
       }
-
     }
 }
 

@@ -66,7 +66,6 @@ int main( int argc, char * argv [] )
   message.tlist[0].transform[9] = 46.0531f;
   message.tlist[0].transform[10] = 19.4709f;
   message.tlist[0].transform[11] = 46.0531f;
-  message.tlist[0].error = 46.0531f;
   
   /* Tracking data 1 */
   strncpy((char*)&(message.tlist[1].name), "Tracker1", 20);
@@ -84,7 +83,6 @@ int main( int argc, char * argv [] )
   message.tlist[1].transform[9] = 46.0531f;
   message.tlist[1].transform[10] = 19.4709f;
   message.tlist[1].transform[11] = 46.0531f;
-  message.tlist[1].error = 46.0531f;
 
   /* Tracking data 2 */
   strncpy((char*)&(message.tlist[2].name), "Tracker2", 20);
@@ -102,7 +100,7 @@ int main( int argc, char * argv [] )
   message.tlist[2].transform[9] = 46.0531f;
   message.tlist[2].transform[10] = 19.4709f;
   message.tlist[2].transform[11] = 46.0531f;
-  message.tlist[2].error = 46.0531f;
+
 
   /* Swap byte order if necessary */
   igtl_tdata_convert_byte_order(message.tlist, TEST_TDATA_NUM);
@@ -139,11 +137,11 @@ int main( int argc, char * argv [] )
     s = IGTL_HEADER_SIZE+IGTL_TDATA_ELEMENT_SIZE*TEST_TDATA_NUM;
     if (s > 256)
       {
-     // s = 256;
+      s = 256;
       }
 
     fprintf(stdout, "\n===== First %d bytes of the test message =====\n", s);
-    igtl_message_dump_hex(stdout, (const void*)&message, s);
+    /*igtl_message_dump_hex(stdout, (const void*)&message, s);*/
 
     return EXIT_FAILURE;
     }

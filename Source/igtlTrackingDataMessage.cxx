@@ -382,12 +382,12 @@ int TrackingDataMessage::PackBody()
 
       Matrix4x4 matrix;
       (*iter)->GetMatrix(matrix);
-      for (int i = 0; i < 3; i ++)
+      for (int i = 0; i < 4; i ++)
       {
         element->transform[i]   = matrix[i][0];
-        element->transform[i+3] = matrix[i][1];
-        element->transform[i+6] = matrix[i][2];
-        element->transform[i+9] = matrix[i][3];
+        element->transform[i+4] = matrix[i][1];
+        element->transform[i+8] = matrix[i][2];
+        element->transform[i+12] = matrix[i][3];
       }
       float error;
       error = (*iter)->GetError();
@@ -451,12 +451,12 @@ int TrackingDataMessage::UnpackBody()
 
       Matrix4x4 matrix;
       IdentityMatrix(matrix);
-      for (int j = 0; j < 3; j ++)
+      for (int j = 0; j < 4; j ++)
       {
         matrix[j][0] = element->transform[j];
-        matrix[j][1] = element->transform[j+3];
-        matrix[j][2] = element->transform[j+6];
-        matrix[j][3] = element->transform[j+9];
+        matrix[j][1] = element->transform[j+4];
+        matrix[j][2] = element->transform[j+8];
+        matrix[j][3] = element->transform[j+12];
       }
       elemClass->SetMatrix(matrix);
       float error;

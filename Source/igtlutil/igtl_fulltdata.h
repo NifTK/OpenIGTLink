@@ -17,7 +17,7 @@
 
 #include "igtl_tdata.h"
 
-#define  IGTL_FULLTDATA_ELEMENT_SIZE       74
+#define  IGTL_FULLTDATA_ELEMENT_SIZE       90
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,7 +30,7 @@ typedef struct {
   char         name[IGTL_TDATA_LEN_NAME];  /* Name of instrument / tracker */
   igtl_uint8   type;           /* Tracking data type (1-4) */
   igtl_uint8   reserved;       /* Reserved byte */
-  igtl_float32 transform[12];  /* same as TRANSFORM */
+  igtl_float32 transform[16];  /* same as FULL TRANSFORM */
   igtl_float32 error;          /* the tracking error */
 } igtl_fulltdata_element;
 

@@ -82,6 +82,12 @@ public:
   /// Gets the 4-by-4 transformation matrix. 
   void GetMatrix(Matrix4x4& mat);
 
+  /// Sets the tracking error
+  void SetError (float error);
+
+  /// Gets the tracking error
+  float GetError ();
+
 protected:
   TrackingDataElement();
   ~TrackingDataElement();
@@ -96,6 +102,9 @@ protected:
 
   /// Transform matrix
   Matrix4x4     m_Matrix;
+
+  /// The tracking error 
+  float         m_Error;
 };
 
 
@@ -264,7 +273,8 @@ public:
   /// Gets the tracking data element specified by 'index'.
   void GetTrackingDataElement(int index, TrackingDataElement::Pointer& elem);
 
-
+  /// Set to use full tracking data message (enables tranmission of error metrix and 4x4 matrix;
+  void UseFullTData();
 protected:
   TrackingDataMessage();
   ~TrackingDataMessage();
@@ -277,6 +287,9 @@ protected:
 
   /// The list of trakcing data elements.  
   std::vector<TrackingDataElement::Pointer> m_TrackingDataList;
+
+  /// Use fulltracking data message (enables transmission of an error metric and a full 4x4 matrix)
+  bool m_UseFullTData;
   
 };
 

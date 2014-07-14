@@ -36,6 +36,7 @@ SET(OpenIGTLink_SOURCES
   igtlutil/igtl_util.c
   igtlutil/igtl_position.c
   igtlutil/igtl_capability.c
+  igtlAbstractSocket.cxx
   igtlClientSocket.cxx
   igtlConditionVariable.cxx
   igtlFastMutexLock.cxx
@@ -68,6 +69,7 @@ SET(OpenIGTLink_INCLUDE_FILES
   igtlutil/igtl_util.h
   igtlutil/igtl_capability.h
   igtlutil/igtl_win32header.h
+  igtlAbstractSocket.h
   igtlMessageHandler.h
   igtlMessageHandlerMacro.h
   igtlClientSocket.h

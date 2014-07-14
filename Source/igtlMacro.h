@@ -599,7 +599,6 @@ private:
   std::cerr << igtlmsg.str(); /*::igtl::OutputWindowDisplayDebugText(igtlmsg.str().c_str());*/ \
 }
 
-
 #ifdef IGTL_LEAN_AND_MEAN
 #define igtlGenericOutputMacro(x)
 #else

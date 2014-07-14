@@ -54,23 +54,24 @@ int ServerSocket::GetServerPort()
 //-----------------------------------------------------------------------------
 int ServerSocket::CreateServer(int port)
 {
-  if (this->m_SocketDescriptor != -1)
+  if (this->GetConnected())
     {
     igtlWarningMacro("Server Socket already exists. Closing old socket.");
     this->CloseSocket(this->m_SocketDescriptor);
-    this->m_SocketDescriptor = -1;
+    this->m_SocketDescriptor = INVALID_SOCKET;
     }
   this->m_SocketDescriptor = this->CreateSocket();
-  if (this->m_SocketDescriptor < 0)
+  if (!this->GetConnected())
     {
+    igtlSocketErrorMacro(<< "Failed to create server socket on port " << port);
     return -1;
     }
-  if ( this->BindSocket(this->m_SocketDescriptor, port) != 0|| 
+  if ( this->BindSocket(this->m_SocketDescriptor, port) != 0 ||
     this->Listen(this->m_SocketDescriptor) != 0)
     {
-    // failed to bind or listen.
+    igtlSocketErrorMacro(<< "Failed to bind or listen on port " << port);
     this->CloseSocket(this->m_SocketDescriptor);
-    this->m_SocketDescriptor = -1;
+    this->m_SocketDescriptor = INVALID_SOCKET;
     return -1;
     }
   // Success.
@@ -81,7 +82,7 @@ int ServerSocket::CreateServer(int port)
 //ClientSocket* ServerSocket::WaitForConnection(unsigned long msec /*=0*/)
 ClientSocket::Pointer ServerSocket::WaitForConnection(unsigned long msec /*=0*/)
 {
-  if (this->m_SocketDescriptor < 0)
+  if (!this->GetConnected())
     {
     igtlErrorMacro("Server Socket not created yet!");
     return NULL;

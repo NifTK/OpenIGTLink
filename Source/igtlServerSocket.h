@@ -64,7 +64,9 @@ public:
 
   // Description:
   // Returns the port on which the server is running.
+  // 0 indicates failure.
   int GetServerPort();
+
 protected:
   ServerSocket();
   ~ServerSocket();

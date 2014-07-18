@@ -118,6 +118,22 @@ public:
   /// This function should be called after opening the socket.
   virtual int SetTimeout(int timeout) = 0;
 
+  /// Set reciving timeout for the existing socket in millisecond.
+  /// This function should be called after opening the socket.
+  virtual int SetReceiveTimeout(int timeout) = 0;
+
+  /// Set sending timeout for the existing socket in millisecond.
+  /// This function should be called after opening the socket.
+  virtual int SetSendTimeout(int timeout) = 0;
+
+  /// Set  (psuedo) non-blocking mode for recv(). When sw=1, the time out is set to
+  /// minimum value (1 microsecond in UNIX, 1 millisecond in Windows) for receiving.
+  virtual int SetReceiveBlocking(int sw) = 0;
+
+  /// Set (psuedo) non-blocking mode for recv(). When sw=1, the time out is set to
+  /// minimum value (1 microsecond in UNIX, 1 millisecond in Windows) for sending.
+  virtual int SetSendBlocking(int sw) = 0;
+
   /// Get socket address and port.
   /// Returns 1 on success, 0 on error.
   virtual int GetSocketAddressAndPort(std::string& address, int & port);

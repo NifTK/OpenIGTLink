@@ -27,6 +27,8 @@
 =========================================================================*/
 #include "igtlClientSocket.h"
 
+#include <cstdio>
+
 namespace igtl
 {
 

@@ -27,6 +27,8 @@
 =========================================================================*/
 #include "igtlClientSocket.h"
 
+#include <cstdio>
+
 namespace igtl
 {
 
@@ -43,26 +45,25 @@ ClientSocket::~ClientSocket()
 //-----------------------------------------------------------------------------
 int ClientSocket::ConnectToServer(const char* hostName, int port)
 {
-  if (this->m_SocketDescriptor != -1)
+  if (this->GetConnected())
     {
-    igtlWarningMacro("Client connection already exists. Closing it.");
+    igtlWarningMacro("Client connection already exists on " << hostName << ":" << port << ". Closing it.");
     this->CloseSocket(this->m_SocketDescriptor);
-    this->m_SocketDescriptor = -1;
+    this->m_SocketDescriptor = INVALID_SOCKET;
     }
   
   this->m_SocketDescriptor = this->CreateSocket();
-  if (!this->m_SocketDescriptor)
+  if (!this->GetConnected())
     {
-    igtlErrorMacro("Failed to create socket.");
+    igtlSocketErrorMacro(<< "Failed to create socket.");
     return -1;
     }
 
   if (this->Connect(this->m_SocketDescriptor, hostName, port) == -1)
     {
+    igtlSocketErrorMacro(<< "Failed to connect to server " << hostName << ":" << port);
     this->CloseSocket(this->m_SocketDescriptor);
-    this->m_SocketDescriptor = -1;
-
-    igtlErrorMacro("Failed to connect to server " << hostName << ":" << port);
+    this->m_SocketDescriptor = INVALID_SOCKET;
     return -1;
     }
   return 0;

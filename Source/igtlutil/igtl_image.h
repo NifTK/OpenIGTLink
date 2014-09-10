@@ -108,6 +108,10 @@ void igtl_export igtl_image_get_matrix_4x4(float _matrix[4][4],igtl_image_header
  *  byte order to network byte order, or vice versa. */
 void igtl_export igtl_image_convert_byte_order(igtl_image_header * header);
 
+/** Converts endianness of each member variable in igtl_image_header from host
+ *  byte order to network byte order, or vice versa. */
+void igtl_export igtl_image_convert_byte_order(igtl_image_header * header);
+
 /** Calculates CRC of image data body including header and array of pixel data. */
 igtl_uint64 igtl_export igtl_image_get_crc(igtl_image_header * header, void* image);
 

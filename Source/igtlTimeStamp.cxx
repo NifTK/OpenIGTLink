@@ -151,7 +151,6 @@ igtlUint64 TimeStamp::GetTimeStampUint64()
 
 
 //-----------------------------------------------------------------------------
-<<<<<<< HEAD
 igtlUint64 TimeStamp::GetTimeStampInNanoseconds() const
 {
   igtlUint64 tmp = this->m_Second * 1e9;
@@ -159,8 +158,6 @@ igtlUint64 TimeStamp::GetTimeStampInNanoseconds() const
   return tmp;
 }
 
-=======
->>>>>>> 45-time-stamp-windows
 void TimeStamp::PrintSelf( std::ostream& os) const
 {
   Superclass::PrintSelf(os);

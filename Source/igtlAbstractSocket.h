@@ -54,7 +54,7 @@
   { \
   ::igtl::OStringStream igtlmsg; \
   igtlmsg << "Socket ERROR: In " __FILE__ ", line " << __LINE__ << "\n" \
-          << this->GetNameOfClass() << " (" << this << "): " x   \
+          << this->GetNameOfClass() << " (" << this << "): " x;   \
   std::cerr << igtlmsg.str() << " : " << WSAGetLastError() << "\n\n"; \
   }
 #else
@@ -68,6 +68,8 @@
 #endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
+  #include <windows.h>
+  #include <winsock2.h> 
 #else
   #include <sys/time.h>
   #ifndef INVALID_SOCKET
